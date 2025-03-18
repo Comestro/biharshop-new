@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire\Membership;
 
 use Livewire\Component;
@@ -8,16 +9,21 @@ class Payment extends Component
 {
     public $membership;
     public $transaction_no;
+    public $amount = 999; // Set your membership amount
 
     public function mount(Membership $membership)
     {
         $this->membership = $membership;
+        
+        if ($membership->isPaid) {
+            return redirect()->route('membership.dashboard');
+        }
     }
 
-    public function processPayment()
+    public function submitPayment()
     {
         $this->validate([
-            'transaction_no' => 'required'
+            'transaction_no' => 'required|string|min:6'
         ]);
 
         $this->membership->update([
@@ -26,7 +32,8 @@ class Payment extends Component
             'payment_status' => 'pending_verification'
         ]);
 
-        session()->flash('message', 'Payment submitted for verification');
+        session()->flash('message', 'Payment submitted successfully! Your membership will be activated after verification.');
+        return redirect()->route('membership.dashboard');
     }
 
     public function render()
