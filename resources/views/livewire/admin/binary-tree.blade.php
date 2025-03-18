@@ -30,8 +30,14 @@
 
             const g = svg.append("g");
 
-            // Hierarchy
-            const root = d3.hierarchy(data);
+            // Create hierarchy using stratify
+            const stratify = d3.stratify()
+                .id(d => d.id)
+                .parentId(d => d.parentId);
+
+            // Generate the hierarchy
+            const root = stratify(data)
+                .sum(d => d.value || 1);
 
             // Tree layout with proper spacing
             const treeLayout = d3.tree()
@@ -96,20 +102,20 @@
             const labels = nodes.append("g")
                 .attr("class", "label");
 
-            // Name text
+            // Member ID text (above name)
             labels.append("text")
-                .attr("dy", "-0.5em")
+                .attr("dy", "-1.2em")
                 .attr("text-anchor", "middle")
-                .attr("class", "text-sm font-medium")
-                .text(d => d.data.name)
-                .call(wrap, 80); // Wrap long text
+                .attr("class", "text-[10px] font-medium text-gray-500")
+                .text(d => d.data.token ? '#' + d.data.token : '');
 
-            // ID text
+            // Member name text
             labels.append("text")
-                .attr("dy", "1.5em")
+                .attr("dy", "0.4em")
                 .attr("text-anchor", "middle")
-                .attr("class", "text-xs text-gray-500")
-                .text(d => d.data.token);
+                .attr("class", "text-xs font-medium")
+                .text(d => d.data.name)
+                .call(wrap, 60); // Reduced width for better wrapping
 
             // Text wrapping function
             function wrap(text, width) {

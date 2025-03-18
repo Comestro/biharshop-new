@@ -14,56 +14,62 @@ class BinaryTree extends Component
     public function mount($root_id = null)
     {
         $this->root_id = $root_id ?? Membership::where('isVerified', true)->first()?->id;
-        $this->treeData = $this->formatTreeData($this->root_id);
+        $this->treeData = $this->formatTreeData();
     }
 
-    protected function formatTreeData($member_id, $level = 0)
+    protected function formatTreeData()
     {
-        if ($level > 10 || !$member_id) return null;
+        $flatData = [];
+        $this->processNode($this->root_id, null, $flatData);
+        return $flatData;
+    }
 
-        $member = Membership::find($member_id);
-        if (!$member) return null;
+    protected function processNode($memberId, $parentId, &$flatData)
+    {
+        if (!$memberId) return;
 
-        $tree = BinaryTreeModel::where('parent_id', $member_id)->get();
-        $left = $tree->where('position', 'left')->first();
-        $right = $tree->where('position', 'right')->first();
+        $member = Membership::find($memberId);
+        if (!$member) return;
 
-        $data = [
+        // Add current node to flat data
+        $flatData[] = [
+            'id' => $member->id,
+            'parentId' => $parentId,
             'name' => $member->name,
             'token' => $member->token,
             'status' => $member->isVerified ? 'verified' : 'pending'
         ];
 
-        // Initialize children array
-        $data['children'] = [];
+        // Process children
+        $tree = BinaryTreeModel::where('parent_id', $memberId)->get();
         
-        // Add left child
-        $leftData = $left ? $this->formatTreeData($left->member_id, $level + 1) : null;
-        if ($leftData) {
-            $data['children'][] = $leftData;
+        // Process left child
+        $left = $tree->where('position', 'left')->first();
+        if ($left) {
+            $this->processNode($left->member_id, $member->id, $flatData);
         } else {
-            $data['children'][] = [
+            $flatData[] = [
+                'id' => "empty-left-{$member->id}",
+                'parentId' => $member->id,
                 'name' => 'Empty',
                 'token' => '',
-                'status' => 'empty',
-                'children' => []
+                'status' => 'empty'
             ];
         }
 
-        // Add right child
-        $rightData = $right ? $this->formatTreeData($right->member_id, $level + 1) : null;
-        if ($rightData) {
-            $data['children'][] = $rightData;
+        // Process right child
+        $right = $tree->where('position', 'right')->first();
+        if ($right) {
+            $this->processNode($right->member_id, $member->id, $flatData);
         } else {
-            $data['children'][] = [
+            $flatData[] = [
+                'id' => "empty-right-{$member->id}",
+                'parentId' => $member->id,
                 'name' => 'Empty',
                 'token' => '',
-                'status' => 'empty',
-                'children' => []
+                'status' => 'empty'
             ];
         }
-
-        return $data;
     }
 
     public function render()
