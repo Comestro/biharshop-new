@@ -10,13 +10,25 @@
                     <a href="/" class="text-2xl font-bold">BiharShop</a>
                 </div>
                 
-                <nav class="flex-1 px-4 py-4 space-y-2">
-                    <a href="{{ route('home') }}" class="block px-4 py-2 rounded-lg hover:bg-gray-100">
-                        Home
-                    </a>
-                    <a href="{{ route('membership.register') }}" class="block px-4 py-2 rounded-lg hover:bg-gray-100">
-                        Become a Member
-                    </a>
+                <nav class="flex flex-col flex-1 px-4 py-4">
+                    <div class="space-y-2">
+                        <a href="{{ route('home') }}" class="block px-4 py-2 rounded-lg hover:bg-gray-100">
+                            Home
+                        </a>
+                        <a href="{{ route('membership.register') }}" class="block px-4 py-2 rounded-lg hover:bg-gray-100">
+                            Become a Member
+                        </a>
+                    </div>
+
+                    <!-- Add margin-top auto to push logout to bottom -->
+                    <div class="mt-auto pt-4 border-t">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="w-full text-left px-4 py-2 rounded-lg text-red-600 hover:bg-red-50">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
                 </nav>
             </div>
         </div>

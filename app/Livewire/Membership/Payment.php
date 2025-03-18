@@ -16,7 +16,7 @@ class Payment extends Component
         $this->membership = $membership;
         
         if ($membership->isPaid) {
-            return redirect()->route('membership.dashboard');
+            return redirect()->route('member.dashboard');
         }
     }
 
@@ -33,7 +33,7 @@ class Payment extends Component
         ]);
 
         session()->flash('message', 'Payment submitted successfully! Your membership will be activated after verification.');
-        return redirect()->route('membership.dashboard');
+        return redirect()->route('member.dashboard');  // Changed from membership.dashboard to member.dashboard
     }
 
     public function render()

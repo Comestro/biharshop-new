@@ -15,6 +15,7 @@ class Register extends Component
     public $name, $email, $mobile, $whatsapp, $date_of_birth, $gender;
     public $nationality, $marital_status, $religion;
     public $father_name, $mother_name;
+    public $referral_code;
     
     // Address Details
     public $home_address, $city, $pincode, $state;
@@ -33,6 +34,9 @@ class Register extends Component
     // Terms
     public $terms_and_condition = false;
 
+    public $isSubmitted = false;
+    public $membership = null;
+
     protected $validationAttributes = [
         'terms_and_condition' => 'terms and conditions'
     ];
@@ -42,6 +46,11 @@ class Register extends Component
         if (auth()->check()) {
             $existingMembership = Membership::where('user_id', auth()->id())->first();
             if ($existingMembership) {
+                $this->membership = $existingMembership;
+                if ($existingMembership->isPaid) {
+                    $this->isSubmitted = true;
+                    return;
+                }
                 // Load existing data
                 $this->name = $existingMembership->name;
                 $this->email = $existingMembership->email;
@@ -106,7 +115,8 @@ class Register extends Component
                     'email' => 'required|email',
                     'mobile' => 'required',
                     'date_of_birth' => 'required|date',
-                    'gender' => 'required'
+                    'gender' => 'required',
+                    'referral_code' => 'nullable|exists:memberships,token'
                 ]);
                 break;
             case 2:
@@ -147,8 +157,9 @@ class Register extends Component
                 ]);
                 break;
             case 7:
+                $imageRule = $this->existingImage ? 'nullable' : 'required';
                 $this->validate([
-                    'image' => 'required|image|max:1024',
+                    'image' => $imageRule.'|image|max:1024',
                     'terms_and_condition' => 'accepted'
                 ]);
                 break;
@@ -158,6 +169,11 @@ class Register extends Component
     public function register()
     {
         $this->validateStep($this->currentStep);
+        
+        $referer = null;
+        if ($this->referral_code) {
+            $referer = Membership::where('token', $this->referral_code)->first();
+        }
         
         $data = [
             'name' => $this->name,
@@ -183,7 +199,8 @@ class Register extends Component
             'ifsc' => $this->ifsc,
             'pancard' => $this->pancard,
             'aadhar_card' => $this->aadhar_card,
-            'terms_and_condition' => $this->terms_and_condition
+            'terms_and_condition' => $this->terms_and_condition,
+            'referal_id' => $referer ? $referer->id : null,
         ];
 
         if ($this->image) {
@@ -203,6 +220,9 @@ class Register extends Component
 
     public function render()
     {
+        if ($this->isSubmitted) {
+            return view('livewire.membership.show');
+        }
         return view('livewire.membership.register');
     }
 }

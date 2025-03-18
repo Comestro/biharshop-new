@@ -11,13 +11,10 @@ class RouteServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        // ...existing code...
-
         $this->routes(function () {
             // ...existing routes...
             
             Route::middleware('web')
-                ->prefix('admin')
                 ->group(base_path('routes/admin.php'));
         });
     }

@@ -16,22 +16,32 @@ class Login extends Component
         'password' => 'required'
     ];
 
+    protected function messages()
+    {
+        return [
+            'email.required' => 'Email address is required',
+            'password.required' => 'Password is required',
+        ];
+    }
+
     public function login()
     {
         $this->validate();
-
         if (Auth::guard('admin')->attempt([
             'email' => $this->email,
             'password' => $this->password
         ], $this->remember)) {
-            return redirect()->route('admin.dashboard');
+            session()->regenerate();
+            return redirect()->intended(route('admin.dashboard'));
         }
 
-        session()->flash('error', 'Invalid credentials');
+        $this->addError('email', 'These credentials do not match our records.');
+        $this->reset('password');
     }
 
     public function render()
     {
-        return view('livewire.admin.auth.login');
+        return view('livewire.admin.auth.login')
+                ->layout('components.layouts.auth');
     }
 }
