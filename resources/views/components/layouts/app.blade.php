@@ -10,9 +10,8 @@
 </head>
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100 text-black">
-        <x-layouts.app.sidebar />
         
-        <div class="lg:pl-64">
+        <div>
             <main>
                 {{ $slot }}
             </main>
