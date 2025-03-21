@@ -108,19 +108,19 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <input wire:model="remember" id="remember" type="checkbox"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded">
                         <label for="remember" class="ml-2 block text-sm text-gray-900">Remember me</label>
                     </div>
 
                     @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                        <a href="{{ route('password.request') }}" class="text-sm font-medium text-teal-600 hover:text-teal-500">
                             Forgot your password?
                         </a>
                     @endif
                 </div>
 
                 <div>
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         Sign in
                     </button>
                 </div>
@@ -144,6 +144,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     </div>
                 </div>
             @endif
+
+            <!-- Admin Login Link -->
+            <div class="mt-6 text-center">
+                <a href="{{ route('admin.login') }}" class="text-sm text-teal-600 hover:text-teal-500">
+                    Login as Administrator
+                </a>
+            </div>
         </div>
     </div>
 </div>

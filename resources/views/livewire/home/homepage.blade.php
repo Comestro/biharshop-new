@@ -5,15 +5,25 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex-shrink-0">
-                    <span class="text-2xl font-bold text-indigo-600">BiharShop</span>
+                    <span class="text-2xl font-bold text-teal-600">BiharShop</span>
                 </div>
 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-indigo-600">Home</a>
-                    <a href="#products" class="text-gray-700 hover:text-indigo-600">Products</a>
-                    <a href="#about" class="text-gray-700 hover:text-indigo-600">About</a>
-                    <a href="#contact" class="text-gray-700 hover:text-indigo-600">Contact</a>
+                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-teal-600">Home</a>
+                    <a href="#products" class="text-gray-700 hover:text-teal-600">Products</a>
+                    @auth
+                        @if(auth()->user()->membership)
+                            <a href="{{ route('member.dashboard') }}" class="text-gray-700 hover:text-teal-600">Member Panel</a>
+                        @else
+                            <a href="{{ route('membership.register') }}" class="text-gray-700 hover:text-teal-600">Become Member</a>
+                        @endif
+                        @if(auth()->guard('admin')->check())
+                            <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-teal-600">Admin Panel</a>
+                        @endif
+                    @endauth
+                    <a href="#about" class="text-gray-700 hover:text-teal-600">About</a>
+                    <a href="#contact" class="text-gray-700 hover:text-teal-600">Contact</a>
                 </div>
 
                 <!-- Right Side Menu -->
@@ -36,8 +46,13 @@
                                 </svg>
                             </button>
                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                                @if(auth()->user()->is_admin)
-                                    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admin Dashboard</a>
+                                @if(auth()->user()->membership)
+                                    <a href="{{ route('member.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Member Panel</a>
+                                @else
+                                    <a href="{{ route('membership.register') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Become Member</a>
+                                @endif
+                                @if(auth()->guard('admin')->check())
+                                    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admin Panel</a>
                                 @endif
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -46,8 +61,8 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-indigo-600">Login</a>
-                        <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-teal-600">Login</a>
+                        <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700">
                             Sign Up
                         </a>
                     @endauth
@@ -64,28 +79,81 @@
     </nav>
 
     <!-- Hero Section with Search -->
-    <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+    <div class="relative bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <defs>
+                    <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width="100" height="100" fill="url(#grid)"/>
+            </svg>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
             <div class="text-center">
-                <h1 class="text-4xl font-extrabold sm:text-5xl md:text-6xl">
-                    Find Everything You Need
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6">
+                    Welcome to <span class="text-yellow-400">BiharShop</span>
                 </h1>
-                <p class="mt-4 text-xl">Search through thousands of products at the best prices.</p>
+                <p class="mt-4 text-xl md:text-2xl text-indigo-100 max-w-2xl mx-auto">
+                    Discover a world of authentic products at unbeatable prices.
+                </p>
                 
                 <!-- Search Bar -->
-                <div class="mt-8 max-w-3xl mx-auto">
-                    <div class="flex items-center bg-white rounded-lg overflow-hidden shadow-lg">
-                        <input 
-                            wire:model.live.debounce.300ms="search"
-                            type="search" 
-                            placeholder="Search for products..."
-                            class="flex-1 px-6 py-4 text-gray-700 focus:outline-none">
-                        <button class="px-6 py-4 bg-indigo-600 text-white font-medium hover:bg-indigo-700">
-                            Search
+                <div class="mt-10 max-w-3xl mx-auto">
+                    <div class="flex items-center bg-white rounded-lg overflow-hidden shadow-xl p-1">
+                        <div class="flex-1 px-4">
+                            <input 
+                                wire:model.live.debounce.300ms="search"
+                                type="search" 
+                                placeholder="What are you looking for?"
+                                class="w-full py-3 text-gray-800 placeholder-gray-500 border-none focus:outline-none focus:ring-0 text-lg">
+                        </div>
+                        <button class="px-8 py-3 bg-teal-600 text-white font-medium text-lg rounded-md hover:bg-teal-700 transition-colors duration-200 mx-1">
+                            <span class="hidden md:inline">Search</span>
+                            <svg class="w-6 h-6 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
                         </button>
+                    </div>
+                    <!-- Popular Searches -->
+                    <div class="mt-4 flex items-center justify-center space-x-4 text-sm text-indigo-100">
+                        <span>Popular:</span>
+                        <a href="#" class="hover:text-white">Electronics</a>
+                        <a href="#" class="hover:text-white">Fashion</a>
+                        <a href="#" class="hover:text-white">Home</a>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-16 grid grid-cols-2 gap-5 md:grid-cols-4 lg:gap-8">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
+                        <p class="text-3xl font-bold text-white">2000+</p>
+                        <p class="mt-1 text-indigo-100">Products</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
+                        <p class="text-3xl font-bold text-white">500+</p>
+                        <p class="mt-1 text-indigo-100">Sellers</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
+                        <p class="text-3xl font-bold text-white">10K+</p>
+                        <p class="mt-1 text-indigo-100">Customers</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
+                        <p class="text-3xl font-bold text-white">24/7</p>
+                        <p class="mt-1 text-indigo-100">Support</p>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Wave Shape Divider -->
+        <div class="absolute bottom-0 left-0 right-0">
+            <svg class="fill-gray-100" viewBox="0 0 1920 80" preserveAspectRatio="none">
+                <path d="M0,0 C480,80 960,80 1440,80 C1920,80 1920,80 1920,80 L1920,0 L0,0 Z"></path>
+            </svg>
         </div>
     </div>
 
@@ -94,12 +162,12 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
             <button wire:click="$set('selectedCategory', null)" 
-                    class="flex-none px-4 py-2 rounded-full {{ !$selectedCategory ? 'bg-indigo-600 text-white' : 'bg-white hover:bg-gray-50' }}">
+                    class="flex-none px-4 py-2 rounded-full {{ !$selectedCategory ? 'bg-teal-600 text-white' : 'bg-white hover:bg-gray-50' }}">
                 All Products
             </button>
             @foreach($categories as $category)
                 <button wire:click="$set('selectedCategory', {{ $category->id }})"
-                        class="flex-none px-4 py-2 rounded-full {{ $selectedCategory == $category->id ? 'bg-indigo-600 text-white' : 'bg-white hover:bg-gray-50' }}">
+                        class="flex-none px-4 py-2 rounded-full {{ $selectedCategory == $category->id ? 'bg-teal-600 text-white' : 'bg-white hover:bg-gray-50' }}">
                     {{ $category->name }}
                 </button>
             @endforeach
@@ -120,7 +188,7 @@
                     <div class="p-4">
                         <h3 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h3>
                         <p class="mt-1 text-gray-600">₹{{ number_format($product->price, 2) }}</p>
-                        <button class="mt-4 w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition-colors duration-200">
+                        <button class="mt-4 w-full bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition-colors duration-200">
                             Add to Cart
                         </button>
                     </div>
@@ -143,14 +211,14 @@
         <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex space-x-6 mb-4 md:mb-0">
-                    <a href="#" class="text-gray-500 hover:text-indigo-600">About</a>
-                    <a href="#" class="text-gray-500 hover:text-indigo-600">Contact</a>
-                    <a href="#" class="text-gray-500 hover:text-indigo-600">Terms</a>
-                    <a href="#" class="text-gray-500 hover:text-indigo-600">Privacy</a>
+                    <a href="#" class="text-gray-500 hover:text-teal-600">About</a>
+                    <a href="#" class="text-gray-500 hover:text-teal-600">Contact</a>
+                    <a href="#" class="text-gray-500 hover:text-teal-600">Terms</a>
+                    <a href="#" class="text-gray-500 hover:text-teal-600">Privacy</a>
                 </div>
                 <div class="flex items-center space-x-4">
                     <p class="text-sm text-gray-500">&copy; {{ date('Y') }} BiharShop. All rights reserved.</p>
-                    <a href="{{ route('admin.login') }}" class="text-sm text-gray-500 hover:text-indigo-600">Admin Login</a>
+                    <a href="{{ route('admin.login') }}" class="text-sm text-gray-500 hover:text-teal-600">Admin Login</a>
                 </div>
             </div>
         </div>

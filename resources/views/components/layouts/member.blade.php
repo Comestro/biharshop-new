@@ -11,17 +11,17 @@
 <body class="bg-gray-50">
     <div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
         <!-- Sidebar -->
-        <div class="fixed inset-y-0 left-0 z-30 w-64 transform bg-indigo-700 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 transition ease-in-out duration-300"
+        <div class="fixed inset-y-0 left-0 z-30 w-64 transform bg-teal-700 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 transition ease-in-out duration-300"
              :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
             
             <!-- Logo -->
-            <div class="flex items-center justify-center h-16 bg-indigo-800">
+            <div class="flex items-center justify-center h-16 bg-teal-800">
                 <span class="text-white text-2xl font-bold">Member Panel</span>
             </div>
 
             <!-- Navigation -->
             <nav class="mt-4 space-y-2 px-4">
-                <a href="{{ route('member.dashboard') }}" class="flex items-center px-4 py-2 text-white rounded-lg {{ request()->routeIs('member.dashboard') ? 'bg-indigo-800' : 'hover:bg-indigo-600' }}">
+                <a href="{{ route('member.dashboard') }}" class="flex items-center px-4 py-2 text-white rounded-lg {{ request()->routeIs('member.dashboard') ? 'bg-teal-800' : 'hover:bg-teal-600' }}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>

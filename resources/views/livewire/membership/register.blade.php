@@ -11,7 +11,7 @@
             <div class="flex justify-between items-center">
                 @foreach (['Personal Info', 'Family Details', 'Address', 'Nominee', 'Bank Details', 'Documents', 'Photo'] as $index => $step)
                     <div class="flex flex-col items-center">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center {{ $currentStep > ($index + 1) ? 'bg-green-500' : ($currentStep == ($index + 1) ? 'bg-blue-500' : 'bg-gray-200') }} text-white">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center {{ $currentStep > ($index + 1) ? 'bg-teal-500' : ($currentStep == ($index + 1) ? 'bg-teal-600' : 'bg-gray-200') }} text-white">
                             @if($currentStep > ($index + 1))
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             @else
@@ -38,7 +38,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Full Name</label>
                             <input type="text" wire:model="name" 
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             @error('name') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
@@ -307,7 +307,7 @@
                         </button>
                     @endif
 
-                    <button type="submit" class="ml-auto px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700">
+                    <button type="submit" class="ml-auto px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700">
                         {{ $currentStep < 7 ? 'Next' : 'Complete Registration' }}
                     </button>
                 </div>
