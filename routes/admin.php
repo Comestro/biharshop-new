@@ -15,5 +15,6 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::get('/members', Members::class)->name('admin.members');
     Route::post('/verify-member/{id}', [Members::class, 'verifyMember'])->name('admin.verify-member');
     Route::get('/binary-tree', \App\Livewire\Admin\BinaryTree::class)->name('admin.binary-tree');
+    Route::get('/manage-positions', \App\Livewire\Admin\ManagePositions::class)->name('admin.manage-positions');
 });
 

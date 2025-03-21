@@ -4,7 +4,7 @@ namespace App\Livewire\Membership;
 
 use Livewire\Component;
 use App\Models\Membership;
-use App\Models\BinaryTree;
+use App\Models\BinaryTree;  // Changed from BinaryPosition
 
 class BinaryPosition extends Component
 {

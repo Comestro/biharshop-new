@@ -11,10 +11,6 @@ use App\Livewire\Home\Homepage;
 
 Route::get('/', Homepage::class)->name('home');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 

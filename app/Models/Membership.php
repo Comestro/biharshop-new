@@ -15,7 +15,7 @@ class Membership extends Model
 
     public function binaryPosition()
     {
-        return $this->hasOne(BinaryPosition::class);
+        return $this->hasOne(BinaryTree::class, 'member_id');  // Changed from BinaryPosition to BinaryTree
     }
 
     public function referrer()

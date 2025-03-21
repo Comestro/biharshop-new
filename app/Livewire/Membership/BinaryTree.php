@@ -3,7 +3,7 @@ namespace App\Livewire\Membership;
 
 use Livewire\Component;
 use App\Models\Membership;
-use App\Models\BinaryPosition;
+use App\Models\BinaryTree as BinaryTreeModel;
 
 class BinaryTree extends Component
 {
@@ -16,22 +16,23 @@ class BinaryTree extends Component
 
     protected function getTreeData($member_id, $level = 0)
     {
-        if ($level > 3) return null;
+        if ($level > 3) return null; 
 
         $member = Membership::find($member_id);
         if (!$member) return null;
 
-        $left = BinaryPosition::where('parent_id', $member_id)
+        $left = BinaryTreeModel::where('parent_id', $member_id)
                             ->where('position', 'left')
                             ->first();
-        $right = BinaryPosition::where('parent_id', $member_id)
+
+        $right = BinaryTreeModel::where('parent_id', $member_id)
                              ->where('position', 'right')
                              ->first();
-
+                
         return [
             'member' => $member,
-            'left' => $left ? $this->getTreeData($left->membership_id, $level + 1) : null,
-            'right' => $right ? $this->getTreeData($right->membership_id, $level + 1) : null
+            'left' => $left ? $this->getTreeData($left->member_id, $level + 1) : null,
+            'right' => $right ? $this->getTreeData($right->member_id, $level + 1) : null
         ];
     }
 

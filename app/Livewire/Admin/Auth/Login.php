@@ -27,15 +27,16 @@ class Login extends Component
     public function login()
     {
         $this->validate();
+
         if (Auth::guard('admin')->attempt([
             'email' => $this->email,
             'password' => $this->password
         ], $this->remember)) {
             session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+            return redirect()->route('admin.dashboard');
         }
 
-        $this->addError('email', 'These credentials do not match our records.');
+        $this->addError('email', 'Invalid admin credentials');
         $this->reset('password');
     }
 

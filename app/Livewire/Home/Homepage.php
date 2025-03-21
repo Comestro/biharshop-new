@@ -21,7 +21,10 @@ class Homepage extends Component
                 $query->where('category_id', $this->selectedCategory);
             })
             ->when($this->search, function($query) {
-                $query->where('name', 'like', '%'.$this->search.'%');
+                $query->where(function($q) {
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                      ->orWhere('description', 'like', '%'.$this->search.'%');
+                });
             })
             ->latest()
             ->paginate(12);
@@ -29,6 +32,6 @@ class Homepage extends Component
         return view('livewire.home.homepage', [
             'products' => $products,
             'categories' => Category::all()
-        ]);
+        ])->layout('components.layouts.app');
     }
 }
