@@ -29,7 +29,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/membership/select-position/{membership}', BinaryPosition::class)->name('membership.select-position');
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/member/dashboard', \App\Livewire\Member\Dashboard::class)->name('member.dashboard');
+    Route::get('/member/profile', \App\Livewire\Member\Profile::class)->name('member.profile');
+    Route::get('/member/tree', \App\Livewire\Member\Tree::class)->name('member.tree');
+    Route::get('/member/referrals', \App\Livewire\Member\Referrals::class)->name('member.referrals');
+    Route::get('/member/binary-position/{member_id}', \App\Livewire\Member\BinaryPosition::class)->name('member.binary-position');
+});
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/member/dashboard', \App\Livewire\Member\Dashboard::class)->name('member.dashboard');
+    Route::get('/member/profile', \App\Livewire\Member\Profile::class)->name('member.profile');
+    Route::get('/member/tree', \App\Livewire\Member\Tree::class)->name('member.tree');
+    Route::get('/member/referrals', \App\Livewire\Member\Referrals::class)->name('member.referrals');
+    Route::get('/member/select-position/{membership}', \App\Livewire\Member\BinaryPosition::class)->name('member.select-position');
+});
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

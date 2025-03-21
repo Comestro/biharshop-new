@@ -15,7 +15,7 @@ class Membership extends Model
 
     public function binaryPosition()
     {
-        return $this->hasOne(BinaryTree::class, 'member_id');  // Changed from BinaryPosition to BinaryTree
+        return $this->hasOne(BinaryTree::class, 'member_id');
     }
 
     public function referrer()
@@ -26,5 +26,10 @@ class Membership extends Model
     public function referrals()
     {
         return $this->hasMany(Membership::class, 'referal_id');
+    }
+
+    public function binaryChildren()
+    {
+        return $this->hasMany(BinaryTree::class, 'parent_id');
     }
 }
