@@ -10,6 +10,7 @@ use App\Livewire\Home\Homepage;
 
 
 Route::get('/', Homepage::class)->name('home');
+Route::get('/team', App\Livewire\Home\Team::class)->name('team');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

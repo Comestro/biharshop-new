@@ -100,14 +100,14 @@
                 <p class="mt-4 text-xl md:text-2xl text-indigo-100 max-w-2xl mx-auto">
                     Discover a world of authentic products at unbeatable prices.
                 </p>
-                
+
                 <!-- Search Bar -->
                 <div class="mt-10 max-w-3xl mx-auto">
                     <div class="flex items-center bg-white rounded-lg overflow-hidden shadow-xl p-1">
                         <div class="flex-1 px-4">
-                            <input 
+                            <input
                                 wire:model.live.debounce.300ms="search"
-                                type="search" 
+                                type="search"
                                 placeholder="What are you looking for?"
                                 class="w-full py-3 text-gray-800 placeholder-gray-500 border-none focus:outline-none focus:ring-0 text-lg">
                         </div>
@@ -161,7 +161,7 @@
     @if($categories->count() > 0)
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
-            <button wire:click="$set('selectedCategory', null)" 
+            <button wire:click="$set('selectedCategory', null)"
                     class="flex-none px-4 py-2 rounded-full {{ !$selectedCategory ? 'bg-teal-600 text-white' : 'bg-white hover:bg-gray-50' }}">
                 All Products
             </button>
@@ -181,7 +181,7 @@
             @forelse($products as $product)
                 <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                     @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" 
+                        <img src="{{ asset('storage/' . $product->image) }}"
                              alt="{{ $product->name }}"
                              class="w-full h-48 object-cover rounded-t-lg">
                     @endif
@@ -212,6 +212,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex space-x-6 mb-4 md:mb-0">
                     <a href="#" class="text-gray-500 hover:text-teal-600">About</a>
+                    <a href="{{ route('team') }}" class="text-gray-500 hover:text-teal-600">Our Team</a>
                     <a href="#" class="text-gray-500 hover:text-teal-600">Contact</a>
                     <a href="#" class="text-gray-500 hover:text-teal-600">Terms</a>
                     <a href="#" class="text-gray-500 hover:text-teal-600">Privacy</a>
