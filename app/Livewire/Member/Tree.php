@@ -11,17 +11,17 @@ class Tree extends Component
     public $root_id;
     public $treeData;
     
-    public function mount($root_id = null)
+    public function mount()
     {
-        $this->root_id = $root_id ?? auth()->user()->membership->id;
-        $this->treeData = $this->formatTreeData();
+        $this->root_id = auth()->user()->membership->id;
+        $this->loadTree();
     }
 
-    protected function formatTreeData()
+    protected function loadTree()
     {
         $flatData = [];
         $this->processNode($this->root_id, null, $flatData);
-        return $flatData;
+        $this->treeData = $flatData;
     }
 
     protected function processNode($memberId, $parentId, &$flatData)
@@ -31,6 +31,7 @@ class Tree extends Component
         $member = Membership::find($memberId);
         if (!$member) return;
 
+        // Add current node
         $flatData[] = [
             'id' => $member->id,
             'parentId' => $parentId,
@@ -39,11 +40,11 @@ class Tree extends Component
             'status' => $member->isVerified ? 'verified' : 'pending'
         ];
 
+        // Process children
         $tree = BinaryTree::where('parent_id', $memberId)->get();
         
+        // Process left child
         $left = $tree->where('position', 'left')->first();
-        $right = $tree->where('position', 'right')->first();
-
         if ($left) {
             $this->processNode($left->member_id, $member->id, $flatData);
         } else {
@@ -56,6 +57,8 @@ class Tree extends Component
             ];
         }
 
+        // Process right child
+        $right = $tree->where('position', 'right')->first();
         if ($right) {
             $this->processNode($right->member_id, $member->id, $flatData);
         } else {

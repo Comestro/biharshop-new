@@ -45,5 +45,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/member/select-position/{membership}', \App\Livewire\Member\BinaryPosition::class)->name('member.select-position');
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function() {
+        if (auth()->user()->membership) {
+            return redirect()->route('member.dashboard');
+        }
+        return redirect()->route('membership.register');
+    })->name('dashboard');
+});
+
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

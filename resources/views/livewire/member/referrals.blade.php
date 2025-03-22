@@ -1,9 +1,13 @@
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-semibold text-gray-900">My Referrals</h2>
-        <p class="mt-2 text-sm text-gray-700">Manage and track your direct referrals.</p>
+        <!-- Header -->
+        <div class="mb-6">
+            <h2 class="text-xl font-medium text-gray-900">My Referrals</h2>
+            <p class="mt-1 text-sm text-gray-500">Manage and track your direct referrals.</p>
+        </div>
 
-        <div class="mt-8 bg-white shadow rounded-lg overflow-hidden">
+        <!-- Table Container -->
+        <div class="border rounded-lg overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -16,6 +20,9 @@
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Contact
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Position
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Joined Date
@@ -39,6 +46,16 @@
                                     <div>{{ $referral->mobile }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    @if($referral->binaryPosition)
+                                        <span class="capitalize px-2 py-1 text-xs rounded-full
+                                            {{ $referral->binaryPosition->position === 'left' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                            {{ $referral->binaryPosition->position }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400">Not Positioned</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $referral->created_at->format('d M Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -54,7 +71,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
                                     No referrals found
                                 </td>
                             </tr>
@@ -64,7 +81,7 @@
             </div>
             
             @if($referrals->hasPages())
-                <div class="px-4 py-3 border-t border-gray-200">
+                <div class="px-4 py-3 border-t">
                     {{ $referrals->links() }}
                 </div>
             @endif

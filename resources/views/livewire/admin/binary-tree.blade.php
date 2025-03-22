@@ -96,7 +96,7 @@
                     return d.data.status === 'verified' ? '#10b981' : '#ef4444';
                 })
                 .attr("stroke-width", 3)
-                .attr("class", "transition-colors duration-200 hover:stroke-indigo-500");
+                .attr("class", "text-xs transition-colors duration-200 hover:stroke-indigo-500");
 
             // Node labels
             const labels = nodes.append("g")
@@ -106,14 +106,14 @@
             labels.append("text")
                 .attr("dy", "-1.2em")
                 .attr("text-anchor", "middle")
-                .attr("class", "text-[10px] font-medium text-gray-500")
+                .attr("class", "text-[4px] font-medium text-gray-500")
                 .text(d => d.data.token ? '#' + d.data.token : '');
 
             // Member name text
             labels.append("text")
                 .attr("dy", "0.4em")
                 .attr("text-anchor", "middle")
-                .attr("class", "text-xs font-medium")
+                .attr("class", "text-[6px] font-medium")
                 .text(d => d.data.name)
                 .call(wrap, 60); // Reduced width for better wrapping
 
@@ -181,6 +181,7 @@
         // Initialize when component is ready
         document.addEventListener('DOMContentLoaded', function() {
             const treeData = @json($treeData);
+            console.log(treeData);
             if (treeData) {
                 initBinaryTree(treeData);
             }

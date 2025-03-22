@@ -12,7 +12,8 @@ class Referrals extends Component
 
     public function render()
     {
-        $referrals = Membership::where('referal_id', auth()->user()->membership->id)
+        $referrals = Membership::with('binaryPosition')
+            ->where('referal_id', auth()->user()->membership->id)
             ->latest()
             ->paginate(10);
 
