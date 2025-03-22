@@ -14,16 +14,16 @@
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100 text-black">
         <x-layouts.admin.sidebar />
-        
+
         <div class="lg:pl-64">
             <main class="py-10">
-                <div class="px-4 sm:px-6 lg:px-8">
+                <div class="">
                     {{ $slot }}
                 </div>
             </main>
         </div>
     </div>
-    
+
     @livewireScripts
     @stack('scripts')
 </body>

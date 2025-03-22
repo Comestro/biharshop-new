@@ -10,7 +10,7 @@ class BinaryTree extends Component
 {
     public $root_id;
     public $treeData;
-    
+
     public function mount($root_id = null)
     {
         $this->root_id = $root_id ?? Membership::where('isVerified', true)->first()?->id;
@@ -42,7 +42,7 @@ class BinaryTree extends Component
 
         // Process children
         $tree = BinaryTreeModel::where('parent_id', $memberId)->get();
-        
+
         // Process left child
         $left = $tree->where('position', 'left')->first();
         if ($left) {
