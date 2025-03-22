@@ -51,7 +51,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Email</label>
                             <input type="email" wire:model="email"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             <p class="mt-1 text-xs text-gray-500">Must be a valid email address</p>
                             @error('email') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
@@ -59,7 +59,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Mobile Number</label>
                             <input type="tel" wire:model="mobile"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             <p class="mt-1 text-xs text-gray-500">10 digit number starting with 6-9</p>
                             @error('mobile') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
@@ -67,7 +67,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">WhatsApp</label>
                             <input type="tel" wire:model="whatsapp"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             <p class="mt-1 text-xs text-gray-500">Optional. If different from mobile number</p>
                             @error('whatsapp') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
@@ -76,7 +76,7 @@
                             <label class="block text-sm font-medium text-gray-700">Referral Code (Optional)</label>
                             <input type="text" wire:model.live="referral_code"
                                 placeholder="Enter member ID of referrer"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             @if($referrer_name)
                                 <p class="mt-1 text-sm text-teal-600">Referrer: {{ $referrer_name }}</p>
                             @endif
@@ -86,7 +86,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Date of Birth</label>
                             <input type="date" wire:model="date_of_birth"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             <p class="mt-1 text-xs text-gray-500">Must be at least 18 years old</p>
                             @error('date_of_birth') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
@@ -94,7 +94,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Gender</label>
                             <select wire:model="gender"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                                 <option value="">Select Gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
@@ -112,17 +112,17 @@
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Father's Name</label>
-                            <input type="text" wire:model="father_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="text" wire:model="father_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             @error('father_name') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Mother's Name</label>
-                            <input type="text" wire:model="mother_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="text" wire:model="mother_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             @error('mother_name') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Nationality</label>
-                            <select wire:model="nationality" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select wire:model="nationality" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                                 <option value="">Select Nationality</option>
                                 <option value="Indian">Indian</option>
                                 <option value="Other">Other</option>
@@ -131,7 +131,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Marital Status</label>
-                            <select wire:model="marital_status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select wire:model="marital_status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                                 <option value="">Select Status</option>
                                 <option value="single">Single</option>
                                 <option value="married">Married</option>
@@ -142,7 +142,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Religion</label>
-                            <select wire:model="religion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select wire:model="religion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                                 <option value="">Select Religion</option>
                                 <option value="Hindu">Hindu</option>
                                 <option value="Muslim">Muslim</option>
@@ -165,7 +165,7 @@
                     <div class="grid grid-cols-1 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Home Address</label>
-                            <textarea wire:model="home_address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                            <textarea wire:model="home_address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"></textarea>
                             @error('home_address') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -176,7 +176,7 @@
                                         wire:model.blur="pincode"
                                         maxlength="6"
                                         pattern="[0-9]{6}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
                                         placeholder="Enter 6 digit PIN code">
                                     <div wire:loading wire:target="pincode" class="absolute right-2 top-3">
                                         <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -192,7 +192,7 @@
                                 <label class="block text-sm font-medium text-gray-700">City</label>
                                 <input type="text"
                                     wire:model="city"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
                                     readonly>
                                 @error('city') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                             </div>
@@ -200,7 +200,7 @@
                                 <label class="block text-sm font-medium text-gray-700">State</label>
                                 <input type="text"
                                     wire:model="state"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
                                     readonly>
                                 @error('state') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                             </div>
@@ -216,12 +216,12 @@
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Nominee Name</label>
-                            <input type="text" wire:model="nominee_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="text" wire:model="nominee_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             @error('nominee_name') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Relation with Nominee</label>
-                            <select wire:model="nominee_relation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select wire:model="nominee_relation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                                 <option value="">Select Relation</option>
                                 @foreach($nominee_relations as $relation)
                                     <option value="{{ $relation }}">{{ $relation }}</option>
@@ -245,7 +245,7 @@
                                     wire:model.blur="ifsc"
                                     maxlength="11"
                                     pattern="^[A-Z]{4}0[A-Z0-9]{6}$"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 uppercase"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2 uppercase"
                                     placeholder="Enter IFSC code">
                                 <div wire:loading wire:target="ifsc" class="absolute right-2 top-3">
                                     <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -259,17 +259,17 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Bank Name</label>
-                            <input type="text" wire:model="bank_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="text" wire:model="bank_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             @error('bank_name') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Branch Name</label>
-                            <input type="text" wire:model="branch_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="text" wire:model="branch_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             @error('branch_name') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Account Number</label>
-                            <input type="text" wire:model="account_no" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="text" wire:model="account_no" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             @error('account_no') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
@@ -285,13 +285,13 @@
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">PAN Card Number</label>
-                            <input type="text" wire:model="pancard" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="text" wire:model="pancard" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             <p class="mt-1 text-xs text-gray-500">Valid 10 character PAN number</p>
                             @error('pancard') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Aadhar Card Number</label>
-                            <input type="text" wire:model="aadhar_card" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="text" wire:model="aadhar_card" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                             <p class="mt-1 text-xs text-gray-500">Valid 12 digit Aadhar number</p>
                             @error('aadhar_card') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>

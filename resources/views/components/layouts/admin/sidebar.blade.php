@@ -3,10 +3,10 @@
         <div class="h-16 flex items-center px-6 border-b">
             <a href="{{ route('admin.dashboard') }}" class="text-2xl font-bold">Admin Panel</a>
         </div>
-        
+
         <nav class="flex flex-col flex-1 px-4 py-4">
             <div class="space-y-2">
-                <a href="{{ route('admin.dashboard') }}" 
+                <a href="{{ route('admin.dashboard') }}"
                    class="block px-4 py-2 rounded-lg hover:bg-teal-100 {{ request()->routeIs('admin.dashboard') ? 'bg-teal-100' : '' }}">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -16,7 +16,27 @@
                     </div>
                 </a>
 
-                <a href="{{ route('admin.members') }}" 
+                <a href="{{ route('admin.products') }}"
+                   class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.products') ? 'bg-gray-100' : '' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        Products
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.categories') }}"
+                   class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.categories') ? 'bg-gray-100' : '' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                        Categories
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.members') }}"
                    class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.members') ? 'bg-gray-100' : '' }}">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +49,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('admin.binary-tree') }}" 
+                <a href="{{ route('admin.binary-tree') }}"
                    class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.binary-tree') ? 'bg-gray-100' : '' }}">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +59,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('admin.manage-positions') }}" 
+                <a href="{{ route('admin.manage-positions') }}"
                    class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.manage-positions') ? 'bg-gray-100' : '' }}">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

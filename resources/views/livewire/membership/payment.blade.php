@@ -36,11 +36,11 @@
                         <label class="block text-sm font-medium text-gray-700">
                             Transaction Number / UTR
                         </label>
-                        <input type="text" 
+                        <input type="text"
                                wire:model="transaction_no"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
                                placeholder="Enter your payment reference number">
-                        @error('transaction_no') 
+                        @error('transaction_no')
                             <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
                         @enderror
                     </div>
