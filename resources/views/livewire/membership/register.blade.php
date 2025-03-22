@@ -64,9 +64,12 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Referral Code (Optional)</label>
-                            <input type="text" wire:model="referral_code"
+                            <input type="text" wire:model.live="referral_code"
                                 placeholder="Enter member ID of referrer" 
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            @if($referrer_name)
+                                <p class="mt-1 text-sm text-teal-600">Referrer: {{ $referrer_name }}</p>
+                            @endif
                             @error('referral_code') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 

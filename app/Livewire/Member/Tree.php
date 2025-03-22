@@ -31,13 +31,14 @@ class Tree extends Component
         $member = Membership::find($memberId);
         if (!$member) return;
 
-        // Add current node
+        // Add current node with logged in user check
         $flatData[] = [
             'id' => $member->id,
             'parentId' => $parentId,
             'name' => $member->name,
             'token' => $member->token,
-            'status' => $member->isVerified ? 'verified' : 'pending'
+            'status' => $member->id === auth()->user()->membership->id ? 'current' : 
+                       ($member->isVerified ? 'verified' : 'pending')
         ];
 
         // Process children

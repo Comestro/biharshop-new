@@ -16,6 +16,7 @@ class Register extends Component
     public $nationality, $marital_status, $religion;
     public $father_name, $mother_name;
     public $referral_code;
+    public $referrer_name = '';
     
     // Address Details
     public $home_address, $city, $pincode, $state;
@@ -44,9 +45,20 @@ class Register extends Component
     public function mount()
     {
         if (auth()->check()) {
+            // Pre-fill from user data
+            $user = auth()->user();
+            $this->name = $user->name;
+            $this->email = $user->email;
+            
             $existingMembership = Membership::where('user_id', auth()->id())->first();
             if ($existingMembership) {
                 $this->membership = $existingMembership;
+                
+                // Redirect if membership exists but unpaid
+                if (!$existingMembership->isPaid) {
+                    return redirect()->route('membership.payment', $existingMembership);
+                }
+                
                 if ($existingMembership->isPaid) {
                     $this->isSubmitted = true;
                     return;
@@ -163,6 +175,33 @@ class Register extends Component
                     'terms_and_condition' => 'accepted'
                 ]);
                 break;
+        }
+    }
+
+    public function updatedReferralCode()
+    {
+        if ($this->referral_code) {
+            $referrer = Membership::where('token', $this->referral_code)
+                                ->where('isVerified', true)
+                                ->first();
+            
+            if ($referrer) {
+                // Check available positions
+                $existingPositions = \App\Models\BinaryTree::where('parent_id', $referrer->id)
+                                                          ->pluck('position')
+                                                          ->toArray();
+                
+                if (count($existingPositions) >= 2) {
+                    $this->referrer_name = $referrer->name . ' (No positions available)';
+                    $this->addError('referral_code', 'This member has no available positions');
+                } else {
+                    $this->referrer_name = $referrer->name . ' (' . (2 - count($existingPositions)) . ' position(s) available)';
+                }
+            } else {
+                $this->referrer_name = '';
+            }
+        } else {
+            $this->referrer_name = '';
         }
     }
 

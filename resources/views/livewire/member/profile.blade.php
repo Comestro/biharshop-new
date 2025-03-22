@@ -72,9 +72,17 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Payment Status</p>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $membership->isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $membership->isPaid ? 'Paid' : 'Unpaid' }}
-                            </span>
+                            <div class="flex items-center space-x-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $membership->isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                    {{ $membership->isPaid ? 'Paid' : 'Unpaid' }}
+                                </span>
+                                @if(!$membership->isPaid)
+                                    <a href="{{ route('membership.payment', $membership) }}" 
+                                       class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700">
+                                        Pay Now
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
