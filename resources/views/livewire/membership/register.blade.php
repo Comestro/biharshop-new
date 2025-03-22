@@ -37,35 +37,40 @@
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                            <input type="text" wire:model="name" 
+                            <input type="text" wire:model="name"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            <p class="mt-1 text-xs text-gray-500">Must be at least 3 characters long</p>
                             @error('name') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" wire:model="email" 
+                            <input type="email" wire:model="email"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">Must be a valid email address</p>
                             @error('email') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                            <input type="tel" wire:model="mobile" 
+                            <input type="tel" wire:model="mobile"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">10 digit number starting with 6-9</p>
                             @error('mobile') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">WhatsApp</label>
-                            <input type="tel" wire:model="whatsapp" 
+                            <input type="tel" wire:model="whatsapp"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">Optional. If different from mobile number</p>
+                            @error('whatsapp') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Referral Code (Optional)</label>
                             <input type="text" wire:model.live="referral_code"
-                                placeholder="Enter member ID of referrer" 
+                                placeholder="Enter member ID of referrer"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             @if($referrer_name)
                                 <p class="mt-1 text-sm text-teal-600">Referrer: {{ $referrer_name }}</p>
@@ -75,13 +80,15 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Date of Birth</label>
-                            <input type="date" wire:model="date_of_birth" 
+                            <input type="date" wire:model="date_of_birth"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">Must be at least 18 years old</p>
+                            @error('date_of_birth') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Gender</label>
-                            <select wire:model="gender" 
+                            <select wire:model="gender"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">Select Gender</option>
                                 <option value="male">Male</option>
@@ -110,7 +117,11 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Nationality</label>
-                            <input type="text" wire:model="nationality" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select wire:model="nationality" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">Select Nationality</option>
+                                <option value="Indian">Indian</option>
+                                <option value="Other">Other</option>
+                            </select>
                             @error('nationality') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div>
@@ -126,7 +137,16 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Religion</label>
-                            <input type="text" wire:model="religion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select wire:model="religion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">Select Religion</option>
+                                <option value="Hindu">Hindu</option>
+                                <option value="Muslim">Muslim</option>
+                                <option value="Christian">Christian</option>
+                                <option value="Sikh">Sikh</option>
+                                <option value="Buddhist">Buddhist</option>
+                                <option value="Jain">Jain</option>
+                                <option value="Other">Other</option>
+                            </select>
                             @error('religion') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                     </div>
@@ -145,19 +165,39 @@
                         </div>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
+                                <label class="block text-sm font-medium text-gray-700">PIN Code</label>
+                                <div class="relative">
+                                    <input type="text"
+                                        wire:model.blur="pincode"
+                                        maxlength="6"
+                                        pattern="[0-9]{6}"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder="Enter 6 digit PIN code">
+                                    <div wire:loading wire:target="pincode" class="absolute right-2 top-3">
+                                        <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">Enter PIN code to auto-fill city and state</p>
+                                @error('pincode') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700">City</label>
-                                <input type="text" wire:model="city" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="text"
+                                    wire:model="city"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    readonly>
                                 @error('city') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">State</label>
-                                <input type="text" wire:model="state" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="text"
+                                    wire:model="state"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    readonly>
                                 @error('state') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">PIN Code</label>
-                                <input type="text" wire:model="pincode" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @error('pincode') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                             </div>
                         </div>
                     </div>
@@ -176,7 +216,12 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Relation with Nominee</label>
-                            <input type="text" wire:model="nominee_relation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select wire:model="nominee_relation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">Select Relation</option>
+                                @foreach($nominee_relations as $relation)
+                                    <option value="{{ $relation }}">{{ $relation }}</option>
+                                @endforeach
+                            </select>
                             @error('nominee_relation') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                     </div>
@@ -188,6 +233,25 @@
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 mb-6">Bank Details</h3>
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">IFSC Code</label>
+                            <div class="relative">
+                                <input type="text"
+                                    wire:model.blur="ifsc"
+                                    maxlength="11"
+                                    pattern="^[A-Z]{4}0[A-Z0-9]{6}$"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 uppercase"
+                                    placeholder="Enter IFSC code">
+                                <div wire:loading wire:target="ifsc" class="absolute right-2 top-3">
+                                    <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">11 character bank IFSC code</p>
+                            @error('ifsc') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Bank Name</label>
                             <input type="text" wire:model="bank_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -203,11 +267,8 @@
                             <input type="text" wire:model="account_no" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             @error('account_no') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">IFSC Code</label>
-                            <input type="text" wire:model="ifsc" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('ifsc') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
-                        </div>
+
+
                     </div>
                 </div>
                 @endif
@@ -220,11 +281,13 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">PAN Card Number</label>
                             <input type="text" wire:model="pancard" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">Valid 10 character PAN number</p>
                             @error('pancard') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Aadhar Card Number</label>
                             <input type="text" wire:model="aadhar_card" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <p class="mt-1 text-xs text-gray-500">Valid 12 digit Aadhar number</p>
                             @error('aadhar_card') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                     </div>
@@ -241,13 +304,13 @@
                             <div class="mt-2 flex items-center space-x-4">
                                 @if($existingImage && !$image)
                                     <div class="relative">
-                                        <img src="{{ Storage::url($existingImage) }}" 
+                                        <img src="{{ Storage::url($existingImage) }}"
                                              class="h-24 w-24 object-cover rounded-lg border-2 border-gray-200">
-                                        <button type="button" 
+                                        <button type="button"
                                                 onclick="document.getElementById('photo-upload').click()"
                                                 class="absolute -bottom-2 -right-2 p-1.5 rounded-full bg-indigo-600 text-white hover:bg-indigo-700">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </button>
@@ -256,13 +319,13 @@
 
                                 @if($image)
                                     <div class="relative">
-                                        <img src="{{ $image->temporaryUrl() }}" 
+                                        <img src="{{ $image->temporaryUrl() }}"
                                              class="h-24 w-24 object-cover rounded-lg border-2 border-gray-200">
                                         <button type="button"
                                                 wire:click="$set('image', null)"
                                                 class="absolute -bottom-2 -right-2 p-1.5 rounded-full bg-red-600 text-white hover:bg-red-700">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
@@ -270,10 +333,10 @@
                                 @endif
 
                                 <div class="flex-1">
-                                    <input type="file" 
+                                    <input type="file"
                                            id="photo-upload"
-                                           wire:model="image" 
-                                           accept="image/*" 
+                                           wire:model="image"
+                                           accept="image/*"
                                            class="hidden">
                                     <button type="button"
                                             onclick="document.getElementById('photo-upload').click()"
