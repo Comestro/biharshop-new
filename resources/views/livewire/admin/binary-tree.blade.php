@@ -282,6 +282,7 @@
         // Handle window resize
         window.addEventListener('resize', function() {
             const treeData = @json($treeData);
+            console.log(treeData);
             if (treeData) {
                 initBinaryTree(treeData);
             }

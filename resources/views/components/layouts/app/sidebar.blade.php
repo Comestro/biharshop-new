@@ -9,7 +9,7 @@
                 <div class="h-16 flex items-center px-6 border-b">
                     <a href="/" class="text-2xl font-bold">BiharShop</a>
                 </div>
-                
+
                 <nav class="flex flex-col flex-1 px-4 py-4">
                     <div class="space-y-2">
                         <a href="{{ route('home') }}" class="block px-4 py-2 rounded-lg hover:bg-gray-100">
@@ -34,6 +34,5 @@
         </div>
         {{ $slot }}
 
-        @fluxScripts
     </body>
 </html>

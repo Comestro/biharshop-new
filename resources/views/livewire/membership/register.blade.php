@@ -30,6 +30,11 @@
         <!-- Form Steps -->
         <div class="bg-white shadow rounded-lg p-6 sm:p-8">
             <form wire:submit.prevent="{{ $currentStep < 7 ? 'nextStep' : 'register' }}">
+                <x-global.loader wire:loading.flex wire:target="register" message="Registering..." />
+                <x-global.loader wire:loading.flex wire:target="nextStep" message="Processing..." />
+                <x-global.loader wire:loading.flex wire:target="previousStep" message="Loading previous step..." />
+                <x-global.loader wire:loading.flex wire:target="pincode" message="Fetching address..." />
+                <x-global.loader wire:loading.flex wire:target="ifsc" message="Fetching bank details..." />
                 <!-- Step 1: Personal Information -->
                 @if($currentStep === 1)
                 <div>

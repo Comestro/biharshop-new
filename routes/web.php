@@ -54,5 +54,6 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 });
 
+
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

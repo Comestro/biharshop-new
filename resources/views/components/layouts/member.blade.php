@@ -9,11 +9,13 @@
     @livewireStyles
 </head>
 <body class="bg-gray-50">
+    <x-global.loader />
+
     <div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
         <!-- Sidebar -->
         <div class="fixed inset-y-0 left-0 z-30 w-64 transform bg-teal-700 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 transition ease-in-out duration-300"
              :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
-            
+
             <!-- Logo -->
             <div class="flex items-center justify-center h-16 bg-teal-800">
                 <span class="text-white text-2xl font-bold">Member Panel</span>

@@ -4,23 +4,48 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use App\Models\Membership;
-use App\Models\BinaryTree as BinaryTreeModel;
+use App\Models\BinaryTree;
 
-class BinaryTree extends Component
+class ViewMember extends Component
 {
-    public $root_id;
-    public $treeData;
+    public $member;
+    public $activeTab = 'personal';
 
-    public function mount($root_id = null)
+    protected $validTabs = ['personal', 'financial', 'network', 'tree'];
+    protected $listeners = ['treeNodeSelected' => 'navigateToMember'];
+
+    public function mount($id)
     {
-        $this->root_id = $root_id ?? Membership::where('isVerified', true)->first()?->id;
-        $this->treeData = $this->formatTreeData();
+        $this->member = Membership::with([
+            'referrer',
+            'referrals',
+            'binaryPosition.parent',
+            'children.member'
+        ])->findOrFail($id);
     }
 
-    protected function formatTreeData()
+    public function setTab($tab)
+    {
+        if (in_array($tab, $this->validTabs)) {
+            $this->activeTab = $tab;
+            if ($tab === 'tree') {
+                // Send tree data after tab change
+                $this->dispatch('tabChanged', treeData: $this->getTreeData());
+            }
+        }
+    }
+
+    public function navigateToMember($memberId)
+    {
+        if ($memberId && !str_contains($memberId, 'empty')) {
+            return redirect()->route('admin.members.view', $memberId);
+        }
+    }
+
+    protected function getTreeData()
     {
         $flatData = [];
-        $this->processNode($this->root_id, null, $flatData);
+        $this->processNode($this->member->id, null, $flatData);
         return $flatData;
     }
 
@@ -31,7 +56,6 @@ class BinaryTree extends Component
         $member = Membership::find($memberId);
         if (!$member) return;
 
-        // Add current node to flat data
         $flatData[] = [
             'id' => $member->id,
             'parentId' => $parentId,
@@ -40,8 +64,7 @@ class BinaryTree extends Component
             'status' => $member->isVerified ? 'verified' : 'pending'
         ];
 
-        // Process children
-        $tree = BinaryTreeModel::where('parent_id', $memberId)->get();
+        $tree = BinaryTree::where('parent_id', $memberId)->get();
 
         // Process left child
         $left = $tree->where('position', 'left')->first();
@@ -74,8 +97,9 @@ class BinaryTree extends Component
 
     public function render()
     {
-        return view('livewire.admin.binary-tree', [
-            'treeData' => $this->treeData
+        return view('livewire.admin.view-member', [
+            'treeData' => $this->getTreeData()
         ])->layout('components.layouts.admin');
     }
 }
+

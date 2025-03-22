@@ -1,4 +1,5 @@
-<div class="py-12 bg-gray-50"
+<div>
+    <div class="py-12 bg-gray-50"
      x-data="{
         showPositionModal: false,
         showTreeModal: false,
@@ -175,4 +176,10 @@
             @endif
         </div>
     </div>
+</div>
+
+<x-global.loader wire:loading.flex wire:target="updatePosition" message="Updating position..." />
+<x-global.loader wire:loading.flex wire:target="selectMember" message="Loading member..." />
+<x-global.loader wire:loading.flex wire:target="viewTree" message="Loading tree view..." />
+
 </div>
