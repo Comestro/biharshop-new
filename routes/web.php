@@ -70,7 +70,9 @@ Route::get('/storage-link', function () {
 });
 
 Route::get('/seed', function () {
-    Artisan::call('db:seed');
+    Artisan::call('db:seed', [
+        '--class' => 'AdminSeeder'
+    ]);
     return 'Seeding done!';
 });
 
