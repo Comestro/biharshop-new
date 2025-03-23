@@ -7,6 +7,9 @@ use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Product\Manager as ProductManager;
 use App\Livewire\Category\Manager as CategoryManager;
 use App\Livewire\Home\Homepage;
+use Illuminate\Support\Facades\Artisan;
+use Livewire\Livewire;
+
 
 
 Route::get('/', Homepage::class)->name('home');
@@ -53,6 +56,27 @@ Route::middleware(['auth'])->group(function () {
         }
         return redirect()->route('membership.register');
     })->name('dashboard');
+});
+
+
+Livewire::setUpdateRoute(function ($handle) {
+    return Route::post('/bihar-shop/public/livewire/update', $handle);
+});
+
+
+Route::get('/storage-link', function () {
+    Artisan::call('storage:link');
+    return 'Storage link has been created!';
+});
+
+Route::get('/clear-cache', function () {
+    Artisan::call('cache:clear');
+    Artisan::call('config:cache');
+    Artisan::call('config:clear');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+    Artisan::call('optimize:clear');
+    return "All Caches are cleared by @Roni";
 });
 
 
