@@ -69,6 +69,12 @@ Route::get('/storage-link', function () {
     return 'Storage link has been created!';
 });
 
+Route::get('/seed', function () {
+    Artisan::call('db:seed');
+    return 'Seeding done!';
+});
+
+
 Route::get('/clear-cache', function () {
     Artisan::call('cache:clear');
     Artisan::call('config:cache');
