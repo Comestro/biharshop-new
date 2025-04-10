@@ -292,6 +292,16 @@ class Register extends Component
         }
     }
 
+    private function generateSequentialToken()
+    {
+        $lastMembership = Membership::orderBy('id', 'desc')->first();
+        if (!$lastMembership) {
+            return 'BSE1971';
+        }
+        $lastNumber = (int) str_replace('BSE', '', $lastMembership->token);
+        return 'BSE' . ($lastNumber + 1);
+    }
+
     public function register()
     {
         $this->validateStep($this->currentStep);
@@ -336,7 +346,7 @@ class Register extends Component
         $membership = Membership::updateOrCreate(
             ['user_id' => auth()->id()],
             array_merge($data, [
-                'token' => uniqid('MEM'),
+                'token' => $this->generateSequentialToken(),
                 'user_id' => auth()->id()
             ])
         );
