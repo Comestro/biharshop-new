@@ -299,7 +299,32 @@ class Register extends Component
             return 'BSE1971';
         }
         $lastNumber = (int) str_replace('BSE', '', $lastMembership->token);
+        
         return 'BSE' . ($lastNumber + 1);
+    }
+
+    private function sendMembershipMessage(){
+        $response = Http::withHeaders([
+            'authkey' => env('MSG91_AUTH_KEY'),
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ])->post('https://control.msg91.com/api/v5/flow', [
+            'template_id' => '68026dc7d6fc056c182551f2', // replace with your approved template ID
+            'short_url' => 0, // 1 to enable short links, 0 to disable
+            'recipients' => [
+                [
+                    'mobiles' => '91' . $mobile,
+                    'name' => $request->name,
+                    'amount' => 500,
+                ]
+            ]
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'SMS sent successfully']);
+        } else {
+            return response()->json(['error' => 'Failed to send SMS', 'details' => $response->body()], 500);
+        }
     }
 
     public function register()
