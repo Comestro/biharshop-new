@@ -309,13 +309,13 @@ class Register extends Component
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ])->post('https://control.msg91.com/api/v5/flow', [
-            'template_id' => '68026dc7d6fc056c182551f2', // replace with your approved template ID
+            'template_id' => '683e9d01d6fc053f9a6f39d3', // replace with your approved template ID
             'short_url' => 0, // 1 to enable short links, 0 to disable
             'recipients' => [
                 [
                     'mobiles' => '91' . $mobile,
                     'name' => $request->name,
-                    'amount' => 500,
+                    'membershipid' => $request->membershipid,
                 ]
             ]
         ]);
