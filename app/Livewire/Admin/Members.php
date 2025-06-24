@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Membership;
 use App\Models\BinaryTree;
+use Illuminate\Support\Facades\Http;
 
 class Members extends Component
 {
@@ -37,15 +38,14 @@ class Members extends Component
             // Handle binary position if referral exists
             if ($this->selectedMembership->referal_id) {
                 $referrer = Membership::find($this->selectedMembership->referal_id);
-                
+
                 // Check available positions under referrer
                 $existingPositions = BinaryTree::where('parent_id', $referrer->id)
-                                            ->pluck('position')
-                                            ->toArray();
-                
+                    ->pluck('position')
+                    ->toArray();
+
                 // Assign to first available position
-                $position = !in_array('left', $existingPositions) ? 'left' : 
-                          (!in_array('right', $existingPositions) ? 'right' : null);
+                $position = !in_array('left', $existingPositions) ? 'left' : (!in_array('right', $existingPositions) ? 'right' : null);
 
                 if ($position) {
                     BinaryTree::create([
@@ -58,7 +58,7 @@ class Members extends Component
                 // If no referrer, find first member without full positions
                 $availableSponsor = Membership::where('isVerified', true)
                     ->where('id', '!=', $this->selectedMembership->id)
-                    ->whereDoesntHave('binaryChildren', function($q) {
+                    ->whereDoesntHave('binaryChildren', function ($q) {
                         $q->whereIn('position', ['left', 'right']);
                     })
                     ->first();
@@ -74,6 +74,32 @@ class Members extends Component
 
             $this->showModal = false;
             session()->flash('message', 'Member verified and positioned successfully.');
+            $this->sendMembershipMessage($this->selectedMembership->mobile, $this->selectedMembership->name, $this->selectedMembership->token);
+        }
+    }
+
+    private function sendMembershipMessage($mobile, $name, $membershipid)
+    {
+        $response = Http::withHeaders([
+            'authkey' => env('MSG91_AUTH_KEY'),
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ])->post('https://control.msg91.com/api/v5/flow', [
+            'template_id' => '683e9d01d6fc053f9a6f39d3', // replace with your approved template ID
+            'short_url' => 0, // 1 to enable short links, 0 to disable
+            'recipients' => [
+                [
+                    'mobiles' => '91' . $mobile,
+                    'name' => $name,
+                    'membershipid' => $membershipid,
+                ]
+            ]
+        ]);
+
+        if ($response->successful()) {
+            return response()->json(['message' => 'SMS sent successfully']);
+        } else {
+            return response()->json(['error' => 'Failed to send SMS', 'details' => $response->body()], 500);
         }
     }
 
@@ -90,11 +116,11 @@ class Members extends Component
                 return $q->where('isPaid', false);
             })
             ->when($this->search, function ($q) {
-                return $q->where(function($query) {
-                    $query->where('name', 'like', '%'.$this->search.'%')
-                          ->orWhere('email', 'like', '%'.$this->search.'%')
-                          ->orWhere('mobile', 'like', '%'.$this->search.'%')
-                          ->orWhere('token', 'like', '%'.$this->search.'%');
+                return $q->where(function ($query) {
+                    $query->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhere('email', 'like', '%' . $this->search . '%')
+                        ->orWhere('mobile', 'like', '%' . $this->search . '%')
+                        ->orWhere('token', 'like', '%' . $this->search . '%');
                 });
             });
 
