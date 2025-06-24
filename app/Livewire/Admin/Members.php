@@ -75,7 +75,7 @@ class Members extends Component
             $this->showModal = false;
             session()->flash('message', 'Member verified and positioned successfully.');
             
-            dd($this->sendMembershipMessage($this->selectedMembership->mobile, $this->selectedMembership->name, $this->selectedMembership->token));
+            $this->sendMembershipMessage($this->selectedMembership->mobile, $this->selectedMembership->name, $this->selectedMembership->token);
         }
     }
 
