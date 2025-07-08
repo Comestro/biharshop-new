@@ -23,6 +23,32 @@
         </div>
     @endif
 
+    <!-- Member Header with Photo -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex flex-col sm:flex-row items-center sm:items-start">
+            <div class="mb-4 sm:mb-0 sm:mr-6">
+                @if ($membership->image)
+                    <img src="{{ Storage::url($membership->image) }}" alt="{{ $membership->name }}" 
+                         class="h-24 w-24 rounded-full object-cover border-2 border-gray-200">
+                @else
+                    <div class="h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center border-2 border-gray-200">
+                        <span class="text-2xl font-medium text-blue-500">{{ substr($membership->name, 0, 1) }}</span>
+                    </div>
+                @endif
+            </div>
+            <div class="text-center sm:text-left">
+                <h1 class="text-2xl font-bold text-gray-900">Welcome, {{ $membership->name }}</h1>
+                <p class="text-gray-500">Member ID: {{ $membership->token }}</p>
+                <div class="mt-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                        {{ $membership->isVerified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                        {{ $membership->isVerified ? 'Active' : 'Pending' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div class="bg-white rounded-lg shadow p-6">

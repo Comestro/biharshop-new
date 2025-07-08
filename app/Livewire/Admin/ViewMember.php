@@ -10,6 +10,9 @@ class ViewMember extends Component
 {
     public $member;
     public $activeTab = 'personal';
+    public $leftTeamSize = 0;
+    public $rightTeamSize = 0;
+    public $totalTeamSize = 0;
 
     protected $validTabs = ['personal', 'financial', 'network', 'tree'];
     protected $listeners = ['treeNodeSelected' => 'navigateToMember'];
@@ -22,6 +25,52 @@ class ViewMember extends Component
             'binaryPosition.parent',
             'children.member'
         ])->findOrFail($id);
+        
+        // Calculate team sizes
+        $this->calculateTeamSizes();
+    }
+    
+    protected function calculateTeamSizes()
+    {
+        $this->leftTeamSize = 0;
+        $this->rightTeamSize = 0;
+        
+        if ($this->member) {
+            // Get left and right legs first
+            $leftChild = BinaryTree::where('parent_id', $this->member->id)
+                ->where('position', 'left')
+                ->first();
+                
+            $rightChild = BinaryTree::where('parent_id', $this->member->id)
+                ->where('position', 'right')
+                ->first();
+            
+            // Count members in left leg
+            if ($leftChild) {
+                $this->leftTeamSize = 1 + $this->countTreeMembers($leftChild->member_id);
+            }
+            
+            // Count members in right leg
+            if ($rightChild) {
+                $this->rightTeamSize = 1 + $this->countTreeMembers($rightChild->member_id);
+            }
+            
+            // Calculate total team size
+            $this->totalTeamSize = $this->leftTeamSize + $this->rightTeamSize;
+        }
+    }
+    
+    protected function countTreeMembers($memberId)
+    {
+        $count = 0;
+        $children = BinaryTree::where('parent_id', $memberId)->get();
+        
+        foreach ($children as $child) {
+            $count++; // Count this child
+            $count += $this->countTreeMembers($child->member_id); // Add all descendants
+        }
+        
+        return $count;
     }
 
     public function setTab($tab)

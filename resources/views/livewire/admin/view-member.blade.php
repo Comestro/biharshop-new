@@ -14,28 +14,49 @@
         <!-- Member Header -->
         <div class="bg-white rounded-xl border border-slate-200 mb-6">
             <div class="p-6">
-                <div class="flex items-center space-x-6">
-                    @if ($member->image)
-                        <img src="{{ Storage::url($member->image) }}" alt="{{ $member->name }}"
-                            class="h-24 w-24 rounded-full object-cover border-2 border-slate-200">
-                    @else
-                        <div
-                            class="h-24 w-24 rounded-full bg-slate-100 flex items-center justify-center border-2 border-slate-200">
-                            <span class="text-2xl font-medium text-slate-500">{{ substr($member->name, 0, 1) }}</span>
+                <div class="flex flex-col md:flex-row md:items-center justify-between">
+                    <div class="flex items-center mb-4 md:mb-0">
+                        @if ($member->image)
+                            <img src="{{ Storage::url($member->image) }}" alt="{{ $member->name }}"
+                                class="h-24 w-24 rounded-full object-cover border-2 border-slate-200">
+                        @else
+                            <div
+                                class="h-24 w-24 rounded-full bg-slate-100 flex items-center justify-center border-2 border-slate-200">
+                                <span class="text-2xl font-medium text-slate-500">{{ substr($member->name, 0, 1) }}</span>
+                            </div>
+                        @endif
+                        <div class="ml-6">
+                            <h1 class="text-2xl font-bold text-slate-900">{{ $member->name }}</h1>
+                            <p class="text-sm text-slate-500">Member ID: {{ $member->token }}</p>
+                            <div class="mt-2">
+                                <span @class([
+                                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                                    'bg-green-100 text-green-800' => $member->isVerified,
+                                    'bg-yellow-100 text-yellow-800' => !$member->isVerified && $member->isPaid,
+                                    'bg-slate-100 text-slate-800' => !$member->isPaid,
+                                ])>
+                                    {{ $member->isVerified ? 'Verified' : ($member->isPaid ? 'Pending' : 'Unpaid') }}
+                                </span>
+                            </div>
                         </div>
-                    @endif
-                    <div>
-                        <h1 class="text-2xl font-bold text-slate-900">{{ $member->name }}</h1>
-                        <p class="text-sm text-slate-500">Member ID: {{ $member->token }}</p>
-                        <div class="mt-2">
-                            <span @class([
-                                'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                                'bg-green-100 text-green-800' => $member->isVerified,
-                                'bg-yellow-100 text-yellow-800' => !$member->isVerified && $member->isPaid,
-                                'bg-slate-100 text-slate-800' => !$member->isPaid,
-                            ])>
-                                {{ $member->isVerified ? 'Verified' : ($member->isPaid ? 'Pending' : 'Unpaid') }}
-                            </span>
+                    </div>
+                    
+                    <!-- Team Size Summary - Redesigned -->
+                    <div class="flex flex-row md:flex-col gap-3 md:gap-1 md:items-end">
+                        <h3 class="hidden md:block text-sm font-medium text-slate-700 mb-2">Team Summary</h3>
+                        <div class="flex items-center bg-slate-50 rounded-lg p-3 shadow-sm">
+                            <div class="flex flex-col items-center px-4 border-r border-slate-200">
+                                <span class="text-sm font-medium text-slate-500">Left Team</span>
+                                <span class="text-2xl font-bold text-blue-600">{{ $leftTeamSize }}</span>
+                            </div>
+                            <div class="flex flex-col items-center px-4 border-r border-slate-200">
+                                <span class="text-sm font-medium text-slate-500">Right Team</span>
+                                <span class="text-2xl font-bold text-green-600">{{ $rightTeamSize }}</span>
+                            </div>
+                            <div class="flex flex-col items-center px-4">
+                                <span class="text-sm font-medium text-slate-500">Total</span>
+                                <span class="text-2xl font-bold text-slate-700">{{ $totalTeamSize }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -236,6 +257,25 @@
                                 @else
                                     <p class="text-sm text-slate-500">No position assigned yet</p>
                                 @endif
+                            </dl>
+                        </div>
+
+                        <!-- Team Size Information -->
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Team Size</h3>
+                            <dl class="grid grid-cols-1 gap-3">
+                                <div class="grid grid-cols-2">
+                                    <dt class="text-sm font-medium text-slate-500">Left Team</dt>
+                                    <dd class="text-sm text-slate-900">{{ $leftTeamSize }} members</dd>
+                                </div>
+                                <div class="grid grid-cols-2">
+                                    <dt class="text-sm font-medium text-slate-500">Right Team</dt>
+                                    <dd class="text-sm text-slate-900">{{ $rightTeamSize }} members</dd>
+                                </div>
+                                <div class="grid grid-cols-2">
+                                    <dt class="text-sm font-medium text-slate-500">Total Team</dt>
+                                    <dd class="text-sm text-slate-900">{{ $totalTeamSize }} members</dd>
+                                </div>
                             </dl>
                         </div>
 
