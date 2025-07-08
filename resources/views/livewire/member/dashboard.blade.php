@@ -48,7 +48,20 @@
                 </div>
                 <div>
                     <p class="text-gray-500 text-sm">Team Size</p>
-                    <p class="text-2xl font-semibold">{{ $treeMembers }}</p>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500">Left</p>
+                            <p class="text-xl font-semibold">{{ $leftTeamSize }}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500">Right</p>
+                            <p class="text-xl font-semibold">{{ $rightTeamSize }}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500">Total</p>
+                            <p class="text-xl font-semibold">{{ $treeMembers }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

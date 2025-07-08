@@ -10,6 +10,8 @@ class Dashboard extends Component
     public $membership;
     public $directReferrals;
     public $treeMembers;
+    public $leftTeamSize;
+    public $rightTeamSize;
 
     public function mount()
     {
@@ -26,10 +28,31 @@ class Dashboard extends Component
     {
         $this->directReferrals = Membership::where('referal_id', $this->membership->id)->count();
         $this->treeMembers = 0; // Initialize to 0
+        $this->leftTeamSize = 0;
+        $this->rightTeamSize = 0;
         
         if ($this->membership->binaryPosition) {
-            // Count all members in the binary tree under this member
-            $this->treeMembers = $this->countTreeMembers($this->membership->id);
+            // Get left and right legs first
+            $leftChild = \App\Models\BinaryTree::where('parent_id', $this->membership->id)
+                ->where('position', 'left')
+                ->first();
+                
+            $rightChild = \App\Models\BinaryTree::where('parent_id', $this->membership->id)
+                ->where('position', 'right')
+                ->first();
+            
+            // Count members in left leg
+            if ($leftChild) {
+                $this->leftTeamSize = 1 + $this->countTreeMembers($leftChild->member_id);
+            }
+            
+            // Count members in right leg
+            if ($rightChild) {
+                $this->rightTeamSize = 1 + $this->countTreeMembers($rightChild->member_id);
+            }
+            
+            // Total tree members is the sum of both legs
+            $this->treeMembers = $this->leftTeamSize + $this->rightTeamSize;
         }
     }
 
