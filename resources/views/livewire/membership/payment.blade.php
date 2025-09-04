@@ -15,8 +15,7 @@
                 <div class="space-y-1 text-sm text-gray-600">
                     <p>Please make the payment using one of these methods:</p>
                     <ul class="list-disc list-inside mt-2">
-                        <li>UPI: your-upi@bank</li>
-                        <li>Bank Transfer: Account No: XXXXX</li>
+                        <li>UPI: biharshopecommerceprivatelimited@sbi</li>
                         <li>QR Code (scan below)</li>
                     </ul>
                 </div>
@@ -26,6 +25,7 @@
             <div class="flex justify-center mb-8">
                 <div class="p-4 border-2 border-dashed border-gray-300 rounded-lg">
                     <p class="text-gray-500">Payment QR Code</p>
+                    <img src="{{ asset("qr.png") }}" alt="">
                 </div>
             </div>
 
