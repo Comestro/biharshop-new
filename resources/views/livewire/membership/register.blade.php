@@ -192,16 +192,14 @@
                                 <label class="block text-sm font-medium text-gray-700">City</label>
                                 <input type="text"
                                     wire:model="city"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                                    readonly>
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                                 @error('city') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">State</label>
                                 <input type="text"
                                     wire:model="state"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                                    readonly>
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
                                 @error('state') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                             </div>
                         </div>
