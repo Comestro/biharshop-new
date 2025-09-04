@@ -9,12 +9,12 @@ class Payment extends Component
 {
     public $membership;
     public $transaction_no;
-    public $amount = 999; // Set your membership amount
+    public $amount = 1999; // Set your membership amount
 
     public function mount(Membership $membership)
     {
         $this->membership = $membership;
-        
+
         if ($membership->isPaid) {
             return redirect()->route('member.dashboard');
         }
