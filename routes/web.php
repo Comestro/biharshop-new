@@ -1,5 +1,7 @@
 <?php
 
+use App\Livewire\Home\ProductView;
+use App\Livewire\Home\Shoppage;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Livewire\Membership\{Register, BinaryPosition, Payment, BinaryTree};
@@ -13,6 +15,8 @@ use Livewire\Livewire;
 
 
 Route::get('/', Homepage::class)->name('home');
+Route::get('/shop',Shoppage::class)->name('shop');
+Route::get('/product',ProductView::class)->name('productview');
 Route::get('/team', App\Livewire\Home\Team::class)->name('team');
 
 Route::middleware(['auth'])->group(function () {

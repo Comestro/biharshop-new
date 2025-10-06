@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Admin;
 
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Membership;
 use App\Models\BinaryTree;
 use Illuminate\Support\Facades\Http;
-
+#[Layout('components.layouts.admin')]
 class Members extends Component
 {
     use WithPagination;
@@ -127,6 +128,6 @@ class Members extends Component
 
         return view('livewire.admin.members', [
             'members' => $query->latest()->paginate(10)
-        ])->layout('components.layouts.admin');
+        ]);
     }
 }

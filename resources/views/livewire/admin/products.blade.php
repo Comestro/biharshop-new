@@ -12,18 +12,20 @@
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
                         <div class="flex items-center">
                             <h2 class="text-xl font-semibold text-gray-900">Products</h2>
-                            <button wire:click="create" class="ml-4 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                            <button wire:click="create"
+                                class="ml-4 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                                 Add Product
                             </button>
                         </div>
                         <div class="relative">
-                            <input type="search"
-                                wire:model.live.debounce.300ms="search"
+                            <input type="search" wire:model.live.debounce.300ms="search"
                                 placeholder="Search products..."
                                 class="block w-full sm:w-64 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-10 border px-3 py-2">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
                         </div>
@@ -36,7 +38,8 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category
+                                </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
@@ -46,18 +49,22 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($product->image)
-                                            <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" class="h-12 w-12 object-cover rounded-lg">
+                                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
+                                                class="h-12 w-12 object-cover rounded-lg">
                                         @else
                                             <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
                                             </div>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="text-sm font-medium text-gray-900">{{ $product->name }}</div>
-                                        <div class="text-sm text-gray-500 truncate max-w-xs">{{ $product->description }}</div>
+                                        <div class="text-sm text-gray-500 truncate max-w-xs">{{ $product->description }}
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $product->category->name }}
@@ -66,10 +73,13 @@
                                         ₹{{ number_format($product->price, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <button wire:click="edit({{ $product->id }})" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                                        <button wire:click="edit({{ $product->id }})"
+                                            class="text-indigo-600 hover:text-indigo-900 mr-3">
                                             Edit
                                         </button>
-                                        <button wire:click="delete({{ $product->id }})" wire:confirm="Are you sure you want to delete this product?" class="text-red-600 hover:text-red-900">
+                                        <button wire:click="delete({{ $product->id }})"
+                                            wire:confirm="Are you sure you want to delete this product?"
+                                            class="text-red-600 hover:text-red-900">
                                             Delete
                                         </button>
                                     </td>
@@ -92,117 +102,183 @@
         </div>
 
         <!-- Product Modal -->
-        <div x-show="showModal"
-             x-cloak
-             class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4"
-             x-transition>
-            <div class="bg-white rounded-xl max-w-lg w-full" @click.away="showModal = false">
+        <div x-show="showModal" x-cloak
+            class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4" x-transition>
+            <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                @click.away="showModal = false">
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">
                         {{ $editMode ? 'Edit Product' : 'Add Product' }}
                     </h3>
                     <button @click="showModal = false" class="text-gray-400 hover:text-gray-500">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <form wire:submit.prevent="save" class="p-6">
-                    <div class="space-y-4">
+                <form wire:submit.prevent="save" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                    <!-- Basic Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Product Name</label>
-                            <input type="text"
-                                   wire:model="name"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
-                            @error('name')
-                                <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
-                            @enderror
+                            <input type="text" wire:model="name"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 border">
+                            @error('name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">SKU</label>
+                            <input type="text" wire:model="sku"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('sku') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Slug</label>
+                            <input type="text" wire:model="slug"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('slug') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Brand</label>
+                            <input type="text" wire:model="brand"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Category</label>
                             <select wire:model="category_id"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="">Select Category</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
                             </select>
-                            @error('category_id')
-                                <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
-                            @enderror
+                            @error('category_id') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Description</label>
-                            <textarea wire:model="description"
-                                      rows="3"
-                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"></textarea>
-                            @error('description')
-                                <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
-                            @enderror
+                            <label class="block text-sm font-medium text-gray-700">Subcategory</label>
+                            <select wire:model="subcategory_id"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">Select Subcategory</option>
+
+                            </select>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Price</label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 sm:text-sm">₹</span>
-                                </div>
-                                <input type="number"
-                                       wire:model="price"
-                                       step="0.01"
-                                       class="pl-7 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
-                            </div>
-                            @error('price')
-                                <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
-                            @enderror
+                            <label class="block text-sm font-medium text-gray-700">Product Type</label>
+                            <input type="text" wire:model="product_type"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('product_type') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Product Image</label>
-                            <div class="mt-2 flex items-center space-x-4">
-                                @if($existingImage && !$image)
-                                    <img src="{{ Storage::url($existingImage) }}" alt="Current image" class="h-20 w-20 object-cover rounded-lg">
-                                @endif
+                            <label class="block text-sm font-medium text-gray-700">Tags (comma separated)</label>
+                            <input type="text" wire:model="tags" placeholder="tag1, tag2"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('tags') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
 
-                                @if($image)
-                                    <img src="{{ $image->temporaryUrl() }}" alt="New image" class="h-20 w-20 object-cover rounded-lg">
-                                @endif
-
-                                <div class="flex-1">
-                                    <input type="file"
-                                           wire:model="image"
-                                           class="hidden"
-                                           id="product-image"
-                                           accept="image/*">
-                                    <label for="product-image"
-                                           class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                        {{ $existingImage || $image ? 'Change Image' : 'Upload Image' }}
-                                    </label>
-                                </div>
-                            </div>
-                            @error('image')
-                                <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
-                            @enderror
                         </div>
                     </div>
 
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea wire:model="description" rows="3"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 border"></textarea>
+                        @error('description') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Price</label>
+                            <input type="number" wire:model="price" step="0.01"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                                @error('price') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">MRP</label>
+                            <input type="number" wire:model="mrp" step="0.01"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                                @error('mrp') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Discount (%)</label>
+                            <input type="number" wire:model="discount" step="0.01"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                                @error('discount') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <!-- Variants -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Color</label>
+                            <input type="text" wire:model="color"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                                @error('color') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Size (JSON)</label>
+                            <input type="text" wire:model="size" placeholder='["S","M","L"]'
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                                @error('size') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Material</label>
+                            <input type="text" wire:model="material"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                                @error('material') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <!-- Images -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        @for($i = 0; $i < 4; $i++)
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Image {{ $i + 1 }}</label>
+                                <input type="file" wire:model="images.{{ $i }}" class="mt-1 block w-full">
+                                @if(isset($existingImages[$i]) && $existingImages[$i])
+                                    <img src="{{ Storage::url($existingImages[$i]) }}"
+                                        class="h-20 w-20 object-cover mt-1 rounded-lg">
+                                @endif
+                                @error('images.' . $i) <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                        @endfor
+                    </div>
+
+                    <!-- Flags -->
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <label><input type="checkbox" wire:model="is_active"> Active</label>
+                        @error('is_active') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        <label><input type="checkbox" wire:model="is_featured"> Featured</label>
+                        @error('is_featured') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        <label><input type="checkbox" wire:model="is_new_arrival"> New Arrival</label>
+                        @error('is_new_arrival') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        <label><input type="checkbox" wire:model="is_on_sale"> On Sale</label>
+                        @error('is_on_sale') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Submit -->
                     <div class="mt-6 flex justify-end space-x-3">
-                        <button type="button"
-                                @click="showModal = false"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
-                            Cancel
-                        </button>
+                        <button type="button" @click="showModal = false"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">Cancel</button>
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700">
+                            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700">
                             {{ $editMode ? 'Update' : 'Create' }}
                         </button>
                     </div>
                 </form>
+
             </div>
         </div>
+
     </div>
 
     <x-global.loader wire:loading.flex wire:target="save" message="Saving product..." />

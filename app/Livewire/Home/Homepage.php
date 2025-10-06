@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Home;
 
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\Product;
 use App\Models\Category;
 use Livewire\WithPagination;
-
+#[Layout('components.layouts.app')]
 class Homepage extends Component
 {
     use WithPagination;
@@ -32,6 +33,6 @@ class Homepage extends Component
         return view('livewire.home.homepage', [
             'products' => $products,
             'categories' => Category::all()
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

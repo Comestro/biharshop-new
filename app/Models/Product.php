@@ -6,13 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $fillable = [
-        'name',
-        'description',
-        'price',
-        'image',
-        'category_id'
-    ];
+    protected $guarded = [];
 
     public function category()
     {
