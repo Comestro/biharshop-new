@@ -9,15 +9,6 @@ return new class extends Migration {
     {
         Schema::table('products', function (Blueprint $table) {
 
-            // Images
-            $table->string('image_id')->nullable()->after('image');
-            $table->string('image1')->nullable()->after('image_id');
-            $table->string('image1_id')->nullable()->after('image1');
-            $table->string('image2')->nullable()->after('image1_id');
-            $table->string('image2_id')->nullable()->after('image2');
-            $table->string('image3')->nullable()->after('image2_id');
-            $table->string('image3_id')->nullable()->after('image3');
-
             // SKU & slug
             $table->string('sku')->nullable()->unique()->after('name');
             $table->string('slug')->nullable()->unique()->after('sku');
@@ -30,8 +21,9 @@ return new class extends Migration {
 
             // Variants
             $table->string('color')->nullable()->after('brand');
-            $table->json('size')->nullable()->after('color'); // for clothing/shoes
+            $table->string('size')->nullable()->after('color'); // for clothing/shoes
             $table->string('material')->nullable()->after('size');
+
 
 
             // Pricing
@@ -43,7 +35,7 @@ return new class extends Migration {
 
             // Inventory
             $table->integer('quantity')->default(0)->after('currency');
-            $table->boolean('in_stock')->default(true)->after('quantity');
+            $table->string('in_stock')->nullable()->after('quantity');
             $table->integer('min_order_quantity')->default(1)->after('in_stock');
 
             // Shipping

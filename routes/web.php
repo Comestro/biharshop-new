@@ -1,5 +1,8 @@
 <?php
 
+use App\Livewire\Home\Cart;
+use App\Livewire\Home\Checkout;
+use App\Livewire\Home\OrderSuccess;
 use App\Livewire\Home\ProductView;
 use App\Livewire\Home\Shoppage;
 use Illuminate\Support\Facades\Route;
@@ -15,10 +18,14 @@ use Livewire\Livewire;
 
 
 Route::get('/', Homepage::class)->name('home');
-Route::get('/shop',Shoppage::class)->name('shop');
-Route::get('/product',ProductView::class)->name('productview');
+Route::get('/shop', Shoppage::class)->name('shop');
+Route::get('/cart', Cart::class)->name('cart');
+Route::get('/product/{slug}', ProductView::class)->name('productview');
 Route::get('/team', App\Livewire\Home\Team::class)->name('team');
-
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', Checkout::class)->name('checkout');
+    Route::get('/order-success', OrderSuccess::class)->name('ordersuccess');
+});
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -54,7 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function() {
+    Route::get('/dashboard', function () {
         if (auth()->user()->membership) {
             return redirect()->route('member.dashboard');
         }
@@ -92,5 +99,5 @@ Route::get('/clear-cache', function () {
 });
 
 
-require __DIR__.'/auth.php';
-require __DIR__.'/admin.php';
+require __DIR__ . '/auth.php';
+require __DIR__ . '/admin.php';

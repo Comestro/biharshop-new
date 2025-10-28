@@ -1,241 +1,259 @@
-<div class="py-6 lg:py-8 min-h-screen">
-    <div class="mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
-                <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Binary Tree Structure</h2>
+<div class="min-h-screen bg-gray-50 flex flex-col">
+    <!-- Header -->
+    <header
+        class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-t-2xl">
+        <div class="">
+            <h1 class="text-2xl font-semibold text-gray-800 tracking-tight">Binary Tree Structure</h1>
+            <p class="text-sm text-gray-500">Visual representation of your downline structure</p>
+        </div>
 
-                <!-- Search Box -->
-                <div class="flex items-center space-x-2">
-                    <input id="search-node" type="text" placeholder="Search by name..."
-                        class="border px-3 py-2 rounded-lg w-64 focus:ring focus:border-blue-400" />
-                    <button id="clear-search"
-                        class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg">Clear</button>
-                </div>
+        <!-- Control Panel -->
+        <div
+            class="flex items-center gap-3 bg-white/70 backdrop-blur-sm shadow-sm border border-gray-200 rounded-xl p-1 flex-wrap justify-end">
+            <!-- Search -->
+            <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                <input id="search-node" type="text" placeholder="Search by name..."
+                    class="border-gray-300 text-sm px-3 py-2 rounded-lg outline-none w-full border-2" />
+                <button id="clear-search"
+                    class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition flex-shrink-0">Clear</button>
             </div>
 
-            <div class="relative">
-                <!-- Loading Overlay -->
-                <div wire:loading class="absolute inset-0 bg-white/75 flex items-center justify-center z-10">
-                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500"></div>
-                </div>
-
-                <!-- Tree Container -->
-                <div class="p-4 sm:p-6 bg-slate-50/50">
-                    <div id="binary-tree-container"
-                        class="w-full h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg bg-white" wire:ignore></div>
-                </div>
-
-                <!-- Zoom Controls -->
-                <div class="absolute bottom-6 right-6 flex space-x-2">
-                    <button onclick="zoomIn()"
-                        class="p-2 bg-white rounded-full shadow-sm border border-slate-200 hover:bg-slate-50">
-                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </button>
-                    <button onclick="zoomOut()"
-                        class="p-2 bg-white rounded-full shadow-sm border border-slate-200 hover:bg-slate-50">
-                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
-                        </svg>
-                    </button>
-                    <button onclick="resetZoom()"
-                        class="p-2 bg-white rounded-full shadow-sm border border-slate-200 hover:bg-slate-50">
-                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                    </button>
-                </div>
+            <!-- Zoom Controls -->
+            <div class="flex items-center space-x-2 mt-2 sm:mt-0">
+                <button id="zoom-in"
+                    class="p-2 text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors flex items-center justify-center"
+                    title="Zoom In">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+                <button id="zoom-out"
+                    class="p-2 text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors flex items-center justify-center"
+                    title="Zoom Out">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                    </svg>
+                </button>
+                <button id="zoom-reset"
+                    class="p-2 text-gray-700 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors flex items-center justify-center"
+                    title="Reset Zoom">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h16v16H4z" />
+                    </svg>
+                </button>
             </div>
         </div>
-    </div>
+    </header>
 
-    @push('scripts')
-        <script src="https://d3js.org/d3.v7.min.js"></script>
-        <script>
-            let svg, currentZoom, initialTransform, g, root;
 
-            function initBinaryTree(data) {
-                if (!data) return;
-
-                // Clear previous tree
-                d3.select("#binary-tree-container").html("");
-
-                const width = document.getElementById('binary-tree-container').offsetWidth;
-                const height = 600;
-                const margin = { top: 60, right: 20, bottom: 60, left: 20 };
-
-                svg = d3.select("#binary-tree-container")
-                    .append("svg")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr("class", "bg-gray-50 rounded-lg");
-
-                g = svg.append("g");
-
-                const stratify = d3.stratify()
-                    .id(d => d.id)
-                    .parentId(d => d.parentId);
-
-                root = stratify(data).sum(d => d.value || 1);
-
-                const fixedWidth = 10000;
-                const levelHeight = 150;
-
-                const treeLayout = d3.tree()
-                    .size([fixedWidth, root.height * levelHeight])
-                    .separation((a, b) => a.parent === b.parent ? 1.5 : 2.5);
-
-                treeLayout(root);
-
-                const centerX = width / 2 - root.x;
-                g.attr("transform", `translate(${centerX},${margin.top})`);
-
-                // Links
-                g.selectAll(".link")
-                    .data(root.links())
-                    .join("path")
-                    .attr("class", "link")
-                    .attr("d", d => `M${d.source.x},${d.source.y + 30}L${d.target.x},${d.target.y - 30}`)
-                    .attr("fill", "none")
-                    .attr("stroke", "#94a3b8")
-                    .attr("stroke-width", 2)
-                    .attr("marker-end", "url(#arrowhead)");
-
-                svg.append("defs").append("marker")
-                    .attr("id", "arrowhead")
-                    .attr("viewBox", "0 -5 10 10")
-                    .attr("refX", 8)
-                    .attr("refY", 0)
-                    .attr("markerWidth", 8)
-                    .attr("markerHeight", 8)
-                    .attr("orient", "auto")
-                    .append("path")
-                    .attr("d", "M0,-5L10,0L0,5")
-                    .attr("fill", "#94a3b8");
-
-                // Nodes
-                const nodes = g.selectAll(".node")
-                    .data(root.descendants())
-                    .join("g")
-                    .attr("class", "node")
-                    .attr("transform", d => `translate(${d.x},${d.y})`);
-
-                nodes.append("rect")
-                    .attr("x", -60)
-                    .attr("y", -30)
-                    .attr("width", 120)
-                    .attr("height", 60)
-                    .attr("rx", 4)
-                    .attr("fill", d => d.data.status === 'verified' ? '#ecfdf5' : '#fef2f2')
-                    .attr("stroke", d => d.data.status === 'verified' ? '#10b981' : '#ef4444')
-                    .attr("stroke-width", 2)
-                    .attr("class", "node-rect transition-colors duration-300");
-
-                nodes.append("text")
-                    .attr("y", -35)
-                    .attr("text-anchor", "middle")
-                    .attr("class", "text-[10px] font-medium text-gray-400")
-                    .text(d => d.data.position === 'left' ? 'Left' : d.data.position === 'right' ? 'Right' : '');
-
-                const labels = nodes.append("g").attr("class", "label");
-
-                labels.append("text")
-                    .attr("dy", "-0.5em")
-                    .attr("text-anchor", "middle")
-                    .attr("class", "text-[10px] font-medium")
-                    .attr("fill", d => d.data.position === 'left' ? '#3b82f6' : d.data.position === 'right' ? '#8b5cf6' : '#6b7280')
-                    .text(d => d.data.token ? '#' + d.data.token : '');
-
-                labels.append("text")
-                    .attr("dy", "0.5em")
-                    .attr("text-anchor", "middle")
-                    .attr("class", "text-[12px] font-medium text-gray-900")
-                    .text(d => d.data.name)
-                    .call(wrap, 100);
-
-                function wrap(text, width) {
-                    text.each(function () {
-                        const text = d3.select(this);
-                        const words = text.text().split(/\s+/).reverse();
-                        let word, line = [], lineNumber = 0;
-                        const lineHeight = 1.1, y = text.attr("y"), dy = parseFloat(text.attr("dy"));
-                        let tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
-                        while (word = words.pop()) {
-                            line.push(word);
-                            tspan.text(line.join(" "));
-                            if (tspan.node().getComputedTextLength() > width) {
-                                line.pop();
-                                tspan.text(line.join(" "));
-                                line = [word];
-                                tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
-                            }
-                        }
-                    });
-                }
-
-                // Zoom
-                currentZoom = d3.zoom()
-                    .scaleExtent([0.3, 2])
-                    .on("zoom", (event) => g.attr("transform", event.transform));
-
-                svg.call(currentZoom);
-
-                // Initial fit
-                const bounds = g.node().getBBox();
-                const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9;
-                initialTransform = d3.zoomIdentity
-                    .translate(width / 2 - bounds.x * scale - bounds.width * scale / 2, height / 2 - bounds.y * scale - bounds.height * scale / 2)
-                    .scale(scale);
-
-                svg.transition().duration(1000).call(currentZoom.transform, initialTransform);
-            }
-
-            // Zoom helpers
-            function zoomIn() { if (svg) svg.transition().duration(300).call(currentZoom.scaleBy, 1.2); }
-            function zoomOut() { if (svg) svg.transition().duration(300).call(currentZoom.scaleBy, 0.8); }
-            function resetZoom() { if (svg) svg.transition().duration(500).call(currentZoom.transform, initialTransform); }
-
-            // 🔍 Search Feature
-            function searchNode(name) {
-                const nodes = g.selectAll(".node");
-                let foundNode = null;
-
-                nodes.select("rect")
-                    .attr("stroke", d => {
-                        const match = name && d.data.name.toLowerCase().includes(name.toLowerCase());
-                        if (match) foundNode = d;
-                        return match ? "#2563eb" : (d.data.status === 'verified' ? '#10b981' : '#ef4444');
-                    })
-                    .attr("stroke-width", d => name && d.data.name.toLowerCase().includes(name.toLowerCase()) ? 4 : 2);
-
-                // Auto zoom to found node
-                if (foundNode) {
-                    const scale = 1.2;
-                    const x = -foundNode.x * scale + svg.attr("width") / 2;
-                    const y = -foundNode.y * scale + svg.attr("height") / 2;
-                    svg.transition().duration(750).call(currentZoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
-                }
-            }
-
-            document.getElementById("search-node").addEventListener("input", e => searchNode(e.target.value));
-            document.getElementById("clear-search").addEventListener("click", () => {
-                document.getElementById("search-node").value = "";
-                searchNode("");
-                resetZoom();
-            });
-
-            document.addEventListener('DOMContentLoaded', function () {
-                const treeData = @json($treeData);
-                if (treeData) initBinaryTree(treeData);
-            });
-
-            window.addEventListener('resize', function () {
-                const treeData = @json($treeData);
-                if (treeData) initBinaryTree(treeData);
-            });
-        </script>
-    @endpush
+    <!-- Tree Container -->
+    <main class="flex-1 ">
+        <div class="bg-white border rounded-b-2xl shadow-sm overflow-hidden">
+            <div id="binary-tree-container"
+                class="w-full h-[100vh] bg-[radial-gradient(circle_at_center,_#f8fafc_1px,_transparent_1px)] [background-size:24px_24px] transition-all"
+                wire:ignore></div>
+        </div>
+    </main>
 </div>
+
+<!-- D3 Script -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    let currentZoom;
+
+    function initBinaryTree(data) {
+        if (!data || data.length === 0) return;
+        d3.select("#binary-tree-container").html("");
+
+        const container = document.getElementById('binary-tree-container');
+        const width = container.offsetWidth;
+        const height = container.offsetHeight;
+        const margin = { top: 50, right: 40, bottom: 50, left: 40 };
+
+        const svg = d3.select("#binary-tree-container")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height]);
+
+        const g = svg.append("g");
+
+        const stratify = d3.stratify()
+            .id(d => d.id)
+            .parentId(d => d.parentId);
+
+        const root = stratify(data).sum(d => d.value || 1);
+
+        const treeLayout = d3.tree()
+            .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
+            .nodeSize([160, 120]);
+
+        treeLayout(root);
+
+        const centerX = width / 2 - root.x;
+        g.attr("transform", `translate(${centerX},${margin.top + 40})`);
+
+        // Links
+        g.selectAll(".link")
+            .data(root.links())
+            .join("path")
+            .attr("class", "link")
+            .attr("d", d => `
+                M${d.source.x},${d.source.y}
+                L${d.source.x},${(d.source.y + d.target.y) / 2}
+                L${d.target.x},${(d.source.y + d.target.y) / 2}
+                L${d.target.x},${d.target.y}
+            `)
+            .attr("fill", "none")
+            .attr("stroke", "#e5e7eb")
+            .attr("stroke-width", 1.4);
+
+        // Nodes
+        const nodes = g.selectAll(".node")
+            .data(root.descendants())
+            .join("g")
+            .attr("class", "node group")
+            .attr("transform", d => `translate(${d.x},${d.y})`);
+
+        nodes.append("rect")
+            .attr("width", 130)
+            .attr("height", 66)
+            .attr("x", -65)
+            .attr("y", -33)
+            .attr("rx", 10)
+            .attr("ry", 10)
+            .attr("fill", d => {
+                if (d.data.status === 'empty') return '#f9fafb';
+                if (d.data.status === 'current') return '#ecfdf5';
+                return d.data.status === 'verified' ? '#f0fdf4' : '#fef2f2';
+            })
+            .attr("stroke", d => {
+                if (d.data.status === 'empty') return '#e2e8f0';
+                if (d.data.status === 'current') return '#059669';
+                return d.data.status === 'verified' ? '#22c55e' : '#ef4444';
+            })
+            .attr("stroke-width", d => d.data.status === 'current' ? 3 : 2)
+            .attr("filter", "drop-shadow(0px 2px 2px rgba(0,0,0,0.05))")
+            .on("mouseover", function () {
+                d3.select(this).transition().duration(200).attr("stroke-width", 3).attr("transform", "scale(1.03)");
+            })
+            .on("mouseout", function (d) {
+                d3.select(this).transition().duration(200).attr("stroke-width", d.data?.status === 'current' ? 3 : 2).attr("transform", "scale(1)");
+            });
+
+        // Labels
+        const labels = nodes.append("g").attr("class", "label text-center");
+        labels.append("text")
+            .attr("dy", "-0.8em")
+            .attr("text-anchor", "middle")
+            .attr("class", "text-[11px] font-medium text-gray-500")
+            .text(d => d.data.token ? '#' + d.data.token : '');
+        labels.append("text")
+            .attr("dy", "0.5em")
+            .attr("text-anchor", "middle")
+            .attr("class", "text-[13px] font-semibold text-gray-700")
+            .text(d => d.data.name);
+
+        // Zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.01, 3]) // <-- change minimum 0.1 (more zoom out) and max 3 (more zoom in)
+            .on("zoom", (event) => {
+                currentZoom = event.transform;
+                g.attr("transform", event.transform);
+            });
+
+
+        svg.call(zoom);
+
+        const transform = d3.zoomIdentity.translate(width / 2, height / 6).scale(0.8);
+        svg.call(zoom.transform, transform);
+        currentZoom = transform;
+
+        // Zoom buttons inside container
+        document.getElementById('zoom-in').onclick = () => svg.transition().duration(300).call(zoom.scaleBy, 1.2);
+        document.getElementById('zoom-out').onclick = () => svg.transition().duration(300).call(zoom.scaleBy, 0.8);
+        document.getElementById('zoom-reset').onclick = () => svg.transition().duration(300).call(zoom.transform, transform);
+    }
+
+    // Search & focus node
+    // Search & focus node without changing current zoom scale
+    function searchNode(name) {
+        const nodes = d3.selectAll(".node");
+        let matchedNode = null;
+
+        nodes.select("rect")
+            .transition().duration(200)
+            .attr("stroke", d => {
+                if (!name) {
+                    if (d.data.status === 'empty') return '#e2e8f0';
+                    if (d.data.status === 'current') return '#059669';
+                    return d.data.status === 'verified' ? '#22c55e' : '#ef4444';
+                }
+                if (d.data.name.toLowerCase().includes(name.toLowerCase())) {
+                    matchedNode = d;
+                    return '#2563eb';
+                }
+                return d.data.status === 'empty' ? '#e2e8f0' :
+                    d.data.status === 'current' ? '#059669' :
+                        d.data.status === 'verified' ? '#22c55e' : '#ef4444';
+            })
+            .attr("stroke-width", d => {
+                if (!name) return d.data.status === 'current' ? 3 : 2;
+                return d.data.name.toLowerCase().includes(name.toLowerCase()) ? 4 : 2;
+            });
+
+        // Only pan to node, do not change zoom scale
+        if (matchedNode) {
+            const svg = d3.select("#binary-tree-container svg");
+            const g = svg.select("g");
+            const container = document.getElementById('binary-tree-container');
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            const scale = currentZoom ? currentZoom.k : 1;
+
+            const translateX = width / 2 - matchedNode.x * scale;
+            const translateY = height / 2 - matchedNode.y * scale;
+
+            g.transition()
+                .duration(700)
+                .attr("transform", `translate(${translateX},${translateY}) scale(${scale})`);
+
+            // Update currentZoom translate only, keep scale intact
+            currentZoom = d3.zoomIdentity.translate(translateX, translateY).scale(scale);
+        }
+    }
+
+    // Clear search restores original position without zooming out
+    document.getElementById("clear-search").addEventListener("click", () => {
+        document.getElementById("search-node").value = "";
+        searchNode(""); // resets strokes
+        if (currentZoom) {
+            const svg = d3.select("#binary-tree-container svg");
+            const g = svg.select("g");
+            g.transition()
+                .duration(700)
+                .attr("transform", `translate(${currentZoom.x},${currentZoom.y}) scale(${currentZoom.k})`);
+        }
+    });
+
+
+    // Event listeners
+    document.getElementById("search-node").addEventListener("input", (e) => searchNode(e.target.value));
+    document.getElementById("clear-search").addEventListener("click", () => {
+        document.getElementById("search-node").value = "";
+        searchNode("");
+    });
+
+    document.addEventListener('livewire:init', function () {
+        const treeData = @json($treeData);
+        if (treeData && treeData.length > 0) initBinaryTree(treeData);
+    });
+
+    window.addEventListener('resize', () => {
+        clearTimeout(window.resizeTimer);
+        window.resizeTimer = setTimeout(() => {
+            const treeData = @json($treeData);
+            if (treeData && treeData.length > 0) initBinaryTree(treeData);
+        }, 250);
+    });
+</script>

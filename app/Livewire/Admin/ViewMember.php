@@ -2,10 +2,11 @@
 
 namespace App\Livewire\Admin;
 
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\Membership;
 use App\Models\BinaryTree;
-
+#[Layout('components.layouts.admin')]
 class ViewMember extends Component
 {
     public $member;
@@ -148,7 +149,7 @@ class ViewMember extends Component
     {
         return view('livewire.admin.view-member', [
             'treeData' => $this->getTreeData()
-        ])->layout('components.layouts.admin');
+        ]);
     }
 }
 

@@ -2,15 +2,16 @@
 
 namespace App\Livewire\Member;
 
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\Membership;
 use App\Models\BinaryTree;
-
+#[Layout('components.layouts.member')]
 class Tree extends Component
 {
     public $root_id;
     public $treeData;
-    
+
     public function mount()
     {
         $this->root_id = auth()->user()->membership->id;
@@ -26,10 +27,12 @@ class Tree extends Component
 
     protected function processNode($memberId, $parentId, &$flatData)
     {
-        if (!$memberId) return;
+        if (!$memberId)
+            return;
 
         $member = Membership::find($memberId);
-        if (!$member) return;
+        if (!$member)
+            return;
 
         // Add current node with logged in user check
         $flatData[] = [
@@ -37,13 +40,13 @@ class Tree extends Component
             'parentId' => $parentId,
             'name' => $member->name,
             'token' => $member->token,
-            'status' => $member->id === auth()->user()->membership->id ? 'current' : 
-                       ($member->isVerified ? 'verified' : 'pending')
+            'status' => $member->id === auth()->user()->membership->id ? 'current' :
+                ($member->isVerified ? 'verified' : 'pending')
         ];
 
         // Process children
         $tree = BinaryTree::where('parent_id', $memberId)->get();
-        
+
         // Process left child
         $left = $tree->where('position', 'left')->first();
         if ($left) {
@@ -75,7 +78,6 @@ class Tree extends Component
 
     public function render()
     {
-        return view('livewire.member.tree')
-                ->layout('components.layouts.member');
+        return view('livewire.member.tree');
     }
 }

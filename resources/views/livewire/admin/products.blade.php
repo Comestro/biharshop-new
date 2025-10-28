@@ -122,35 +122,31 @@
                     <!-- Basic Info -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Product Name</label>
-                            <input type="text" wire:model="name"
+                            <label class="block text-sm font-medium text-gray-700">Product Name *</label>
+                            <input type="text" wire:model.live="name"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 border">
                             @error('name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
 
-                        <div>
+                        <div class="hidden">
                             <label class="block text-sm font-medium text-gray-700">SKU</label>
-                            <input type="text" wire:model="sku"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                            <input type="text" wire:model.live="sku"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="(optional)">
                             @error('sku') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Slug</label>
-                            <input type="text" wire:model="slug"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                            @error('slug') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                            <label class="block text-sm font-medium text-gray-700">Brand Name *</label>
+                            <input type="text" wire:model.live="brand"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Dabur,Link,Nike,Doller">
+                            @error('brand') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Brand</label>
-                            <input type="text" wire:model="brand"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Category</label>
-                            <select wire:model="category_id"
+                            <label class="block text-sm font-medium text-gray-700">Category *</label>
+                            <select wire:model.live="category_id"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="">Select Category</option>
                                 @foreach($categories as $category)
@@ -160,9 +156,9 @@
                             @error('category_id') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
 
-                        <div>
+                        <div class="hidden">
                             <label class="block text-sm font-medium text-gray-700">Subcategory</label>
-                            <select wire:model="subcategory_id"
+                            <select wire:model.live="subcategory_id"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="">Select Subcategory</option>
 
@@ -171,25 +167,18 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Product Type</label>
-                            <input type="text" wire:model="product_type"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                            <input type="text" wire:model.live="product_type"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="electronic , faishon">
                             @error('product_type') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Tags (comma separated)</label>
-                            <input type="text" wire:model="tags" placeholder="tag1, tag2"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                            @error('tags') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-
-                        </div>
                     </div>
 
                     <!-- Description -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea wire:model="description" rows="3"
+                        <textarea wire:model.live="description" rows="3"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 border"></textarea>
                         @error('description') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -197,71 +186,81 @@
                     <!-- Pricing -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Price</label>
-                            <input type="number" wire:model="price" step="0.01"
+                            <label class="block text-sm font-medium text-gray-700">Price (₹) *</label>
+                            <input type="number" wire:model.live="price" step="0.01"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                                @error('price') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                            @error('price') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">MRP</label>
-                            <input type="number" wire:model="mrp" step="0.01"
+                            <label class="block text-sm font-medium text-gray-700">MRP (₹) *</label>
+                            <input type="number" wire:model.live="mrp" step="0.01"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                                @error('mrp') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                            @error('mrp') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
-                        <div>
+                        <div class="hidden">
                             <label class="block text-sm font-medium text-gray-700">Discount (%)</label>
-                            <input type="number" wire:model="discount" step="0.01"
+                            <input type="number" wire:model.live="discount" step="0.01"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                                @error('discount') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                            @error('discount') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
                     <!-- Variants -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Color</label>
-                            <input type="text" wire:model="color"
+                            <label class="block text-sm font-medium text-gray-700">Color *</label>
+                            <input type="text" wire:model.live="color"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                                @error('color') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                            @error('color') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Size (JSON)</label>
-                            <input type="text" wire:model="size" placeholder='["S","M","L"]'
+                            <label class="block text-sm font-medium text-gray-700">Size </label>
+                            <input type="text" wire:model.live="size" placeholder='["S","M","L","38","32"]'
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                                @error('size') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                            @error('size') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Material</label>
-                            <input type="text" wire:model="material"
+                            <label class="block text-sm font-medium text-gray-700">Material *</label>
+                            <input type="text" wire:model.live="material"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                                @error('material') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                            @error('material') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">In Stock *</label>
+                            <input type="text" wire:model.live="in_stock"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2 border focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('in_stock') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
                     </div>
 
-                    <!-- Images -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        @for($i = 0; $i < 4; $i++)
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Image {{ $i + 1 }}</label>
-                                <input type="file" wire:model="images.{{ $i }}" class="mt-1 block w-full">
-                                @if(isset($existingImages[$i]) && $existingImages[$i])
-                                    <img src="{{ Storage::url($existingImages[$i]) }}"
-                                        class="h-20 w-20 object-cover mt-1 rounded-lg">
-                                @endif
-                                @error('images.' . $i) <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                            </div>
-                        @endfor
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Image</label>
+                            <input type="file" wire:model.live="image" class="mt-1 block w-full">
+
+                            <!-- 🖼️ Preview new image -->
+                            @if ($image)
+                                <img src="{{ $image->temporaryUrl() }}" class="mt-2 h-24 rounded-md object-cover"
+                                    alt="Preview">
+                            @elseif ($existingImage)
+                                <img src="{{ asset('storage/' . $existingImage) }}"
+                                    class="mt-2 h-24 rounded-md object-cover" alt="Existing Image">
+                            @endif
+
+                            @error('image') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
                     </div>
+
 
                     <!-- Flags -->
                     <div class="grid grid-cols-2 gap-4 mt-4">
-                        <label><input type="checkbox" wire:model="is_active"> Active</label>
+                        <label><input type="checkbox" wire:model.live="is_active"> Active</label>
                         @error('is_active') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                        <label><input type="checkbox" wire:model="is_featured"> Featured</label>
+                        <label><input type="checkbox" wire:model.live="is_featured"> Featured</label>
                         @error('is_featured') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                        <label><input type="checkbox" wire:model="is_new_arrival"> New Arrival</label>
+                        <label><input type="checkbox" wire:model.live="is_new_arrival"> New Arrival</label>
                         @error('is_new_arrival') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                        <label><input type="checkbox" wire:model="is_on_sale"> On Sale</label>
+                        <label><input type="checkbox" wire:model.live="is_on_sale"> On Sale</label>
                         @error('is_on_sale') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
 

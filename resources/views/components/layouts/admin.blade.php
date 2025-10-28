@@ -65,6 +65,10 @@
                     class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.manage-positions') ? 'bg-gray-100' : '' }}">
                     Manage Positions
                 </a>
+                <a href="{{ route('admin.coupons') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.coupons') ? 'bg-gray-100' : '' }}">
+                   Coupons
+                </a>
 
                 <div class="mt-auto pt-4 border-t">
                     <form method="POST" action="{{ route('logout') }}">

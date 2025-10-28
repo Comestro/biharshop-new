@@ -102,15 +102,19 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @forelse($products as $product)
-               
+
                 <div class="bg-white rounded-md shadow-md overflow-hidden hover:shadow-xl transition-all duration-300">
-                    <div class="relative p-4">
-                        <span
-                            class="absolute top-6 left-6 bg-teal-600 text-white text-xs font-semibold px-2 py-1 rounded-xl">25%
-                            OFF</span>
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
-                            class="w-full h-56 object-cover rounded-xl">
-                    </div>
+                    <a href="{{ route('productview', $product->slug) }}">
+                        <div class="relative p-4">
+                            <span
+                                class="absolute top-6 left-6 bg-teal-600 text-white text-xs font-semibold px-2 py-1 rounded-xl">25%
+                                OFF</span>
+
+                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
+                                class="w-full h-56 object-cover rounded-xl">
+
+                        </div>
+                    </a>
                     <div class="px-4 pb-4 space-y-21">
                         <h3 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h3>
 
@@ -134,17 +138,13 @@
                                 class="text-sm text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-md font-semibold">4.5</span>
                         </div>
                         <div class="flex items-center gap-3 mt-3">
-                            <!-- Add to Cart Button -->
-                            <button
+                            <a href="{{ route('cart', ['add' => $product->id]) }}"
                                 class="flex-1 bg-teal-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium hover:bg-teal-700 transition">
                                 <i class="fas fa-shopping-cart"></i> Add to cart
-                            </button>
+                            </a>
 
-                            <!-- Like Button -->
-                            <button
-                                class="w-12 h-11 flex items-center justify-center bg-gray-100 text-red-500 rounded-lg hover:bg-red-100 transition">
-                                <i class="fas fa-heart"></i>
-                            </button>
+                            <livewire:home.component.wishlist :products="$product->id" />
+
                         </div>
 
 

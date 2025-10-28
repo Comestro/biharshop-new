@@ -40,7 +40,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Team Size Summary - Redesigned -->
                     <div class="flex flex-row md:flex-col gap-3 md:gap-1 md:items-end">
                         <h3 class="hidden md:block text-sm font-medium text-slate-700 mb-2">Team Summary</h3>
@@ -72,7 +72,6 @@
                     <option value="personal">Personal Information</option>
                     <option value="financial">Financial Details</option>
                     <option value="network">Network Details</option>
-                    <option value="tree">Tree View</option>
                 </select>
             </div>
 
@@ -103,14 +102,7 @@
                     ])>
                         Network Details
                     </button>
-                    <button wire:click="setTab('tree')" @class([
-                        'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
-                        'border-blue-500 text-blue-600' => $activeTab === 'tree',
-                        'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
-                            $activeTab !== 'tree',
-                    ])>
-                        Tree View
-                    </button>
+
                 </nav>
             </div>
 
@@ -252,7 +244,8 @@
                                     <div class="grid grid-cols-2">
                                         <dt class="text-sm font-medium text-slate-500">Position</dt>
                                         <dd class="text-sm text-slate-900">
-                                            {{ ucfirst($member->binaryPosition->position) }}</dd>
+                                            {{ ucfirst($member->binaryPosition->position) }}
+                                        </dd>
                                     </div>
                                 @else
                                     <p class="text-sm text-slate-500">No position assigned yet</p>
@@ -296,97 +289,13 @@
                         </div>
                     </div>
                 @endif
-
-                @if ($activeTab === 'tree')
-                    <div class="space-y-6">
-                        <div class="mx-auto px-4 sm:px-6 lg:px-8">
-                            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-                                <div class="p-4 sm:p-6 border-b border-slate-200">
-                                    <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Binary Tree Structure</h2>
-                                </div>
-
-                                <div class="relative">
-                                    <!-- Loading Overlay -->
-                                    <div wire:loading class="absolute inset-0 bg-white/75 flex items-center justify-center z-10">
-                                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500"></div>
-                                    </div>
-
-                                    <!-- Tree Container -->
-                                    <div class="p-4 sm:p-6 bg-slate-50/50">
-                                        <div id="binary-tree-container"
-                                             class="w-full h-[400px] sm:h-[500px] lg:h-[600px] rounded-lg bg-white"
-                                             wire:ignore></div>
-                                    </div>
-
-                                    <!-- Zoom Controls -->
-                                    <div class="absolute bottom-6 right-6 flex space-x-2">
-                                        <button onclick="zoomIn()"
-                                                class="p-2 bg-white rounded-full shadow-sm border border-slate-200 hover:bg-slate-50">
-                                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                            </svg>
-                                        </button>
-                                        <button onclick="zoomOut()"
-                                                class="p-2 bg-white rounded-full shadow-sm border border-slate-200 hover:bg-slate-50">
-                                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"/>
-                                            </svg>
-                                        </button>
-                                        <button onclick="resetZoom()"
-                                                class="p-2 bg-white rounded-full shadow-sm border border-slate-200 hover:bg-slate-50">
-                                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @push('scripts')
-                        <script src="https://d3js.org/d3.v7.min.js"></script>
-
-                    @endpush
-                @endif
-
             </div>
         </div>
     </div>
+    <section id="tree">
+        <div class="lg:p-7 mt-2">
+            <livewire:admin.binary-tree :root_id="$member->id" :key="9" />
+        </div>
+    </section>
+
 </div>
-@script
-<script>
-
-let svg, currentZoom, initialTransform;
-
-function initBinaryTree(data) {
-    if (!data) return;
-
-    const container = document.getElementById('binary-tree-container');
-    if (!container) return;
-
-    // Clear previous tree
-    d3.select("#binary-tree-container").html("");
-
-    const width = container.offsetWidth;
-    // ...rest of initBinaryTree function...
-}
-
-// Initialize when tab changes
-    Livewire.on('tabChanged', ({ treeData }) => {
-        console.log(treeData);
-        if (treeData && treeData.length > 0) {
-            setTimeout(() => initBinaryTree(treeData), 200);
-        }
-    });
-
-    // Initialize if we start on tree tab
-    if (@js($activeTab === 'tree')) {
-        console.log('Tree Data:', @js($treeData));
-        const treeData = @js($treeData);
-        if (treeData && treeData.length > 0) {
-            setTimeout(() => initBinaryTree(treeData), 200);
-        }
-    }
-</script>
-@endscript
