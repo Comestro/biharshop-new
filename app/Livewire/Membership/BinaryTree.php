@@ -10,7 +10,7 @@ class BinaryTree extends Component
     public $root_id;
     
     public function mount($root_id = null)
-    {
+    { 
         $this->root_id = $root_id ?? auth()->user()->membership->id;
     }
 

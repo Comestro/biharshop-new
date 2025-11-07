@@ -14,7 +14,7 @@ use Livewire\Component;
 
 class Checkout extends Component
 {
-    public $isOpenAddModel = false;
+    public $isOpenAddModel = false; 
     public $selected = null;
     public $selectedAddressId = null;
     public $continueToPaymentSection = false;

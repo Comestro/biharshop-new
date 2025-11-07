@@ -147,7 +147,7 @@
                         @endforeach
                     </div>
                 @endif
-                @if ($selectedAddressId)
+                @if ($selectedAddressId) 
                     <div class="divide-y divide-gray-100 border-t border-gray-200 mt-5">
                         <div class="flex items-center py-2">
                             <div class="ml-auto">

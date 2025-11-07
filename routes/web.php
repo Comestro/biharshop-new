@@ -5,6 +5,12 @@ use App\Livewire\Home\Checkout;
 use App\Livewire\Home\OrderSuccess;
 use App\Livewire\Home\ProductView;
 use App\Livewire\Home\Shoppage;
+use App\Livewire\User\MyAddress;
+use App\Livewire\User\MyDashboard;
+use App\Livewire\User\MyOrder;
+use App\Livewire\User\MyOrderItem;
+use App\Livewire\User\MyProfile;
+use App\Livewire\User\MyWishlistItem;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Livewire\Membership\{Register, BinaryPosition, Payment, BinaryTree};
@@ -25,6 +31,12 @@ Route::get('/team', App\Livewire\Home\Team::class)->name('team');
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', Checkout::class)->name('checkout');
     Route::get('/order-success', OrderSuccess::class)->name('ordersuccess');
+    Route::get('/myOrder', MyOrder::class)->name('myOrder');
+    Route::get('/myOrderItem', MyOrderItem::class)->name('myOrderItem');
+    Route::get('/myWishlist', MyWishlistItem::class)->name('myWishlist');
+    Route::get('/myProfile', MyProfile::class)->name('myProfile');
+    Route::get('/myAddress', MyAddress::class)->name('myAddress');
+    Route::get('/myDashboard', MyDashboard::class)->name('myDashboard');
 });
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

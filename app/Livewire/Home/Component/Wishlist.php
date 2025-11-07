@@ -8,10 +8,10 @@ use App\Models\Wishlist as WishlistModel;
 
 class Wishlist extends Component
 {
-    public $productId;
+    public $productId; 
     public $isWishlisted = false;
 
-    public function mount($products)
+    public function mount($products) 
     {
         $this->productId = $products;
 
