@@ -61,6 +61,29 @@
 <script>
     let currentZoom;
 
+
+    function linkRounded(d) {
+        const x1 = d.source.x;
+        const y1 = d.source.y;
+        const x2 = d.target.x;
+        const y2 = d.target.y;
+
+        const radius = 16; // curve roundness
+        const midY = (y1 + y2) / 2; // horizontal rail halfway down
+        const sign = x2 > x1 ? 1 : -1; // direction of curve
+
+        // outward-curving elbow link
+        return `
+    M${x1},${y1}
+    V${midY - radius}
+    Q${x1},${midY} ${x1 + sign * radius},${midY}
+    H${x2 - sign * radius}
+    Q${x2},${midY} ${x2},${midY + radius}
+    V${y2}
+  `;
+    }
+
+
     function initBinaryTree(data) {
         if (!data || data.length === 0) return;
         d3.select("#binary-tree-container").html("");
@@ -68,7 +91,12 @@
         const container = document.getElementById('binary-tree-container');
         const width = container.offsetWidth;
         const height = container.offsetHeight;
-        const margin = { top: 50, right: 40, bottom: 50, left: 40 };
+        const margin = {
+            top: 50,
+            right: 40,
+            bottom: 50,
+            left: 40
+        };
 
         const svg = d3.select("#binary-tree-container")
             .append("svg")
@@ -77,6 +105,7 @@
             .attr("viewBox", [0, 0, width, height]);
 
         const g = svg.append("g");
+        const defs = svg.append("defs");
 
         const stratify = d3.stratify()
             .id(d => d.id)
@@ -86,7 +115,7 @@
 
         const treeLayout = d3.tree()
             .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
-            .nodeSize([160, 120]);
+            .nodeSize([120, 120]);
 
         treeLayout(root);
 
@@ -98,30 +127,60 @@
             .data(root.links())
             .join("path")
             .attr("class", "link")
-            .attr("d", d => `
-                M${d.source.x},${d.source.y}
-                L${d.source.x},${(d.source.y + d.target.y) / 2}
-                L${d.target.x},${(d.source.y + d.target.y) / 2}
-                L${d.target.x},${d.target.y}
-            `)
+            .attr('d', linkRounded)
             .attr("fill", "none")
             .attr("stroke", "#e5e7eb")
-            .attr("stroke-width", 1.4);
+            .attr("stroke-width", 2);
 
         // Nodes
         const nodes = g.selectAll(".node")
             .data(root.descendants())
             .join("g")
             .attr("class", "node group")
-            .attr("transform", d => `translate(${d.x},${d.y})`);
+            .attr("transform", d => `translate(${d.x},${d.y})`)
+            .style("cursor", d => d.data.status !== 'empty' ? "pointer" : "default")
+            .on("click", function(event, d) {
+                // coerce id to string because it may be numeric and not support .includes
+                const id = d && d.data ? d.data.id : null;
+                const idStr = id !== null && id !== undefined ? String(id) : '';
+                if (idStr && !idStr.includes('empty')) {
+                    // Prefer direct $wire call when available (no event plumbing)
+                        Livewire.dispatch('binaryTreeChangeRoot', [id]);
+                        console.log('Dispatched binaryTreeChangeRoot with id:', id);    
+                }
+            });
+        // For avatar clipping helper
+        function safeId(id) {
+            return String(id).replace(/[^a-zA-Z0-9_-]/g, '_');
+        }
 
+        // Create per-node clipPaths for avatars (rounded rect)
+        nodes.each(function(d) {
+            const id = safeId(d.data.id);
+            const w = d.data.status === 'empty' ? 40 : 60;
+            const h = w;
+            const x = -w / 2;
+            const y = -h / 2;
+            if (!defs.select(`#clip-${id}`).size()) {
+                const cp = defs.append('clipPath').attr('id', `clip-${id}`);
+                cp.append('rect')
+                    .attr('x', x)
+                    .attr('y', y)
+                    .attr('width', w)
+                    .attr('height', h)
+                    .attr('rx', 10)
+                    .attr('ry', 10);
+            }
+        });
+
+        // Rounded square border/background (node)
         nodes.append("rect")
-            .attr("width", 130)
-            .attr("height", 66)
-            .attr("x", -65)
-            .attr("y", -33)
-            .attr("rx", 10)
-            .attr("ry", 10)
+            .attr("x", d => d.data.status === 'empty' ? -20 : -30)
+            .attr("y", d => d.data.status === 'empty' ? -20 : -30)
+            .attr("width", d => d.data.status === 'empty' ? 40 : 60)
+            .attr("height", d => d.data.status === 'empty' ? 40 : 60)
+            .attr('rx', 10)
+            .attr('ry', 10)
             .attr("fill", d => {
                 if (d.data.status === 'empty') return '#f9fafb';
                 if (d.data.status === 'current') return '#ecfdf5';
@@ -133,25 +192,44 @@
                 return d.data.status === 'verified' ? '#22c55e' : '#ef4444';
             })
             .attr("stroke-width", d => d.data.status === 'current' ? 3 : 2)
+            .attr("stroke-dasharray", d => d.data.status === 'empty' ? "5,5" : "none")
             .attr("filter", "drop-shadow(0px 2px 2px rgba(0,0,0,0.05))")
-            .on("mouseover", function () {
-                d3.select(this).transition().duration(200).attr("stroke-width", 3).attr("transform", "scale(1.03)");
+            .on("mouseover", function() {
+                if (d3.select(this).datum().data.status !== 'empty') {
+                    d3.select(this).transition().duration(200).attr("stroke-width", 3).attr("transform",
+                        "scale(1.03)");
+                }
             })
-            .on("mouseout", function (d) {
-                d3.select(this).transition().duration(200).attr("stroke-width", d.data?.status === 'current' ? 3 : 2).attr("transform", "scale(1)");
+            .on("mouseout", function(d) {
+                const datum = d3.select(this).datum();
+                d3.select(this).transition().duration(200).attr("stroke-width", datum.data.status === 'current' ?
+                    3 : 2).attr("transform", "scale(1)");
             });
+
+        // Avatar image (if provided)
+        nodes.append('image')
+            .attr('x', d => d.data.status === 'empty' ? -20 : -30)
+            .attr('y', d => d.data.status === 'empty' ? -20 : -30)
+            .attr('width', d => d.data.status === 'empty' ? 40 : 60)
+            .attr('height', d => d.data.status === 'empty' ? 40 : 60)
+            .attr('preserveAspectRatio', 'xMidYMid slice')
+            .attr('href', d => d.data.avatar ? d.data.avatar : '')
+            .attr('clip-path', d => `url(#clip-${safeId(d.data.id)})`)
+            .style('display', d => d.data.avatar ? null : 'none');
 
         // Labels
         const labels = nodes.append("g").attr("class", "label text-center");
-        labels.append("text")
-            .attr("dy", "-0.8em")
+        // Initial inside circle for non-empty
+        labels.filter(d => d.data.status !== 'empty').append("text")
+            .attr("dy", "0.35em")
             .attr("text-anchor", "middle")
-            .attr("class", "text-[11px] font-medium text-gray-500")
-            .text(d => d.data.token ? '#' + d.data.token : '');
+            .attr("class", "text-[16px] font-bold text-gray-700 fill-current")
+            .text(d => (d.data.initials || (d.data.name ? d.data.name.charAt(0) : '')).toUpperCase());
+        // Name below circle
         labels.append("text")
-            .attr("dy", "0.5em")
+            .attr("dy", d => d.data.status === 'empty' ? "1.5em" : "2.5em")
             .attr("text-anchor", "middle")
-            .attr("class", "text-[13px] font-semibold text-gray-700")
+            .attr("class", "text-[12px] font-medium text-gray-600")
             .text(d => d.data.name);
 
         // Zoom behavior
@@ -172,7 +250,8 @@
         // Zoom buttons inside container
         document.getElementById('zoom-in').onclick = () => svg.transition().duration(300).call(zoom.scaleBy, 1.2);
         document.getElementById('zoom-out').onclick = () => svg.transition().duration(300).call(zoom.scaleBy, 0.8);
-        document.getElementById('zoom-reset').onclick = () => svg.transition().duration(300).call(zoom.transform, transform);
+        document.getElementById('zoom-reset').onclick = () => svg.transition().duration(300).call(zoom.transform,
+            transform);
     }
 
     // Search & focus node
@@ -195,7 +274,7 @@
                 }
                 return d.data.status === 'empty' ? '#e2e8f0' :
                     d.data.status === 'current' ? '#059669' :
-                        d.data.status === 'verified' ? '#22c55e' : '#ef4444';
+                    d.data.status === 'verified' ? '#22c55e' : '#ef4444';
             })
             .attr("stroke-width", d => {
                 if (!name) return d.data.status === 'current' ? 3 : 2;
@@ -244,9 +323,25 @@
         searchNode("");
     });
 
-    document.addEventListener('livewire:init', function () {
+    document.addEventListener('livewire:init', function() {
         const treeData = @json($treeData);
         if (treeData && treeData.length > 0) initBinaryTree(treeData);
+        // Listen for Livewire dispatched browser events or Livewire JS events
+        try {
+            if (window.Livewire && typeof Livewire.on === 'function') {
+                Livewire.on('binaryTreeChangeRoot', function(treeData) {
+                    initBinaryTree(treeData);
+                });
+            }
+        } catch (err) {
+            // ignore
+        }
+
+        window.addEventListener('binaryTreeChangeRoot', function(e) {
+            if (e && e.detail && e.detail.treeData) {
+                initBinaryTree(e.detail.treeData);
+            }
+        });
     });
 
     window.addEventListener('resize', () => {

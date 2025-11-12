@@ -6,12 +6,15 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\Membership;
 use App\Models\BinaryTree as BinaryTreeModel;
+use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Log;
 
 #[Layout('components.layouts.admin')]
 class BinaryTree extends Component
 {
     public $root_id;
     public $treeData = [];
+    
 
     public function mount($root_id = null)
     {
@@ -32,13 +35,13 @@ class BinaryTree extends Component
         }
 
         $flatData = [];
-        $this->processNode($this->root_id, null, $flatData);
+        $this->processNode($this->root_id, null, $flatData, 0);
         $this->treeData = $flatData;
     }
 
-    protected function processNode($memberId, $parentId, &$flatData)
+    protected function processNode($memberId, $parentId, &$flatData, $depth)
     {
-        if (!$memberId) return;
+        if (!$memberId || $depth > 5) return;
 
         $member = Membership::find($memberId);
         if (!$member) return;
@@ -48,14 +51,20 @@ class BinaryTree extends Component
             'parentId' => $parentId,
             'name' => $member->name,
             'token' => $member->token,
-            'status' => $member->isVerified ? 'verified' : 'pending'
+            // mark the current root so the frontend can highlight it
+            'status' => $member->id == $this->root_id ? 'current' : ($member->isVerified ? 'verified' : 'pending'),
+            // helpful fields for the frontend (avatar or initials)
+            'avatar' => $member->user?->avatar ?? null,
+            'initials' => $member->user?->initials() ?? strtoupper(substr($member->name, 0, 1)),
         ];
+
+        if ($depth >= 5) return;
 
         $tree = BinaryTreeModel::where('parent_id', $memberId)->get();
 
         $left = $tree->where('position', 'left')->first();
         if ($left) {
-            $this->processNode($left->member_id, $member->id, $flatData);
+            $this->processNode($left->member_id, $member->id, $flatData, $depth + 1);
         } else {
             $flatData[] = [
                 'id' => "empty-left-{$member->id}",
@@ -68,7 +77,7 @@ class BinaryTree extends Component
 
         $right = $tree->where('position', 'right')->first();
         if ($right) {
-            $this->processNode($right->member_id, $member->id, $flatData);
+            $this->processNode($right->member_id, $member->id, $flatData, $depth + 1);
         } else {
             $flatData[] = [
                 'id' => "empty-right-{$member->id}",
@@ -80,12 +89,13 @@ class BinaryTree extends Component
         }
     }
 
+    #[On('binaryTreeChangeRoot')]
     public function changeRoot($id)
     {
         $this->root_id = $id;
         $this->loadTree();
-        $this->dispatch('treeUpdated', treeData: $this->treeData);
-    }
+            $this->dispatch('binaryTreeChangeRoot', treeData: $this->treeData);
+            }
 
     public function render()
     {
