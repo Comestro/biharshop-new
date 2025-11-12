@@ -2,10 +2,11 @@
 
 namespace App\Livewire\Membership;
 
-use Livewire\Component;
-use Livewire\WithFileUploads;
 use App\Models\Membership;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\Rule;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class Register extends Component
 {
@@ -13,34 +14,74 @@ class Register extends Component
 
     // Personal Info
     public $currentStep = 1;
-    public $name, $email, $mobile, $whatsapp, $date_of_birth, $gender;
-    public $nationality, $marital_status, $religion;
-    public $father_name, $mother_name;
+
+    public $name;
+
+    public $email;
+
+    public $mobile;
+
+    public $whatsapp;
+
+    public $date_of_birth;
+
+    public $gender;
+
+    public $nationality;
+
+    public $marital_status;
+
+    public $religion;
+
+    public $father_name;
+
+    public $mother_name;
+
     public $referral_code;
+
     public $referrer_name = '';
 
     // Address Details
-    public $home_address, $city, $pincode, $state;
+    public $home_address;
+
+    public $city;
+
+    public $pincode;
+
+    public $state;
 
     // Nominee Details
-    public $nominee_name, $nominee_relation;
+    public $nominee_name;
+
+    public $nominee_relation;
 
     // Bank Details
-    public $bank_name, $branch_name, $account_no, $ifsc;
+    public $bank_name;
+
+    public $branch_name;
+
+    public $account_no;
+
+    public $ifsc;
 
     // Documents
-    public $pancard, $aadhar_card;
+    public $pancard;
+
+    public $aadhar_card;
+
     public $image;
+
     public $existingImage;
 
     // Terms
     public $terms_and_condition = false;
 
     public $isSubmitted = false;
+
     public $membership = null;
 
     protected $validationAttributes = [
-        'terms_and_condition' => 'terms and conditions'
+        'terms_and_condition' => 'terms and conditions',
     ];
 
     public $states = [
@@ -51,13 +92,13 @@ class Register extends Component
         'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
         'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
         'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
-        'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+        'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
     ];
 
     public $nominee_relations = [
         'Spouse', 'Son', 'Daughter', 'Father', 'Mother',
         'Brother', 'Sister', 'Grandson', 'Granddaughter',
-        'Uncle', 'Aunt', 'Nephew', 'Niece', 'Other'
+        'Uncle', 'Aunt', 'Nephew', 'Niece', 'Other',
     ];
 
     public function mount()
@@ -73,12 +114,13 @@ class Register extends Component
                 $this->membership = $existingMembership;
 
                 // Redirect if membership exists but unpaid
-                if (!$existingMembership->isPaid) {
+                if (! $existingMembership->isPaid) {
                     return redirect()->route('membership.payment', $existingMembership);
                 }
 
                 if ($existingMembership->isPaid) {
                     $this->isSubmitted = true;
+
                     return;
                 }
                 // Load existing data
@@ -115,13 +157,28 @@ class Register extends Component
 
     protected function determineCurrentStep($membership)
     {
-        if (!$membership->name || !$membership->email || !$membership->mobile) return 1;
-        if (!$membership->father_name || !$membership->mother_name) return 2;
-        if (!$membership->home_address || !$membership->city) return 3;
-        if (!$membership->nominee_name) return 4;
-        if (!$membership->bank_name) return 5;
-        if (!$membership->pancard || !$membership->aadhar_card) return 6;
-        if (!$membership->image || !$membership->terms_and_condition) return 7;
+        if (! $membership->name || ! $membership->email || ! $membership->mobile) {
+            return 1;
+        }
+        if (! $membership->father_name || ! $membership->mother_name) {
+            return 2;
+        }
+        if (! $membership->home_address || ! $membership->city) {
+            return 3;
+        }
+        if (! $membership->nominee_name) {
+            return 4;
+        }
+        if (! $membership->bank_name) {
+            return 5;
+        }
+        if (! $membership->pancard || ! $membership->aadhar_card) {
+            return 6;
+        }
+        if (! $membership->image || ! $membership->terms_and_condition) {
+            return 7;
+        }
+
         return 7;
     }
 
@@ -147,13 +204,22 @@ class Register extends Component
                     'whatsapp' => 'nullable|regex:/^[6-9]\d{9}$/',
                     'date_of_birth' => 'required|date|before:today|after:1940-01-01',
                     'gender' => 'required|in:male,female,other',
-                    'referral_code' => 'nullable|exists:memberships,token'
+                    'referral_code' => [
+                        'nullable',
+                        Rule::exists('memberships', 'token')->where(fn ($q) => $q->where('isVerified', true)),
+                    ],
                 ], [
                     'mobile.regex' => 'Please enter a valid 10 digit mobile number',
                     'whatsapp.regex' => 'Please enter a valid 10 digit WhatsApp number',
                     'date_of_birth.before' => 'Date of birth must be in the past',
-                    'date_of_birth.after' => 'Please enter a valid date of birth'
+                    'date_of_birth.after' => 'Please enter a valid date of birth',
                 ]);
+                $checkRef = Membership::where('token', $this->referral_code)
+                    ->where('isVerified', true)
+                    ->first();
+                if ($this->referral_code && ! $checkRef) {
+                    $this->addError('referral_code', 'Invalid referral code');
+                }
                 break;
 
             case 2:
@@ -162,7 +228,7 @@ class Register extends Component
                     'mother_name' => 'required|string|min:3|max:100',
                     'nationality' => 'required|string|max:50',
                     'marital_status' => 'required|in:single,married,divorced,widowed',
-                    'religion' => 'required|string|max:50'
+                    'religion' => 'required|string|max:50',
                 ]);
                 break;
 
@@ -171,14 +237,14 @@ class Register extends Component
                     'home_address' => 'required|string|min:10|max:255',
                     'city' => 'required|string|max:50',
                     'state' => 'required|string|max:50',
-                    'pincode' => 'required|digits:6'
+                    'pincode' => 'required|digits:6',
                 ]);
                 break;
 
             case 4:
                 $this->validate([
                     'nominee_name' => 'required|string|min:3|max:100',
-                    'nominee_relation' => 'required|string|max:50'
+                    'nominee_relation' => 'required|string|max:50',
                 ]);
                 break;
 
@@ -187,20 +253,20 @@ class Register extends Component
                     'bank_name' => 'required|string|max:100',
                     'branch_name' => 'required|string|max:100',
                     'account_no' => 'required|min:9|max:18|regex:/^\d+$/',
-                    'ifsc' => 'required|regex:/^[A-Za-z]{4}0[A-Z0-9]{6}$/'
+                    'ifsc' => 'required|regex:/^[A-Za-z]{4}0[A-Z0-9]{6}$/',
                 ], [
                     'account_no.regex' => 'Please enter a valid account number',
-                    'ifsc.regex' => 'Please enter a valid IFSC code'
+                    'ifsc.regex' => 'Please enter a valid IFSC code',
                 ]);
                 break;
 
             case 6:
                 $this->validate([
                     'pancard' => 'required|regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/|unique:memberships,pancard,'.$this->membership?->id,
-                    'aadhar_card' => 'required|digits:12|unique:memberships,aadhar_card,'.$this->membership?->id
+                    'aadhar_card' => 'required|digits:12|unique:memberships,aadhar_card,'.$this->membership?->id,
                 ], [
                     'pancard.regex' => 'Please enter a valid PAN card number',
-                    'aadhar_card.digits' => 'Please enter a valid 12 digit Aadhar number'
+                    'aadhar_card.digits' => 'Please enter a valid 12 digit Aadhar number',
                 ]);
                 break;
 
@@ -208,10 +274,10 @@ class Register extends Component
                 $imageRule = $this->existingImage ? 'nullable' : 'required';
                 $this->validate([
                     'image' => $imageRule.'|image|max:1024|dimensions:min_width=200,min_height=200',
-                    'terms_and_condition' => 'accepted'
+                    'terms_and_condition' => 'accepted',
                 ], [
                     'image.dimensions' => 'Image must be at least 200x200 pixels',
-                    'image.max' => 'Image size must not exceed 1MB'
+                    'image.max' => 'Image size must not exceed 1MB',
                 ]);
                 break;
         }
@@ -221,20 +287,20 @@ class Register extends Component
     {
         if ($this->referral_code) {
             $referrer = Membership::where('token', $this->referral_code)
-                                ->where('isVerified', true)
-                                ->first();
+                ->where('isVerified', true)
+                ->first();
 
             if ($referrer) {
                 // Check available positions
                 $existingPositions = \App\Models\BinaryTree::where('parent_id', $referrer->id)
-                                                          ->pluck('position')
-                                                          ->toArray();
+                    ->pluck('position')
+                    ->toArray();
 
                 if (count($existingPositions) >= 2) {
-                    $this->referrer_name = $referrer->name . ' (No positions available)';
+                    $this->referrer_name = $referrer->name.' (No positions available)';
                     $this->addError('referral_code', 'This member has no available positions');
                 } else {
-                    $this->referrer_name = $referrer->name . ' (' . (2 - count($existingPositions)) . ' position(s) available)';
+                    $this->referrer_name = $referrer->name.' ('.(2 - count($existingPositions)).' position(s) available)';
                 }
             } else {
                 $this->referrer_name = '';
@@ -248,14 +314,14 @@ class Register extends Component
     {
         $this->reset(['city', 'state']); // Clear existing values
 
-        if(strlen($value) === 6 && is_numeric($value)) {
+        if (strlen($value) === 6 && is_numeric($value)) {
             try {
                 $response = Http::timeout(5)->get("https://api.postalpincode.in/pincode/{$value}");
 
-                if($response->successful()) {
+                if ($response->successful()) {
                     $data = $response->json();
 
-                    if(isset($data[0]['Status']) && $data[0]['Status'] === 'Success') {
+                    if (isset($data[0]['Status']) && $data[0]['Status'] === 'Success') {
                         $postOffice = $data[0]['PostOffice'][0];
                         $this->city = $postOffice['District'];
                         $this->state = $postOffice['State'];
@@ -274,11 +340,11 @@ class Register extends Component
     {
         $this->reset(['bank_name', 'branch_name']); // Clear existing values
 
-        if(strlen($value) === 11) {
+        if (strlen($value) === 11) {
             try {
                 $response = Http::timeout(5)->get("https://ifsc.razorpay.com/{$value}");
 
-                if($response->successful()) {
+                if ($response->successful()) {
                     $data = $response->json();
                     $this->bank_name = $data['BANK'];
                     $this->branch_name = $data['BRANCH'];
@@ -295,14 +361,13 @@ class Register extends Component
     private function generateSequentialToken()
     {
         $lastMembership = Membership::orderBy('id', 'desc')->first();
-        if (!$lastMembership) {
+        if (! $lastMembership) {
             return 'BSE1971';
         }
         $lastNumber = (int) str_replace('BSE', '', $lastMembership->token);
-        
-        return 'BSE' . ($lastNumber + 1);
-    }
 
+        return 'BSE'.($lastNumber + 1);
+    }
 
     public function register()
     {
@@ -310,7 +375,12 @@ class Register extends Component
 
         $referer = null;
         if ($this->referral_code) {
-            $referer = Membership::where('token', $this->referral_code)->first();
+            $referer = Membership::where('token', $this->referral_code)->where('isVerified', true)->first();
+            if (! $referer) {
+                $this->addError('referral_code', 'Invalid referral code');
+
+                return;
+            }
         }
 
         $data = [
@@ -349,7 +419,7 @@ class Register extends Component
             ['user_id' => auth()->id()],
             array_merge($data, [
                 'token' => $this->generateSequentialToken(),
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ])
         );
 
@@ -361,6 +431,7 @@ class Register extends Component
         if ($this->isSubmitted) {
             return view('livewire.membership.show');
         }
+
         return view('livewire.membership.register');
     }
 }

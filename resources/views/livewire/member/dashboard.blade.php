@@ -38,7 +38,7 @@
             </div>
             <div class="text-center sm:text-left">
                 <h1 class="text-2xl font-bold text-gray-900">Welcome, {{ $membership->name }}</h1>
-                <p class="text-gray-500">Member ID: {{ $membership->token }}</p>
+                <p class="text-gray-500">Member ID: {{ $membership->isVerified ? $membership->token : 'N/A' }}</p>
                 <div class="mt-2">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                         {{ $membership->isVerified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">

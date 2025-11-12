@@ -78,7 +78,7 @@
                     </button>
                     <div class="flex items-center">
                         <span class="text-sm text-gray-500 mr-2">Member ID:</span>
-                        <span class="text-sm font-medium">{{ auth()->user()->membership->token ?? 'N/A' }}</span>
+                        <span class="text-sm font-medium">{{ auth()->user()->membership->isVerified ? auth()->user()->membership->token : 'N/A' }}</span>
                     </div>
                 </div>
             </div>

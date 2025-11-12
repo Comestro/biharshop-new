@@ -14,7 +14,7 @@
                     @endif
                     <div>
                         <h3 class="text-2xl font-semibold">{{ $membership->name }}</h3>
-                        <p class="text-gray-500">Member ID: {{ $membership->token }}</p>
+                        <p class="text-gray-500">Member ID: {{ $membership->isVerified ? $membership->token : 'N/A' }}</p>
                     </div>
                 </div>
 
