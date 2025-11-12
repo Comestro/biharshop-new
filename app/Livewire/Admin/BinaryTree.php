@@ -9,7 +9,7 @@ use App\Models\BinaryTree as BinaryTreeModel;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
 
-#[Layout('components.layouts.admin')]
+    #[Layout('components.layouts.admin')]
 class BinaryTree extends Component
 {
     public $root_id;
@@ -89,13 +89,15 @@ class BinaryTree extends Component
         }
     }
 
-    #[On('binaryTreeChangeRoot')]
-    public function changeRoot($id)
+    // Listen for browser/JS request to change root
+    #[On('binaryTreeChangeRootRequest')]
+    public function changeRootRequest($id)
     {
         $this->root_id = $id;
         $this->loadTree();
-            $this->dispatch('binaryTreeChangeRoot', treeData: $this->treeData);
-            }
+        // Dispatch an event with updated tree data (different name to avoid recursion)
+        $this->dispatch('binaryTreeDataUpdated', treeData: $this->treeData);
+    }
 
     public function render()
     {

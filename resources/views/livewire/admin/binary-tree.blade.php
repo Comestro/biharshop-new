@@ -144,9 +144,9 @@
                 const id = d && d.data ? d.data.id : null;
                 const idStr = id !== null && id !== undefined ? String(id) : '';
                 if (idStr && !idStr.includes('empty')) {
-                    // Prefer direct $wire call when available (no event plumbing)
-                        Livewire.dispatch('binaryTreeChangeRoot', [id]);
-                        console.log('Dispatched binaryTreeChangeRoot with id:', id);    
+                    // Request root change via Livewire JS event with named payload
+                    Livewire.dispatch('binaryTreeChangeRootRequest', { id: id });
+                    console.log('Dispatched binaryTreeChangeRootRequest with id:', id);
                 }
             });
         // For avatar clipping helper
@@ -329,7 +329,8 @@
         // Listen for Livewire dispatched browser events or Livewire JS events
         try {
             if (window.Livewire && typeof Livewire.on === 'function') {
-                Livewire.on('binaryTreeChangeRoot', function(treeData) {
+                // Listen for updated tree data from Livewire component
+                Livewire.on('binaryTreeDataUpdated', function(treeData) {
                     initBinaryTree(treeData);
                 });
             }
@@ -337,7 +338,7 @@
             // ignore
         }
 
-        window.addEventListener('binaryTreeChangeRoot', function(e) {
+        window.addEventListener('binaryTreeDataUpdated', function(e) {
             if (e && e.detail && e.detail.treeData) {
                 initBinaryTree(e.detail.treeData);
             }
