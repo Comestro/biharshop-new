@@ -50,7 +50,7 @@
     <main class="flex-1 ">
         <div class="bg-white border rounded-b-2xl shadow-sm overflow-hidden">
             <div id="binary-tree-container"
-                class="w-full h-[100vh] bg-[radial-gradient(circle_at_center,_#f8fafc_1px,_transparent_1px)] [background-size:24px_24px] transition-all"
+                class="w-full h-[100vh]  bg-[radial-gradient(circle_at_center,_#f8fafc_1px,_transparent_1px)] [background-size:24px_24px] transition-all"
                 wire:ignore></div>
         </div>
     </main>
@@ -89,6 +89,10 @@
         d3.select("#binary-tree-container").html("");
 
         const container = document.getElementById('binary-tree-container');
+        if (!container) {
+            // DOM not ready or container missing; safely bail
+            return;
+        }
         const width = container.offsetWidth;
         const height = container.offsetHeight;
         const margin = {
@@ -102,7 +106,8 @@
             .append("svg")
             .attr("width", width)
             .attr("height", height)
-            .attr("viewBox", [0, 0, width, height]);
+            .attr("viewBox", [-70, 100, width, height]);
+            
 
         const g = svg.append("g");
         const defs = svg.append("defs");
@@ -115,7 +120,7 @@
 
         const treeLayout = d3.tree()
             .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
-            .nodeSize([70, 120]);
+            .nodeSize([70, 140]);
 
         treeLayout(root);
 
@@ -129,7 +134,7 @@
             .attr("class", "link")
             .attr('d', linkRounded)
             .attr("fill", "none")
-            .attr("stroke", "#e5e7eb")
+            .attr("stroke", "#ddd")
             .attr("stroke-width", 2);
 
         // Nodes
@@ -179,8 +184,8 @@
             .attr("y", d => d.data.status === 'empty' ? -20 : -30)
             .attr("width", d => d.data.status === 'empty' ? 40 : 60)
             .attr("height", d => d.data.status === 'empty' ? 40 : 60)
-            .attr('rx', 10)
-            .attr('ry', 10)
+            .attr('rx', 50)
+            .attr('ry', 50)
             .attr("fill", d => {
                 if (d.data.status === 'empty') return '#f9fafb';
                 if (d.data.status === 'current') return '#ecfdf5';
@@ -225,12 +230,26 @@
             .attr("text-anchor", "middle")
             .attr("class", "text-[16px] font-bold text-gray-700 fill-current")
             .text(d => (d.data.initials || (d.data.name ? d.data.name.charAt(0) : '')).toUpperCase());
-        // Name below circle
-        labels.append("text")
-            .attr("dy", d => d.data.status === 'empty' ? "1.5em" : "2.5em")
-            .attr("text-anchor", "middle")
-            .attr("class", "text-[12px] font-medium text-gray-600")
-            .text(d => d.data.name);
+
+        // Name badge on node (non-empty): pill below the square
+        const badges = nodes.append('g').attr('class', 'name-badge');
+        const nonEmptyBadges = badges.filter(d => d.data.status !== 'empty');
+        nonEmptyBadges.append('rect')
+            .attr('x', -32)
+            .attr('y', 40)
+            .attr('width', 70)
+            .attr('height', 18)
+            .attr('rx', 9)
+            .attr('ry', 9)
+            .attr('fill', '#2563eb')
+            .attr('opacity', 0.9);
+        nonEmptyBadges.append('text')
+            .attr('x', 0)
+            .attr('y', 53)
+            .attr('text-anchor', 'middle')
+            .attr('class', 'text-[11px] font-semibold')
+            .attr('fill', '#ffffff')
+            .text(d => (d.data.token || '').length > 18 ? (d.data.token || '').slice(0, 17) + '…' : (d.data.token || ''));
 
         // Zoom behavior
         const zoom = d3.zoom()
@@ -252,6 +271,55 @@
         document.getElementById('zoom-out').onclick = () => svg.transition().duration(300).call(zoom.scaleBy, 0.8);
         document.getElementById('zoom-reset').onclick = () => svg.transition().duration(300).call(zoom.transform,
             transform);
+
+        // Tooltip element (created once)
+        let tooltipEl = document.getElementById('binary-tree-tooltip');
+        if (!tooltipEl) {
+            tooltipEl = document.createElement('div');
+            tooltipEl.id = 'binary-tree-tooltip';
+            tooltipEl.style.position = 'fixed';
+            tooltipEl.style.zIndex = '9999';
+            tooltipEl.style.pointerEvents = 'none';
+            tooltipEl.style.background = '#ffffff';
+            tooltipEl.style.border = '1px solid #e5e7eb';
+            tooltipEl.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+            tooltipEl.style.borderRadius = '8px';
+            tooltipEl.style.padding = '8px 10px';
+            tooltipEl.style.fontSize = '12px';
+            tooltipEl.style.color = '#111827';
+            tooltipEl.style.display = 'none';
+            document.body.appendChild(tooltipEl);
+        }
+
+        // Tooltip handlers on node groups
+        nodes
+            .on('mouseover', function(event, d) {
+                if (d?.data?.status === 'empty') return;
+                const token = d?.data?.token || '—';
+                const name = d?.data?.name || '—';
+                const status = d?.data?.status || '—';
+                const id = d?.data?.id ?? '—';
+                tooltipEl.innerHTML = `
+                    <div style="display:flex;flex-direction:column;gap:4px;min-width:200px;max-width:280px;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="display:inline-block;padding:2px 8px;background:#2563eb;color:#fff;border-radius:999px;font-weight:600;font-size:11px;">${name}</span>
+                            <span style="font-size:11px;color:#6b7280;">ID: ${id}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;gap:12px;">
+                            <div><span style="color:#6b7280;">Token:</span> <span style="color:#111827;">${token}</span></div>
+                            <div><span style="color:#6b7280;">Status:</span> <span style="color:#111827;">${status}</span></div>
+                        </div>
+                    </div>`;
+                tooltipEl.style.display = 'block';
+            })
+            .on('mousemove', function(event) {
+                const offset = 12;
+                tooltipEl.style.left = (event.pageX + offset) + 'px';
+                tooltipEl.style.top = (event.pageY + offset) + 'px';
+            })
+            .on('mouseout', function() {
+                tooltipEl.style.display = 'none';
+            });
     }
 
     // Search & focus node
