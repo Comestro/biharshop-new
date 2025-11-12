@@ -75,7 +75,7 @@
         // outward-curving elbow link
         return `
     M${x1},${y1}
-    V${midY - radius}
+    V${midY}
     Q${x1},${midY} ${x1 + sign * radius},${midY}
     H${x2 - sign * radius}
     Q${x2},${midY} ${x2},${midY + radius}
@@ -115,12 +115,12 @@
 
         const treeLayout = d3.tree()
             .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
-            .nodeSize([120, 120]);
+            .nodeSize([70, 120]);
 
         treeLayout(root);
 
         const centerX = width / 2 - root.x;
-        g.attr("transform", `translate(${centerX},${margin.top + 40})`);
+        g.attr("transform", `translate(${centerX},${margin.top + 0})`);
 
         // Links
         g.selectAll(".link")

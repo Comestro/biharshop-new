@@ -14,11 +14,16 @@ class BinaryTree extends Component
 {
     public $root_id;
     public $treeData = [];
+    public $initial_root_id;
+    public $root_history = [];
+    public $searchQuery = '';
+    public $maxDepth = 6; // default to 6 levels when not searching
     
 
     public function mount($root_id = null)
     {
-        $this->root_id = $root_id ?? Membership::where('isVerified', true)->first()?->id;
+        $this->initial_root_id = $root_id ?? Membership::where('isVerified', true)->first()?->id;
+        $this->root_id = $this->initial_root_id;
         $this->loadTree();
     }
 
@@ -41,7 +46,9 @@ class BinaryTree extends Component
 
     protected function processNode($memberId, $parentId, &$flatData, $depth)
     {
-        if (!$memberId || $depth > 5) return;
+        if (!$memberId) return;
+        // Respect maxDepth when set (6 by default, unlimited when searching)
+        if ($this->maxDepth !== null && $depth > $this->maxDepth) return;
 
         $member = Membership::find($memberId);
         if (!$member) return;
@@ -58,7 +65,10 @@ class BinaryTree extends Component
             'initials' => $member->user?->initials() ?? strtoupper(substr($member->name, 0, 1)),
         ];
 
-        if ($depth >= 5) return;
+        // If at depth cap, do not traverse children further
+        if ($this->maxDepth !== null && $depth >= $this->maxDepth) {
+            return;
+        }
 
         $tree = BinaryTreeModel::where('parent_id', $memberId)->get();
 
@@ -93,9 +103,47 @@ class BinaryTree extends Component
     #[On('binaryTreeChangeRootRequest')]
     public function changeRootRequest($id)
     {
-        $this->root_id = $id;
+        if ($id && $id != $this->root_id) {
+            if ($this->root_id) {
+                $this->root_history[] = $this->root_id;
+            }
+            $this->root_id = $id;
+        }
         $this->loadTree();
         // Dispatch an event with updated tree data (different name to avoid recursion)
+        $this->dispatch('binaryTreeDataUpdated', treeData: $this->treeData);
+    }
+
+    // Toggle search mode: unlimited depth when query present, else cap at 6
+    #[On('binaryTreeSearch')]
+    public function applySearch($payload)
+    {
+        $query = is_array($payload) ? ($payload['query'] ?? '') : (string) $payload;
+        $this->searchQuery = $query;
+        $this->maxDepth = ($this->searchQuery !== '') ? null : 6;
+        $this->loadTree();
+        $this->dispatch('binaryTreeDataUpdated', treeData: $this->treeData);
+    }
+
+    // Navigate back to previous parent
+    public function backToPreviousRoot()
+    {
+        if (!empty($this->root_history)) {
+            $prev = array_pop($this->root_history);
+            if ($prev) {
+                $this->root_id = $prev;
+                $this->loadTree();
+                $this->dispatch('binaryTreeDataUpdated', treeData: $this->treeData);
+            }
+        }
+    }
+
+    // Reset to the initial root
+    public function resetRoot()
+    {
+        $this->root_history = [];
+        $this->root_id = $this->initial_root_id;
+        $this->loadTree();
         $this->dispatch('binaryTreeDataUpdated', treeData: $this->treeData);
     }
 
