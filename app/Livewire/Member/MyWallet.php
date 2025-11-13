@@ -17,11 +17,8 @@ class MyWallet extends Component
 
     public function mount()
     {
-        $this->memberId = 9;
+        $this->memberId = auth()->user()->membership->id;
         $this->calculateCommission($this->memberId);
-        // $balance = $this->walletBalance;
-        // $this->dispatch('walletUpdated', balance: $balance );
-
     }
 
     private function calculateCommission($memberId)
@@ -140,8 +137,6 @@ class MyWallet extends Component
         }
 
         $this->walletBalance = $wallet;
-        // MyWallet.php
-
     }
 
     /**
