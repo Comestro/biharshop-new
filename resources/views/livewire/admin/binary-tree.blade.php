@@ -145,6 +145,8 @@
             .attr("transform", d => `translate(${d.x},${d.y})`)
             .style("cursor", d => d.data.status !== 'empty' ? "pointer" : "default")
             .on("click", function(event, d) {
+                const t = document.getElementById('binary-tree-tooltip');
+                if (t) t.style.display = 'none';
                 const rawId = d && d.data ? d.data.id : null;
                 const idStr = rawId !== null && rawId !== undefined ? String(rawId) : '';
                 if (!idStr) return;
@@ -452,14 +454,19 @@
         });
     });
 
-    window.addEventListener('resize', () => {
-        clearTimeout(window.resizeTimer);
-        window.resizeTimer = setTimeout(() => {
-            const treeData = @json($treeData);
-            if (treeData && treeData.length > 0) initBinaryTree(treeData);
-        }, 250);
-    });
-</script>
+        window.addEventListener('resize', () => {
+            clearTimeout(window.resizeTimer);
+            window.resizeTimer = setTimeout(() => {
+                const treeData = @json($treeData);
+                if (treeData && treeData.length > 0) initBinaryTree(treeData);
+            }, 250);
+        });
+
+        document.addEventListener('click', function() {
+            const t = document.getElementById('binary-tree-tooltip');
+            if (t) t.style.display = 'none';
+        });
+    </script>
 
 <!-- Create Member Modal -->
 @if($showCreateModal)
