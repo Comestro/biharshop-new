@@ -3,6 +3,7 @@
 use App\Livewire\Admin\AddCoupon;
 use App\Livewire\Admin\Auth\Login;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\ManagePlan;
 use App\Livewire\Admin\Members;
 use App\Livewire\Admin\ViewMember;
 use App\Livewire\Admin\Products;
@@ -24,5 +25,6 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::get('/products', Products::class)->name('admin.products');
     Route::get('/categories', Categories::class)->name('admin.categories');
     Route::get('/coupons', AddCoupon::class)->name('admin.coupons');
+    Route::get('/manage-plans', ManagePlan::class)->name('admin.manageplans');
 });
 

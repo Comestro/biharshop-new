@@ -1,12 +1,13 @@
 <?php
 namespace App\Livewire\Admin;
 
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Membership;
 use App\Models\Product;
 use App\Models\Category;
-
+#[Layout('components.layouts.admin')]
 class Dashboard extends Component
 {
     use WithPagination;
@@ -39,7 +40,7 @@ class Dashboard extends Component
 
         return view('livewire.admin.members', [
             'members' => $query->paginate(10)
-        ])->layout('components.layouts.admin');
+        ]);
     }
 
     public function showMemberDetails($id)
@@ -72,6 +73,6 @@ class Dashboard extends Component
 
         return view('livewire.admin.dashboard.index', [
             'stats' => $stats
-        ])->layout('components.layouts.admin');
+        ]);
     }
 }

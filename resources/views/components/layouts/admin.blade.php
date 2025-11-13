@@ -67,7 +67,11 @@
                 </a>
                 <a href="{{ route('admin.coupons') }}"
                     class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.coupons') ? 'bg-gray-100' : '' }}">
-                   Coupons
+                    Coupons
+                </a>
+                <a href="{{ route('admin.manageplans') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.manageplans') ? 'bg-gray-100' : '' }}">
+                    Plans
                 </a>
 
                 <div class="mt-auto pt-4 border-t">
