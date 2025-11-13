@@ -145,14 +145,25 @@
             .attr("transform", d => `translate(${d.x},${d.y})`)
             .style("cursor", d => d.data.status !== 'empty' ? "pointer" : "default")
             .on("click", function(event, d) {
-                // coerce id to string because it may be numeric and not support .includes
-                const id = d && d.data ? d.data.id : null;
-                const idStr = id !== null && id !== undefined ? String(id) : '';
-                if (idStr && !idStr.includes('empty')) {
-                    // Request root change via Livewire JS event with named payload
-                    Livewire.dispatch('binaryTreeChangeRootRequest', { id: id });
-                    console.log('Dispatched binaryTreeChangeRootRequest with id:', id);
+                const rawId = d && d.data ? d.data.id : null;
+                const idStr = rawId !== null && rawId !== undefined ? String(rawId) : '';
+                if (!idStr) return;
+
+                // Handle empty nodes: create under parent at position
+                if (idStr.startsWith('empty-')) {
+                    const m = idStr.match(/^empty-(left|right)-(\d+)$/);
+                    if (m) {
+                        const position = m[1];
+                        const parentId = parseInt(m[2], 10);
+                        Livewire.dispatch('binaryTreeOpenCreateAtEmpty', { parentId, position });
+                        console.log('Requested open create modal at empty', { parentId, position });
+                    }
+                    return;
                 }
+
+                // Otherwise, request root change via Livewire JS event with named payload
+                Livewire.dispatch('binaryTreeChangeRootRequest', { id: rawId });
+                console.log('Dispatched binaryTreeChangeRootRequest with id:', rawId);
             });
         // For avatar clipping helper
         function safeId(id) {
@@ -231,6 +242,14 @@
             .attr("class", "text-[16px] font-bold text-gray-700 fill-current")
             .text(d => (d.data.initials || (d.data.name ? d.data.name.charAt(0) : '')).toUpperCase());
 
+        // Plus icon centered for empty nodes
+        labels.filter(d => d.data.status === 'empty').append('text')
+            .attr('dy', '0.35em')
+            .attr('text-anchor', 'middle')
+            .attr('class', 'text-[18px] font-bold')
+            .attr('fill', '#2563eb')
+            .text('+');
+
         // Name badge on node (non-empty): pill below the square
         const badges = nodes.append('g').attr('class', 'name-badge');
         const nonEmptyBadges = badges.filter(d => d.data.status !== 'empty');
@@ -250,6 +269,26 @@
             .attr('class', 'text-[11px] font-semibold')
             .attr('fill', '#ffffff')
             .text(d => (d.data.token || '').length > 18 ? (d.data.token || '').slice(0, 17) + '…' : (d.data.token || ''));
+
+        // Hint badge for empty nodes
+        const emptyBadges = badges.filter(d => d.data.status === 'empty');
+        emptyBadges.append('rect')
+            .attr('x', -28)
+            .attr('y', 40)
+            .attr('width', 56)
+            .attr('height', 18)
+            .attr('rx', 9)
+            .attr('ry', 9)
+            .attr('fill', '#e5f2ff')
+            .attr('stroke', '#3b82f6')
+            .attr('opacity', 0.9);
+        emptyBadges.append('text')
+            .attr('x', 0)
+            .attr('y', 53)
+            .attr('text-anchor', 'middle')
+            .attr('class', 'text-[11px] font-semibold')
+            .attr('fill', '#1d4ed8')
+            .text('Add');
 
         // Zoom behavior
         const zoom = d3.zoom()
@@ -421,3 +460,36 @@
         }, 250);
     });
 </script>
+
+<!-- Create Member Modal -->
+@if($showCreateModal)
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6" @click.stop>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Add Member</h2>
+            <button class="text-gray-500 hover:text-gray-700" wire:click="cancelCreateAtEmpty">✕</button>
+        </div>
+        <form wire:submit.prevent="confirmCreateAtEmpty" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.name" placeholder="Member name" />
+                @error('createForm.name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.email" placeholder="email@example.com" />
+                @error('createForm.email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Mobile</label>
+                <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.mobile" placeholder="98########" />
+                @error('createForm.mobile') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" class="px-4 py-2 rounded-lg border" wire:click="cancelCreateAtEmpty">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif

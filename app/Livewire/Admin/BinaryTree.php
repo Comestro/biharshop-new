@@ -6,8 +6,10 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\Membership;
 use App\Models\BinaryTree as BinaryTreeModel;
+use App\Models\User;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
     #[Layout('components.layouts.admin')]
 class BinaryTree extends Component
@@ -18,6 +20,14 @@ class BinaryTree extends Component
     public $root_history = [];
     public $searchQuery = '';
     public $maxDepth = 6; // default to 6 levels when not searching
+    public $showCreateModal = false;
+    public $createParentId = null;
+    public $createPosition = null;
+    public $createForm = [
+        'name' => '',
+        'email' => '',
+        'mobile' => '',
+    ];
     
 
     public function mount($root_id = null)
@@ -123,6 +133,114 @@ class BinaryTree extends Component
         $this->maxDepth = ($this->searchQuery !== '') ? null : 6;
         $this->loadTree();
         $this->dispatch('binaryTreeDataUpdated', treeData: $this->treeData);
+    }
+
+    // Open create modal for empty slot
+    #[On('binaryTreeOpenCreateAtEmpty')]
+    public function openCreateAtEmpty($parentIdOrPayload = null, $position = null)
+    {
+        if (is_array($parentIdOrPayload)) {
+            $this->createParentId = $parentIdOrPayload['parentId'] ?? null;
+            $this->createPosition = $parentIdOrPayload['position'] ?? null;
+        } else {
+            $this->createParentId = $parentIdOrPayload;
+            $this->createPosition = $position;
+        }
+
+        if (!$this->createParentId || !in_array($this->createPosition, ['left', 'right'])) {
+            return;
+        }
+        $this->showCreateModal = true;
+    }
+
+    // Create a new user + membership at an empty position under a parent
+    #[On('binaryTreeCreateAtEmpty')]
+    public function createAtEmpty($parentIdOrPayload = null, $position = null)
+    {
+        // Support both payload object and positional args
+        if (is_array($parentIdOrPayload)) {
+            $parentId = $parentIdOrPayload['parentId'] ?? null;
+            $position = $parentIdOrPayload['position'] ?? null;
+        } else {
+            $parentId = $parentIdOrPayload;
+        }
+        if (!$parentId || !in_array($position, ['left', 'right'])) {
+            return;
+        }
+
+        // Validate that the slot is still empty
+        $exists = BinaryTreeModel::where('parent_id', $parentId)
+            ->where('position', $position)
+            ->exists();
+        if ($exists) {
+            // Slot already filled; just reload
+            $this->loadTree();
+            $this->dispatch('binaryTreeDataUpdated', treeData: $this->treeData);
+            return;
+        }
+
+        // Gather form values if present; otherwise generate defaults
+        $this->validate([
+            'createForm.name' => 'nullable|string|max:255',
+            'createForm.email' => 'nullable|email|max:255',
+            'createForm.mobile' => 'nullable|string|max:20',
+        ]);
+
+        $token = uniqid('MEM');
+        $name = $this->createForm['name'] ?: 'New Member';
+        $email = $this->createForm['email'] ?: strtolower($token).'@example.com';
+        $mobile = $this->createForm['mobile'] ?: null;
+
+        $user = User::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => bcrypt(Str::random(12)),
+        ]);
+
+        // Create membership linked to the user
+        $membership = Membership::create([
+            'user_id' => $user->id,
+            'token' => $token,
+            'name' => $name,
+            'email' => $email,
+            'mobile' => $mobile,
+            'isVerified' => true,
+            'isPaid' => true,
+            'status' => true,
+        ]);
+
+        // Position in binary tree under the parent
+        BinaryTreeModel::create([
+            'member_id' => $membership->id,
+            'parent_id' => $parentId,
+            'position' => $position,
+        ]);
+
+        // Reload and notify frontend
+        $this->loadTree();
+        $this->dispatch('binaryTreeDataUpdated', treeData: $this->treeData);
+        $this->resetCreateModal();
+    }
+
+    public function confirmCreateAtEmpty()
+    {
+        if (!$this->createParentId || !in_array($this->createPosition, ['left', 'right'])) {
+            return;
+        }
+        $this->createAtEmpty($this->createParentId, $this->createPosition);
+    }
+
+    public function cancelCreateAtEmpty()
+    {
+        $this->resetCreateModal();
+    }
+
+    protected function resetCreateModal()
+    {
+        $this->showCreateModal = false;
+        $this->createParentId = null;
+        $this->createPosition = null;
+        $this->createForm = ['name' => '', 'email' => '', 'mobile' => ''];
     }
 
     // Navigate back to previous parent
