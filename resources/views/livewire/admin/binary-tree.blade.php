@@ -16,7 +16,18 @@
                     class="border-gray-300 text-sm px-3 py-2 rounded-lg outline-none w-full border-2" />
                 <button id="clear-search"
                     class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition flex-shrink-0">Clear</button>
+                <button id="global-search"
+                    class="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition flex-shrink-0">Search All</button>
             </div>
+
+            <div class="flex items-center gap-2 mt-2 sm:mt-0">
+                <button id="go-back-root"
+                    class="text-sm px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">Back</button>
+                <button id="reset-tree-root"
+                    class="text-sm px-3 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700">Reset Tree</button>
+            </div>
+
+            <div id="nav-breadcrumb" class="flex items-center flex-wrap gap-1 text-sm text-gray-600 mt-2 sm:mt-0"></div>
 
             <!-- Zoom Controls -->
             <div class="flex items-center space-x-2 mt-2 sm:mt-0">
@@ -60,6 +71,10 @@
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
     let currentZoom;
+    let navigationStack = [];
+    let currentRootId = null;
+    let initialRootId = null;
+    let pendingGlobalSearchQuery = '';
 
 
     function linkRounded(d) {
@@ -117,6 +132,8 @@
             .parentId(d => d.parentId);
 
         const root = stratify(data).sum(d => d.value || 1);
+        currentRootId = root.id;
+        if (!initialRootId) initialRootId = root.id;
 
         const treeLayout = d3.tree()
             .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
@@ -162,10 +179,10 @@
                     }
                     return;
                 }
-
-                // Otherwise, request root change via Livewire JS event with named payload
+                navigationStack.push(currentRootId);
                 Livewire.dispatch('binaryTreeChangeRootRequest', { id: rawId });
                 console.log('Dispatched binaryTreeChangeRootRequest with id:', rawId);
+                updateBreadcrumbUI();
             });
         // For avatar clipping helper
         function safeId(id) {
@@ -361,6 +378,8 @@
             .on('mouseout', function() {
                 tooltipEl.style.display = 'none';
             });
+
+        updateBreadcrumbUI();
     }
 
     // Search & focus node
@@ -411,6 +430,28 @@
         }
     }
 
+    function updateBreadcrumbUI() {
+        const el = document.getElementById('nav-breadcrumb');
+        if (!el) return;
+        el.innerHTML = '';
+        const items = [...navigationStack, currentRootId].filter(Boolean);
+        items.forEach((id, idx) => {
+            const b = document.createElement('button');
+            b.className = 'px-2 py-1 rounded hover:bg-gray-100';
+            b.textContent = idx === 0 ? 'Root' : `#${id}`;
+            b.onclick = () => {
+                Livewire.dispatch('binaryTreeChangeRootRequest', { id });
+            };
+            el.appendChild(b);
+            if (idx < items.length - 1) {
+                const sep = document.createElement('span');
+                sep.textContent = '›';
+                sep.className = 'mx-1 text-gray-400';
+                el.appendChild(sep);
+            }
+        });
+    }
+
     // Clear search restores original position without zooming out
     document.getElementById("clear-search").addEventListener("click", () => {
         document.getElementById("search-node").value = "";
@@ -432,6 +473,24 @@
         searchNode("");
     });
 
+    document.getElementById('search-node').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            const q = e.target.value.trim();
+            if (q) {
+                pendingGlobalSearchQuery = q;
+                Livewire.dispatch('binaryTreeGlobalSearchRequest', { query: q });
+            }
+        }
+    });
+
+    document.getElementById('global-search').addEventListener('click', () => {
+        const q = document.getElementById('search-node').value.trim();
+        if (q) {
+            pendingGlobalSearchQuery = q;
+            Livewire.dispatch('binaryTreeGlobalSearchRequest', { query: q });
+        }
+    });
+
     document.addEventListener('livewire:init', function() {
         const treeData = @json($treeData);
         if (treeData && treeData.length > 0) initBinaryTree(treeData);
@@ -450,6 +509,9 @@
         window.addEventListener('binaryTreeDataUpdated', function(e) {
             if (e && e.detail && e.detail.treeData) {
                 initBinaryTree(e.detail.treeData);
+                if (pendingGlobalSearchQuery) {
+                    searchNode(pendingGlobalSearchQuery);
+                }
             }
         });
     });
@@ -465,6 +527,23 @@
         document.addEventListener('click', function() {
             const t = document.getElementById('binary-tree-tooltip');
             if (t) t.style.display = 'none';
+        });
+
+        document.getElementById('go-back-root').addEventListener('click', function() {
+            if (navigationStack.length > 0) {
+                const prev = navigationStack.pop();
+                if (prev) Livewire.dispatch('binaryTreeChangeRootRequest', { id: prev });
+            }
+            updateBreadcrumbUI();
+        });
+
+        document.getElementById('reset-tree-root').addEventListener('click', function() {
+            if (initialRootId) {
+                navigationStack = [];
+                Livewire.dispatch('binaryTreeChangeRootRequest', { id: initialRootId });
+                pendingGlobalSearchQuery = '';
+            }
+            updateBreadcrumbUI();
         });
     </script>
 
