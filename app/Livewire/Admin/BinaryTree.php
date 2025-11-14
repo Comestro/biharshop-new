@@ -36,6 +36,7 @@ class BinaryTree extends Component
     {
         $this->initial_root_id = $root_id ?? Membership::where('isVerified', true)->first()?->id;
         $this->root_id = $this->initial_root_id;
+        $this->createParentId = $this->root_id;
         $this->loadTree();
     }
 
@@ -139,20 +140,20 @@ class BinaryTree extends Component
 
     // Open create modal for empty slot
     #[On('binaryTreeOpenCreateAtEmpty')]
-    public function openCreateAtEmpty($parentIdOrPayload = null, $position = null)
+    public function openCreateAtEmpty($parentId = null, $position = null)
     {
-        if (is_array($parentIdOrPayload)) {
-            $this->createParentId = $parentIdOrPayload['parentId'] ?? null;
-            $this->createPosition = $parentIdOrPayload['position'] ?? null;
+        
+        if (is_array($parentId)) {
+            $this->createParentId = $parentId['parentId'] ?? null;
+            $this->createPosition = $parentId['position'] ?? null;
         } else {
-            $this->createParentId = $parentIdOrPayload;
+            $this->createParentId = $parentId;
             $this->createPosition = $position;
         }
 
         if (!$this->createParentId || !in_array($this->createPosition, ['left', 'right'])) {
             return;
         }
-        $this->showCreateModal = true;
     }
 
     // Create a new user + membership at an empty position under a parent

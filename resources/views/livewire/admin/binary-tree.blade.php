@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 flex flex-col">
+<div class="min-h-screen bg-gray-50 flex flex-col" x-data="binaryTreeModal()" x-data={open:false} x-init="init()">
     <!-- Header -->
     <header
         class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-t-2xl">
@@ -66,23 +66,22 @@
         </div>
     </main>
 
-<!-- Create Member Modal (rendered when Livewire flag is true) -->
-@if($showCreateModal)
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+<!-- Create Member Modal (Alpine controlled; Livewire entangled) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" x-show="open" x-cloak>
     <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6" @click.stop>
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold">Sign Up Member</h2>
-            <button class="text-gray-500 hover:text-gray-700" wire:click="cancelCreateAtEmpty">✕</button>
+            <button class="text-gray-500 hover:text-gray-700" @click="close">✕</button>
         </div>
         <form wire:submit.prevent="confirmCreateAtEmpty" class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Parent ID</label>
-                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" value="{{ $createParentId }}" readonly />
+                    <label class="block text-sm font-medium text-gray-700">Parent ID (({{ $createParentId }}))</label>
+                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" wire:model.live="createParentId" readonly />
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Position</label>
-                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" value="{{ $createPosition }}" readonly />
+                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" wire:model.live="createPosition" readonly />
                 </div>
             </div>
             <div>
@@ -111,58 +110,57 @@
                 @error('createForm.password_confirmation') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
             <div class="flex justify-end gap-2 pt-2">
-                <button type="button" class="px-4 py-2 rounded-lg border" wire:click="cancelCreateAtEmpty">Cancel</button>
+                <button type="button" class="px-4 py-2 rounded-lg border" @click="close">Cancel</button>
                 <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white">Create</button>
             </div>
         </form>
     </div>
 </div>
-@endif
 </div>
 
 <!-- D3 Script -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
-@script
 <script>
-    document.addEventListener('livewire:init', () => {
-        if (window.Livewire) {
-            const el = document.querySelector('[wire\\:id]');
-            if (el) {
-                const comp = Livewire.find(el.getAttribute('wire:id'));
-                if (comp) window.AdminBinaryTreeWire = comp;
-            }
+(function(){
+    try {
+        const s = document.currentScript;
+        if (!s) return;
+        if (window.Livewire && !window.AdminBinaryTreeWire) {
+            const root = s.closest('[wire\\:id]');
+            if (!root) return;
+            const id = root.getAttribute('wire:id');
+            const comp = Livewire.find(id);
+            if (comp && !window.AdminBinaryTreeWire) window.AdminBinaryTreeWire = comp;
         }
-    });
-    window.addEventListener('admin-binary-tree:open-empty-slot', (e) => {
-        const d = e && e.detail ? e.detail : {};
-        if (!d.parentId || !d.position) return;
-        if (window.AdminBinaryTreeWire) {
-            window.AdminBinaryTreeWire.openCreateAtEmpty(d.parentId, d.position);
-        } else if (window.Livewire && typeof Livewire.dispatch === 'function') {
-            Livewire.dispatch('binaryTreeOpenCreateAtEmpty', { parentId: d.parentId, position: d.position });
-        }
-    });
+    } catch(e) {}
+})();
 </script>
-@endscript
 <script>
-    document.addEventListener('livewire:init', () => {
-        if (!window.AdminBinaryTreeWire && window.Livewire) {
-            const el = document.querySelector('[wire\\:id]');
-            if (el) {
-                const comp = Livewire.find(el.getAttribute('wire:id'));
-                if (comp) window.AdminBinaryTreeWire = comp;
-            }
+function binaryTreeModal() {
+    return {
+        open: false,
+        parentId: null,
+        position: null,
+        init() {
+            window.addEventListener('admin-binary-tree:open-empty-slot', (e) => {
+                const d = e && e.detail ? e.detail : {};
+                if (!d.parentId || !d.position) return;
+                this.parentId = d.parentId;
+                this.position = d.position;
+                try {
+                    $wire.set('createParentId', d.parentId);
+                    $wire.set('createPosition', d.position);
+                    $wire.set('showCreateModal', true);
+                } catch(_) {}
+                this.open = true;
+            });
+        },
+        close() {
+            this.open = false;
+            try { $wire.call('cancelCreateAtEmpty'); } catch(_) { $wire.set('showCreateModal', false); }
         }
-    });
-    document.addEventListener('livewire:navigated', () => {
-        if (window.Livewire) {
-            const el = document.querySelector('[wire\\:id]');
-            if (el) {
-                const comp = Livewire.find(el.getAttribute('wire:id'));
-                if (comp) window.AdminBinaryTreeWire = comp;
-            }
-        }
-    });
+    }
+}
 </script>
 <script>
     let currentZoom;
@@ -269,18 +267,23 @@
                     if (m) {
                         const position = m[1];
                         const parentId = parseInt(m[2], 10);
-                        console.log('Requested open create modal at empty', { parentId, position });
-                        window.dispatchEvent(new CustomEvent('admin-binary-tree:open-empty-slot', { detail: { parentId, position } }));
                         if (window.AdminBinaryTreeWire) {
-                            window.AdminBinaryTreeWire.openCreateAtEmpty(parentId, position);
                             try {
-                                window.AdminBinaryTreeWire.set('createParentId', parentId);
-                                window.AdminBinaryTreeWire.set('createPosition', position);
-                                window.AdminBinaryTreeWire.set('showCreateModal', true);
-                            } catch (_) {}
-                        } else {
-                            Livewire.dispatch('binaryTreeOpenCreateAtEmpty', { parentId, position });
+                                if (typeof window.AdminBinaryTreeWire.set === 'function') {
+                                    window.AdminBinaryTreeWire.set('createParentId', parentId);
+                                    window.AdminBinaryTreeWire.set('createPosition', position);
+                                    window.AdminBinaryTreeWire.set('showCreateModal', true);
+                                }
+                                if (typeof window.AdminBinaryTreeWire.openCreateAtEmpty === 'function') {
+                                    window.AdminBinaryTreeWire.openCreateAtEmpty(parentId, position);
+                                } else if (typeof window.AdminBinaryTreeWire.call === 'function') {
+                                    window.AdminBinaryTreeWire.call('openCreateAtEmpty', parentId, position);
+                                }
+                            } catch(_) {}
                         }
+                        window.dispatchEvent(new CustomEvent('admin-binary-tree:open-empty-slot', { detail: { parentId, position } }));
+                        Livewire.dispatch('binaryTreeOpenCreateAtEmpty', { parentId, position });
+                        console.log('Dispatched binaryTreeOpenCreateAtEmpty with parentId:', parentId, 'position:', position);
                     }
                     return;
                 }
@@ -624,7 +627,18 @@
         window.addEventListener('admin-binary-tree:open-empty-slot', function(e) {
             const d = e && e.detail ? e.detail : {};
             if (window.AdminBinaryTreeWire && d.parentId && d.position) {
-                window.AdminBinaryTreeWire.openCreateAtEmpty(d.parentId, d.position);
+                try {
+                    if (typeof window.AdminBinaryTreeWire.set === 'function') {
+                        window.AdminBinaryTreeWire.set('createParentId', d.parentId);
+                        window.AdminBinaryTreeWire.set('createPosition', d.position);
+                        window.AdminBinaryTreeWire.set('showCreateModal', true);
+                    }
+                    if (typeof window.AdminBinaryTreeWire.openCreateAtEmpty === 'function') {
+                        window.AdminBinaryTreeWire.openCreateAtEmpty(d.parentId, d.position);
+                    } else if (typeof window.AdminBinaryTreeWire.call === 'function') {
+                        window.AdminBinaryTreeWire.call('openCreateAtEmpty', d.parentId, d.position);
+                    }
+                } catch(_) {}
             }
         });
     });

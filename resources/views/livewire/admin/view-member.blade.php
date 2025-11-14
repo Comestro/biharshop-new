@@ -294,7 +294,7 @@
     </div>
     <section id="tree">
         <div class="lg:p-7 mt-2">
-            <livewire:admin.binary-tree :root_id="$member->id" :key="9" /> 
+            <livewire:admin.binary-tree :root_id="$member->id" /> 
         </div>
     </section>
 
