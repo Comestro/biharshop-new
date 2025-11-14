@@ -108,7 +108,6 @@
                     </div>
 
                     <!-- Wallet Balance (Right) -->
-                    <livewire:member.component.total-wallet-balance />
                 </div>
             </div>
 

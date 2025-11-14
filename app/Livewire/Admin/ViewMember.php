@@ -14,7 +14,7 @@ class ViewMember extends Component
     public $leftTeamSize = 0;
     public $rightTeamSize = 0;
     public $totalTeamSize = 0;
-
+   
     protected $validTabs = ['personal', 'financial', 'network', 'tree'];
     protected $listeners = ['treeNodeSelected' => 'navigateToMember'];
 
@@ -147,9 +147,7 @@ class ViewMember extends Component
 
     public function render()
     {
-        return view('livewire.admin.view-member', [
-            'treeData' => $this->getTreeData()
-        ]);
+        return view('livewire.admin.view-member');
     }
 }
 
