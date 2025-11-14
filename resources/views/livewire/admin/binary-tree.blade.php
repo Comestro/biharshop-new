@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 flex flex-col" x-data="binaryTreeModal()" x-data={open:false} x-init="init()">
+<div class="min-h-screen bg-gray-50 flex flex-col" x-data="binaryTreeModal()"  x-init="init()">
     <!-- Header -->
     <header
         class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-t-2xl">
@@ -76,12 +76,12 @@
         <form wire:submit.prevent="confirmCreateAtEmpty" class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Parent ID (({{ $createParentId }}))</label>
-                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" wire:model.live="createParentId" readonly />
+                    <label class="block text-sm font-medium text-gray-700">Parent ID</label>
+                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" value="{{ $createParentId }}" readonly />
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Position</label>
-                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" wire:model.live="createPosition" readonly />
+                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" value="{{ $createPosition }}" readonly />
                 </div>
             </div>
             <div>
@@ -271,13 +271,16 @@ function binaryTreeModal() {
                             try {
                                 if (typeof window.AdminBinaryTreeWire.set === 'function') {
                                     window.AdminBinaryTreeWire.set('createParentId', parentId);
+                                    
                                     window.AdminBinaryTreeWire.set('createPosition', position);
                                     window.AdminBinaryTreeWire.set('showCreateModal', true);
                                 }
                                 if (typeof window.AdminBinaryTreeWire.openCreateAtEmpty === 'function') {
                                     window.AdminBinaryTreeWire.openCreateAtEmpty(parentId, position);
+                                    console.log()
                                 } else if (typeof window.AdminBinaryTreeWire.call === 'function') {
                                     window.AdminBinaryTreeWire.call('openCreateAtEmpty', parentId, position);
+                                    
                                 }
                             } catch(_) {}
                         }
