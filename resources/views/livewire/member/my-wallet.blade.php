@@ -21,48 +21,104 @@
 
     <!-- 🧾 Commission History Table -->
     <div class="overflow-x-auto">
-        <h3 class="text-md font-semibold text-gray-700 mb-3">Detailed Commission History</h3>
-        <table class="min-w-full text-sm border border-gray-200 rounded-lg">
-            <thead class="bg-gray-100 text-gray-700">
-                <tr>
-                    <th class="px-3 py-2 text-left border">Level</th>
-                    <th class="px-3 py-2 text-left border">Status</th>
-                    <th class="px-3 py-2 text-left border">Left Member(s)</th>
-                    <th class="px-3 py-2 text-left border">Right Member(s)</th>
-                    <th class="px-3 py-2 text-left border">Percentage</th>
-                    <th class="px-3 py-2 text-left border">Commission</th>
-                    <th class="px-3 py-2 text-left border">Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($commissionHistory as $row)
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-3 py-2 border font-medium">{{ $row['level'] }}</td>
-                        <td class="px-3 py-2 border">
-                            @if ($row['status'] === 'Paid')
-                                <span class="text-green-700 font-semibold">Paid</span>
-                            @elseif ($row['status'] === 'Pending')
-                                <span class="text-yellow-600 font-semibold">Pending</span>
-                            @else
-                                <span class="text-gray-500">{{ $row['status'] }}</span>
-                            @endif
-                        </td>
-                        <td class="px-3 py-2 border text-blue-700">{{ $row['left_member'] }}</td>
-                        <td class="px-3 py-2 border text-purple-700">{{ $row['right_member'] }}</td>
-                        <td class="px-3 py-2 border text-gray-700">{{ $row['percentage'] }}</td>
-                        <td class="px-3 py-2 border text-green-700 font-semibold">
-                            ₹{{ number_format($row['commission'], 2) }}
-                        </td>
-                        <td class="px-3 py-2 border text-gray-600 leading-snug">
-                            {{ $row['detail'] }}
-                        </td>
-                    </tr>
-                @empty
+
+        {{-- Top Tabs --}}
+        <div class="flex items-center gap-4 mb-4">
+            <button wire:click="$set('binaryComissionHistory', true)" class="px-4 py-2 rounded-lg text-sm font-semibold 
+            {{ $binaryComissionHistory ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                Upline Commission History
+            </button>
+
+            <button wire:click="$set('binaryComissionHistory', false)" class="px-4 py-2 rounded-lg text-sm font-semibold 
+            {{ !$binaryComissionHistory ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                Referral Commission History
+            </button>
+        </div>
+
+
+        {{-- 🔵 UPLINE COMMISSION HISTORY --}}
+        @if ($binaryComissionHistory)
+            <h3 class="text-md font-semibold text-gray-700 mb-3">Upline Commission History</h3>
+
+            <table class="min-w-full text-sm border border-gray-200 rounded-lg">
+                <thead class="bg-gray-100 text-gray-700">
                     <tr>
-                        <td colspan="7" class="text-center text-gray-400 py-3">No commission yet.</td>
+                        <th class="px-3 py-2 border">Level</th>
+                        <th class="px-3 py-2 border">Status</th>
+                        <th class="px-3 py-2 border">Left Member</th>
+                        <th class="px-3 py-2 border">Right Member</th>
+                        <th class="px-3 py-2 border">Percentage</th>
+                        <th class="px-3 py-2 border">Commission</th>
+                        <th class="px-3 py-2 border">Details</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    @forelse ($commissionHistory as $row)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-3 py-2 border">{{ $row['level'] }}</td>
+                            <td class="px-3 py-2 border">
+                                @if ($row['status'] === 'Paid')
+                                    <span class="text-green-700 font-semibold">Paid</span>
+                                @elseif ($row['status'] === 'Pending')
+                                    <span class="text-yellow-600 font-semibold">Pending</span>
+                                @else
+                                    <span class="text-gray-500">{{ $row['status'] }}</span>
+                                @endif
+                            </td>
+                            <td class="px-3 py-2 border text-blue-700">{{ $row['left_member'] }}</td>
+                            <td class="px-3 py-2 border text-purple-700">{{ $row['right_member'] }}</td>
+                            <td class="px-3 py-2 border">{{ $row['percentage'] }}</td>
+                            <td class="px-3 py-2 border text-green-700 font-semibold">
+                                ₹{{ number_format($row['commission'], 2) }}
+                            </td>
+                            <td class="px-3 py-2 border">{{ $row['detail'] }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-gray-400 py-3">No commission yet.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        @endif
+
+
+
+        {{-- 🟣 REFERRAL COMMISSION HISTORY --}}
+        @if (!$binaryComissionHistory)
+            <h3 class="text-md font-semibold text-gray-700 mb-3">Referral Commission History</h3>
+
+            <table class="min-w-full text-sm border border-gray-200 rounded-lg">
+                <thead class="bg-gray-100 text-gray-700">
+                    <tr>
+                        <th class="px-3 py-2 border">Level</th>
+                        <th class="px-3 py-2 border">Upline Token</th>
+                        <th class="px-3 py-2 border">Commission %</th>
+                        <th class="px-3 py-2 border">Commission</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse ($referralComissionHistory as $row)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-3 py-2 border">{{ $row['level'] }}</td>
+                            <td class="px-3 py-2 border">{{ $row['child_id'] }}</td>
+                            <td class="px-3 py-2 border">{{ $row['percentage'] }}%</td>
+                            <td class="px-3 py-2 border text-green-700">
+                                ₹{{ number_format($row['commission'], 2) }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-gray-400 py-3">No referral commission yet.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        @endif
+
+
     </div>
+
 </div>

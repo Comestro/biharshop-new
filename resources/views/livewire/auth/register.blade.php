@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Models\Membership;
+use App\Models\ReferralTree;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,17 +16,98 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $mobile = '';
     public string $password = '';
     public string $password_confirmation = '';
+    public string $referral_code = '';
+    public string $referrer_name = '';
+
 
     /**
      * Handle an incoming registration request.
      */
     public function register(): void
     {
+        if ($this->referral_code) {
+            $referrer = Membership::where('token', $this->referral_code)
+                ->where('isVerified', true)
+                ->first();
+
+            $referrerByRefCode = Membership::where('referral_code', $this->referral_code)
+                ->where('isVerified', true)
+                ->first();
+
+            if ($referrer) {
+                // Check available positions
+                $existingPositions = \App\Models\BinaryTree::where('parent_id', $referrer->id)
+                    ->pluck('position')
+                    ->toArray();
+
+                if (count($existingPositions) >= 2) {
+                    $this->referrer_name = $referrer->name . ' (No positions available)';
+                    $this->addError('referral_code', 'This member has no available positions');
+                } else {
+                    $this->referrer_name = $referrer->name . ' (' . (2 - count($existingPositions)) . ' position(s) available)';
+                }
+
+
+            } elseif ($referrerByRefCode) {
+                $existingReferrer = ReferralTree::where('parent_id', $referrerByRefCode->id);
+                if ($existingReferrer) {
+                    $this->referrer_name = $referrerByRefCode->name;
+                } else {
+                    $this->referrer_name = $referrerByRefCode->name . ' (Not available)';
+                    $this->addError('referral_code', 'This member has no available ');
+                }
+
+            } else {
+                $this->referrer_name = '';
+            }
+        } else {
+            $this->referrer_name = '';
+        }
+
+
+        $referer = null;
+        $membershipId = null;
+
+        if ($this->referral_code) {
+
+            // First check token
+            $referer = Membership::where('token', $this->referral_code)
+                ->where('isVerified', true)
+                ->first();
+            if (!$referer) {
+                $referer = null;
+            }
+
+            // If not token → check referral_code
+
+            $membershipId = Membership::where('referral_code', $this->referral_code)
+                ->where('isVerified', true)
+                ->first();
+
+            if (!$membershipId) {
+                $membershipId = null;
+            }
+        }
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'mobile' => ['required', 'regex:/^[6-9]\d{9}$/'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+            'referral_code' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    $exists = Membership::where('isVerified', true)
+                        ->where(function ($q) use ($value) {
+                            $q->where('token', $value)
+                                ->orWhere('referral_code', $value);
+                        })
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail('The referral code is invalid or user is not verified.');
+                    }
+                },
+            ],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -36,11 +118,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $existing = Membership::where(function ($q) use ($validated) {
             $q->where('email', $validated['email'])
-              ->orWhere('mobile', $this->mobile);
+                ->orWhere('mobile', $this->mobile);
         })->first();
 
         if ($existing) {
-            if (! $existing->user_id) {
+            if (!$existing->user_id) {
                 $existing->user_id = $user->id;
                 $existing->save();
             }
@@ -52,6 +134,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 'email' => $validated['email'],
                 'mobile' => $this->mobile,
                 'token' => $token,
+                'referal_id' => $referer ? $referer->id : null,
+                'membership_id' => $membershipId ? $membershipId->id : null,
+
             ]);
         }
 
@@ -62,7 +147,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     private function generateSequentialToken(): string
     {
         $lastMembership = Membership::orderBy('id', 'desc')->first();
-        if (! $lastMembership || ! $lastMembership->token) {
+        if (!$lastMembership || !$lastMembership->token) {
             return 'BSE1971';
         }
         $lastNumber = (int) str_replace('BSE', '', $lastMembership->token);
@@ -114,6 +199,17 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     @error('mobile') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
                 </div>
 
+                <!-- Referral Code -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Referral Code (Optional)</label>
+                    <input type="text" wire:model.live="referral_code" placeholder="Enter member ID of referrer"
+                        class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                    @if($referrer_name)
+                        <p class="mt-1 text-sm text-teal-600">Referrer: {{ $referrer_name }}</p>
+                    @endif
+                    @error('referral_code') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
+                </div>
+
                 <!-- Password -->
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
@@ -127,7 +223,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
                 <!-- Confirm Password -->
                 <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm password</label>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm
+                        password</label>
                     <div class="mt-1">
                         <input wire:model="password_confirmation" id="password_confirmation" type="password" required
                             class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -164,7 +261,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 </div>
 
                 <div class="mt-6">
-                    <a href="{{ route('login') }}" 
+                    <a href="{{ route('login') }}"
                         class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         Sign in instead
                     </a>
