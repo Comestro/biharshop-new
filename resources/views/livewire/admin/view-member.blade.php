@@ -72,6 +72,8 @@
                     <option value="personal">Personal Information</option>
                     <option value="financial">Financial Details</option>
                     <option value="network">Network Details</option>
+                    <option value="wallet">Wallet</option>
+                    <option value="tree">Tree</option>
                 </select>
             </div>
 
@@ -101,6 +103,22 @@
                             $activeTab !== 'network',
                     ])>
                         Network Details
+                    </button>
+                    <button wire:click="setTab('wallet')" @class([
+                        'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
+                        'border-blue-500 text-blue-600' => $activeTab === 'wallet',
+                        'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
+                            $activeTab !== 'wallet',
+                    ])>
+                        Wallet
+                    </button>
+                    <button wire:click="setTab('tree')" @class([
+                        'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
+                        'border-blue-500 text-blue-600' => $activeTab === 'tree',
+                        'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
+                            $activeTab !== 'tree',
+                    ])>
+                        Tree
                     </button>
 
                 </nav>
@@ -289,13 +307,161 @@
                         </div>
                     </div>
                 @endif
+
+                @if ($activeTab === 'wallet')
+                    <div class="space-y-6">
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-medium text-slate-900">Wallet Summary</h3>
+                                <button wire:click="refreshWallet" class="px-3 py-1.5 bg-teal-600 text-white rounded-md">
+                                    Refresh
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="p-4 rounded-md border border-slate-200 bg-white">
+                                    <p class="text-xs text-slate-500 uppercase">Balance</p>
+                                    <h3 class="text-2xl font-bold text-teal-700">₹{{ number_format($walletBalance, 2) }}</h3>
+                                </div>
+                                <div class="p-4 rounded-md border border-slate-200 bg-white">
+                                    <p class="text-xs text-slate-500 uppercase">Paid Status</p>
+                                    <h3 class="text-sm font-semibold">{{ $member->isPaid ? 'Paid' : 'Unpaid' }}</h3>
+                                </div>
+                                <div class="p-4 rounded-md border border-slate-200 bg-white">
+                                    <p class="text-xs text-slate-500 uppercase">Transaction ID</p>
+                                    <h3 class="text-sm font-semibold">{{ $member->transaction_no ?: 'N/A' }}</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Transactions</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm border border-slate-200 rounded-lg">
+                                    <thead class="bg-slate-100 text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 border">Type</th>
+                                            <th class="px-3 py-2 border">Amount</th>
+                                            <th class="px-3 py-2 border">Status</th>
+                                            <th class="px-3 py-2 border">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($transactions as $tx)
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-3 py-2 border">{{ $tx['type'] }}</td>
+                                                <td class="px-3 py-2 border text-teal-700">₹{{ number_format($tx['amount'], 2) }}</td>
+                                                <td class="px-3 py-2 border">{{ $tx['status'] }}</td>
+                                                <td class="px-3 py-2 border">{{ \Carbon\Carbon::parse($tx['created_at'])->format('d M Y, h:i A') }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-slate-400 py-3">No transactions.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Withdrawals</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm border border-slate-200 rounded-lg">
+                                    <thead class="bg-slate-100 text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 border">Amount</th>
+                                            <th class="px-3 py-2 border">Status</th>
+                                            <th class="px-3 py-2 border">Requested</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($withdrawals as $w)
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-3 py-2 border text-red-700">₹{{ number_format($w['amount'], 2) }}</td>
+                                                <td class="px-3 py-2 border">{{ $w['status'] }}</td>
+                                                <td class="px-3 py-2 border">{{ \Carbon\Carbon::parse($w['created_at'])->format('d M Y, h:i A') }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-slate-400 py-3">No withdraw requests.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if ($activeTab === 'tree')
+                    <div class="space-y-6">
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Binary Tree</h3>
+                            <livewire:admin.binary-tree :root_id="$member->id" />
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Upline Details (Binary)</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm border border-slate-200 rounded-lg">
+                                    <thead class="bg-slate-100 text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 border">Level</th>
+                                            <th class="px-3 py-2 border">Name</th>
+                                            <th class="px-3 py-2 border">Token</th>
+                                            <th class="px-3 py-2 border">Position</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($binaryUplines as $up)
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-3 py-2 border">{{ $up['level'] }}</td>
+                                                <td class="px-3 py-2 border">{{ $up['name'] }}</td>
+                                                <td class="px-3 py-2 border">{{ $up['token'] }}</td>
+                                                <td class="px-3 py-2 border">{{ ucfirst($up['position']) }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-slate-400 py-3">No uplines</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Upline Details (Referral)</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm border border-slate-200 rounded-lg">
+                                    <thead class="bg-slate-100 text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 border">Level</th>
+                                            <th class="px-3 py-2 border">Name</th>
+                                            <th class="px-3 py-2 border">Token</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($referralUplines as $up)
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-3 py-2 border">{{ $up['level'] }}</td>
+                                                <td class="px-3 py-2 border">{{ $up['name'] }}</td>
+                                                <td class="px-3 py-2 border">{{ $up['token'] }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-slate-400 py-3">No uplines</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
-    <section id="tree">
-        <div class="lg:p-7 mt-2">
-            <livewire:admin.binary-tree :root_id="$member->id" /> 
-        </div>
-    </section>
+    
 
 </div>

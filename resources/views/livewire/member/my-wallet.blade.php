@@ -1,5 +1,5 @@
 <div class="bg-white border border-gray-100 rounded-xl shadow-md p-6 mt-6">
-    @if($kycComplete)
+    @if($isVerified)
     <h2 class="text-lg font-bold text-teal-700 mb-4">Commission Summary</h2>
 
     <!-- ✅ Summary Cards -->
@@ -91,7 +91,7 @@
                 <thead class="bg-gray-100 text-gray-700">
                     <tr>
                         <th class="px-3 py-2 border">Level</th>
-                        <th class="px-3 py-2 border">Upline Token</th>
+                        <th class="px-3 py-2 border">Child Token</th>
                         <th class="px-3 py-2 border">Commission %</th>
                         <th class="px-3 py-2 border">Commission</th>
                     </tr>
@@ -101,7 +101,7 @@
                     @forelse ($referralComissionHistory as $row)
                         <tr class="hover:bg-gray-50">
                             <td class="px-3 py-2 border">{{ $row['level'] }}</td>
-                            <td class="px-3 py-2 border">{{ $row['upline_id'] }}</td>
+                            <td class="px-3 py-2 border">{{ $row['child_id'] }}</td>
                             <td class="px-3 py-2 border">{{ $row['percentage'] }}%</td>
                             <td class="px-3 py-2 border text-green-700">
                                 ₹{{ number_format($row['commission'], 2) }}
@@ -118,6 +118,7 @@
 
         <div class="mt-6">
             <h3 class="text-md font-semibold text-gray-700 mb-3">Transactions</h3>
+            @if($kycComplete)
             <table class="min-w-full text-sm border border-gray-200 rounded-lg">
                 <thead class="bg-gray-100 text-gray-700">
                     <tr>
@@ -142,10 +143,14 @@
                     @endforelse
                 </tbody>
             </table>
+            @else
+            <p class="text-sm text-gray-600">Complete KYC to view transactions.</p>
+            @endif
         </div>
 
         <div class="mt-6">
             <h3 class="text-md font-semibold text-gray-700 mb-3">Withdraw</h3>
+            @if($kycComplete)
             <div class="flex items-center gap-2">
                 <input type="number" step="0.01" wire:model="withdrawAmount" class="border rounded-md px-3 py-2 w-48" placeholder="Amount">
                 <button wire:click="withdraw" class="px-4 py-2 bg-teal-600 text-white rounded-md">Request Withdraw</button>
@@ -172,11 +177,14 @@
                     @endforelse
                 </tbody>
             </table>
+            @else
+            <p class="text-sm text-gray-600">Complete KYC to request withdrawals.</p>
+            @endif
         </div>
 
     </div>
     @else
-    <h2 class="text-lg font-bold text-red-700">Complete KYC to access Wallet</h2>
-    <p class="text-sm text-gray-600 mt-2">Update profile details to enable transactions and withdrawals.</p>
+    <h2 class="text-lg font-bold text-red-700">Verify membership to access Wallet</h2>
+    <p class="text-sm text-gray-600 mt-2">Once verified, commission earnings will be visible. Complete KYC to enable transactions and withdrawals.</p>
     @endif
 </div>

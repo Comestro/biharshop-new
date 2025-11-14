@@ -68,6 +68,15 @@
                         Manage Positions
                     </div>
                 </a>
+                <a href="{{ route('admin.withdrawals') }}"
+                   class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.withdrawals') ? 'bg-gray-100' : '' }}">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-10v10m8 2a9 9 0 11-16 0 9 9 0 0116 0z"/>
+                        </svg>
+                        Withdrawals
+                    </div>
+                </a>
             </div>
 
             <!-- Push logout to bottom -->

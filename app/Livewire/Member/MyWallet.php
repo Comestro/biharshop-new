@@ -21,6 +21,7 @@ class MyWallet extends Component
     public $referralComissionHistory = [];
     public $binaryComissionHistory = true;
     public $kycComplete = false;
+    public $isVerified = false;
     public $transactions = [];
     public $withdrawals = [];
     public $withdrawAmount = null;
@@ -29,14 +30,11 @@ class MyWallet extends Component
     {
         $this->memberId = auth()->user()->membership->id;
         $this->kycComplete = auth()->user()->membership->isKycComplete();
+        $this->isVerified = auth()->user()->membership->isVerified;
 
         $this->calculateCommission($this->memberId);
-
-        $refResult = $this->calculateReferralCommission($this->memberId, 3000);
-
-        $this->referralComissionHistory = $refResult['levels'];
-
         $this->loadWallet();
+        $this->loadReferralHistory();
     }
 
     // binary wala
@@ -236,23 +234,7 @@ class MyWallet extends Component
                 'percentage' => $percent,
                 'commission' => $calc,
             ];
-            $exists = WalletTransaction::where('membership_id', $this->memberId)
-                ->where('type', 'referral_commission')
-                ->where('meta->level', $i + 1)
-                ->exists();
-            if (!$exists) {
-                WalletTransaction::create([
-                    'membership_id' => $this->memberId,
-                    'type' => 'referral_commission',
-                    'amount' => $calc,
-                    'status' => 'confirmed',
-                    'meta' => [
-                        'level' => $i + 1,
-                        'upline_id' => $this->getToken($parentId),
-                        'percentage' => $percent
-                    ]
-                ]);
-            }
+            // Display-only; actual referral commission distribution occurs when a member is verified
 
             $total += $calc;
 
@@ -284,6 +266,24 @@ class MyWallet extends Component
             ->orderBy('created_at', 'desc')
             ->limit(100)
             ->get()
+            ->toArray();
+    }
+
+    private function loadReferralHistory()
+    {
+        $this->referralComissionHistory = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'referral_commission')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($tx) {
+                $meta = $tx->meta ?? [];
+                return [
+                    'level' => $meta['level'] ?? '-',
+                    'child_id' => $meta['child_id'] ?? '-',
+                    'percentage' => $meta['percentage'] ?? '-',
+                    'commission' => $tx->amount,
+                ];
+            })
             ->toArray();
     }
 

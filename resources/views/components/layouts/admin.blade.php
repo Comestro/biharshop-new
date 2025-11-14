@@ -72,6 +72,11 @@
                     class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.manageplans') ? 'bg-gray-100' : '' }}">
                     Plans
                 </a>
+                <a href="{{ route('admin.withdrawals') }}"
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 text-gray-800 {{ request()->routeIs('admin.withdrawals') ? 'bg-gray-100 text-teal-800' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-10v10m8 2a9 9 0 11-16 0 9 9 0 0116 0z"/></svg>
+                    <span>Withdrawals</span>
+                </a>
 
                 <div class="mt-auto pt-4 border-t">
                     <form method="POST" action="{{ route('logout') }}">

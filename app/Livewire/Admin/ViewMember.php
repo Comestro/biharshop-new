@@ -6,16 +6,23 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\Membership;
 use App\Models\BinaryTree;
+use App\Models\WalletTransaction;
+use App\Models\Withdrawal;
 #[Layout('components.layouts.admin')]
 class ViewMember extends Component
 {
     public $member;
-    public $activeTab = 'personal';
+    public $activeTab = 'tree';
     public $leftTeamSize = 0;
     public $rightTeamSize = 0;
     public $totalTeamSize = 0;
+    public $walletBalance = 0.00;
+    public $transactions = [];
+    public $withdrawals = [];
+    public $binaryUplines = [];
+    public $referralUplines = [];
    
-    protected $validTabs = ['personal', 'financial', 'network', 'tree'];
+    protected $validTabs = ['personal', 'financial', 'network', 'wallet', 'tree'];
     protected $listeners = ['treeNodeSelected' => 'navigateToMember'];
 
     public function mount($id)
@@ -29,6 +36,8 @@ class ViewMember extends Component
         
         // Calculate team sizes
         $this->calculateTeamSizes();
+        $this->loadWalletData();
+        $this->loadUplines();
     }
     
     protected function calculateTeamSizes()
@@ -72,6 +81,196 @@ class ViewMember extends Component
         }
         
         return $count;
+    }
+
+    protected function loadWalletData()
+    {
+        $credits = WalletTransaction::where('membership_id', $this->member->id)
+            ->whereIn('type', ['binary_commission', 'referral_commission'])
+            ->where('status', 'confirmed')
+            ->sum('amount');
+
+        $debits = Withdrawal::where('membership_id', $this->member->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->sum('amount');
+
+        $this->walletBalance = $credits - $debits;
+
+        $this->transactions = WalletTransaction::where('membership_id', $this->member->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(100)
+            ->get()
+            ->toArray();
+
+        $this->withdrawals = Withdrawal::where('membership_id', $this->member->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(100)
+            ->get()
+            ->toArray();
+    }
+
+    public function refreshWallet()
+    {
+        $this->member = Membership::with([
+            'referrer',
+            'referrals',
+            'binaryPosition.parent',
+            'children.member'
+        ])->findOrFail($this->member->id);
+        $this->calculateTeamSizes();
+        $this->generateBinaryCommissions();
+        $this->loadWalletData();
+        $this->loadUplines();
+    }
+
+    protected function generateBinaryCommissions()
+    {
+        $memberId = $this->member->id;
+        $baseAmount = $this->member->plan?->price ?? 3000;
+
+        $left = BinaryTree::where('parent_id', $memberId)->where('position', 'left')->first();
+        $right = BinaryTree::where('parent_id', $memberId)->where('position', 'right')->first();
+
+        if (!$left || !$right) {
+            return;
+        }
+
+        [$leftDepth, $leftMembers] = $this->getDirectionalDepth($left->member_id, 'left');
+        [$rightDepth, $rightMembers] = $this->getDirectionalDepth($right->member_id, 'right');
+
+        $leftTokens = array_map(fn($id) => $this->getToken($id), $leftMembers);
+        $rightTokens = array_map(fn($id) => $this->getToken($id), $rightMembers);
+
+        $maxDepth = max($leftDepth, $rightDepth);
+        $minDepth = min($leftDepth, $rightDepth);
+        $todayCount = WalletTransaction::where('membership_id', $memberId)
+            ->where('type', 'binary_commission')
+            ->whereDate('created_at', now()->toDateString())
+            ->count();
+        $capRemaining = max(25 - $todayCount, 0);
+
+        if ($maxDepth >= 2 && $minDepth >= 1) {
+            $commission = ($baseAmount * 16) / 100;
+            $recorded = WalletTransaction::where('membership_id', $memberId)
+                ->where('type', 'binary_commission')
+                ->where('meta->level', 1)
+                ->exists();
+            if (!$recorded && $capRemaining > 0) {
+                WalletTransaction::create([
+                    'membership_id' => $memberId,
+                    'type' => 'binary_commission',
+                    'amount' => $commission,
+                    'status' => 'confirmed',
+                    'meta' => [
+                        'level' => 1,
+                        'left_member' => $leftTokens[0] ?? 'N/A',
+                        'right_member' => $rightTokens[0] ?? 'N/A',
+                        'percentage' => 16
+                    ]
+                ]);
+                $capRemaining--;
+            }
+        }
+
+        $pairs = $minDepth;
+        if ($pairs > 1) {
+            for ($i = 2; $i <= $pairs; $i++) {
+                $commission = ($baseAmount * 12) / 100;
+                $recorded = WalletTransaction::where('membership_id', $memberId)
+                    ->where('type', 'binary_commission')
+                    ->where('meta->level', $i)
+                    ->exists();
+                if (!$recorded && $capRemaining > 0) {
+                    WalletTransaction::create([
+                        'membership_id' => $memberId,
+                        'type' => 'binary_commission',
+                        'amount' => $commission,
+                        'status' => 'confirmed',
+                        'meta' => [
+                            'level' => $i,
+                            'left_member' => $leftTokens[$i - 1] ?? 'N/A',
+                            'right_member' => $rightTokens[$i - 1] ?? 'N/A',
+                            'percentage' => 12
+                        ]
+                    ]);
+                    $capRemaining--;
+                }
+            }
+        }
+    }
+
+    protected function getDirectionalDepth($memberId, $direction)
+    {
+        $depth = 1;
+        $current = $memberId;
+        $chain = [$current];
+        while (true) {
+            $next = BinaryTree::where('parent_id', $current)
+                ->where('position', $direction)
+                ->first();
+            if (!$next) break;
+            $depth++;
+            $current = $next->member_id;
+            $chain[] = $current;
+        }
+        return [$depth, $chain];
+    }
+
+    protected function getToken($memberId)
+    {
+        if (!$memberId) return 'N/A';
+        return Membership::find($memberId)?->token ?? 'N/A';
+    }
+
+    protected function loadUplines()
+    {
+        $this->binaryUplines = $this->getBinaryUplines($this->member->id);
+        $this->referralUplines = $this->getReferralUplines($this->member->id);
+    }
+
+    protected function getBinaryUplines($memberId)
+    {
+        $list = [];
+        $current = $memberId;
+        $level = 1;
+        while (true) {
+            $pos = BinaryTree::where('member_id', $current)->first();
+            if (!$pos || !$pos->parent_id) break;
+            $parent = Membership::find($pos->parent_id);
+            if (!$parent) break;
+            $list[] = [
+                'level' => $level,
+                'name' => $parent->name,
+                'token' => $parent->token,
+                'position' => $pos->position
+            ];
+            $current = $parent->id;
+            $level++;
+            if ($level > 10) break;
+        }
+        return $list;
+    }
+
+    protected function getReferralUplines($memberId)
+    {
+        $list = [];
+        $current = $memberId;
+        $level = 1;
+        while (true) {
+            $ref = \App\Models\ReferralTree::where('member_id', $current)->first();
+            if (!$ref || !$ref->parent_id) break;
+            $parent = Membership::find($ref->parent_id);
+            if (!$parent) break;
+            $list[] = [
+                'level' => $level,
+                'name' => $parent->name,
+                'token' => $parent->token
+            ];
+            $current = $parent->id;
+            $level++;
+            if ($level > 10) break;
+        }
+        return $list;
     }
 
     public function setTab($tab)
@@ -150,4 +349,3 @@ class ViewMember extends Component
         return view('livewire.admin.view-member');
     }
 }
-
