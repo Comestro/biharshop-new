@@ -3,6 +3,7 @@
 namespace App\Livewire\Membership;
 
 use App\Models\Membership;
+use App\Models\ReferralTree;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -85,20 +86,59 @@ class Register extends Component
     ];
 
     public $states = [
-        'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-        'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
-        'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
-        'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-        'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-        'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-        'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
-        'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
+        'Andhra Pradesh',
+        'Arunachal Pradesh',
+        'Assam',
+        'Bihar',
+        'Chhattisgarh',
+        'Goa',
+        'Gujarat',
+        'Haryana',
+        'Himachal Pradesh',
+        'Jharkhand',
+        'Karnataka',
+        'Kerala',
+        'Madhya Pradesh',
+        'Maharashtra',
+        'Manipur',
+        'Meghalaya',
+        'Mizoram',
+        'Nagaland',
+        'Odisha',
+        'Punjab',
+        'Rajasthan',
+        'Sikkim',
+        'Tamil Nadu',
+        'Telangana',
+        'Tripura',
+        'Uttar Pradesh',
+        'Uttarakhand',
+        'West Bengal',
+        'Andaman and Nicobar Islands',
+        'Chandigarh',
+        'Dadra and Nagar Haveli and Daman and Diu',
+        'Delhi',
+        'Jammu and Kashmir',
+        'Ladakh',
+        'Lakshadweep',
+        'Puducherry',
     ];
 
     public $nominee_relations = [
-        'Spouse', 'Son', 'Daughter', 'Father', 'Mother',
-        'Brother', 'Sister', 'Grandson', 'Granddaughter',
-        'Uncle', 'Aunt', 'Nephew', 'Niece', 'Other',
+        'Spouse',
+        'Son',
+        'Daughter',
+        'Father',
+        'Mother',
+        'Brother',
+        'Sister',
+        'Grandson',
+        'Granddaughter',
+        'Uncle',
+        'Aunt',
+        'Nephew',
+        'Niece',
+        'Other',
     ];
 
     public function mount()
@@ -156,25 +196,25 @@ class Register extends Component
 
     protected function determineCurrentStep($membership)
     {
-        if (! $membership->name || ! $membership->email || ! $membership->mobile) {
+        if (!$membership->name || !$membership->email || !$membership->mobile) {
             return 1;
         }
-        if (! $membership->father_name || ! $membership->mother_name) {
+        if (!$membership->father_name || !$membership->mother_name) {
             return 2;
         }
-        if (! $membership->home_address || ! $membership->city) {
+        if (!$membership->home_address || !$membership->city) {
             return 3;
         }
-        if (! $membership->nominee_name) {
+        if (!$membership->nominee_name) {
             return 4;
         }
-        if (! $membership->bank_name) {
+        if (!$membership->bank_name) {
             return 5;
         }
-        if (! $membership->pancard || ! $membership->aadhar_card) {
+        if (!$membership->pancard || !$membership->aadhar_card) {
             return 6;
         }
-        if (! $membership->image || ! $membership->terms_and_condition) {
+        if (!$membership->image || !$membership->terms_and_condition) {
             return 7;
         }
 
@@ -198,25 +238,41 @@ class Register extends Component
             case 1:
                 $this->validate([
                     'name' => 'required|string|min:3|max:100',
-                    'email' => 'required|email|unique:memberships,email,'.$this->membership?->id,
-                    'mobile' => 'required|regex:/^[6-9]\d{9}$/|unique:memberships,mobile,'.$this->membership?->id,
+                    'email' => 'required|email|unique:memberships,email,' . $this->membership?->id,
+                    'mobile' => 'required|regex:/^[6-9]\d{9}$/|unique:memberships,mobile,' . $this->membership?->id,
                     'whatsapp' => 'nullable|regex:/^[6-9]\d{9}$/',
                     'date_of_birth' => 'required|date|before:today|after:1940-01-01',
                     'gender' => 'required|in:male,female,other',
                     'referral_code' => [
                         'nullable',
-                        Rule::exists('memberships', 'token')->where(fn ($q) => $q->where('isVerified', true)),
+                        function ($attribute, $value, $fail) {
+                            $exists = Membership::where('isVerified', true)
+                                ->where(function ($q) use ($value) {
+                                    $q->where('token', $value)
+                                        ->orWhere('referral_code', $value);
+                                })
+                                ->exists();
+
+                            if (!$exists) {
+                                $fail('The referral code is invalid or user is not verified.');
+                            }
+                        },
                     ],
+
                 ], [
                     'mobile.regex' => 'Please enter a valid 10 digit mobile number',
                     'whatsapp.regex' => 'Please enter a valid 10 digit WhatsApp number',
                     'date_of_birth.before' => 'Date of birth must be in the past',
                     'date_of_birth.after' => 'Please enter a valid date of birth',
                 ]);
-                $checkRef = Membership::where('token', $this->referral_code)
-                    ->where('isVerified', true)
+                $checkRef = Membership::where('isVerified', true)
+                    ->where(function ($q) {
+                        $q->where('token', $this->referral_code)
+                            ->orWhere('referral_code', $this->referral_code);
+                    })
                     ->first();
-                if ($this->referral_code && ! $checkRef) {
+
+                if ($this->referral_code && !$checkRef) {
                     $this->addError('referral_code', 'Invalid referral code');
                 }
                 break;
@@ -261,8 +317,8 @@ class Register extends Component
 
             case 6:
                 $this->validate([
-                    'pancard' => 'required|regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/|unique:memberships,pancard,'.$this->membership?->id,
-                    'aadhar_card' => 'required|digits:12|unique:memberships,aadhar_card,'.$this->membership?->id,
+                    'pancard' => 'required|regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/|unique:memberships,pancard,' . $this->membership?->id,
+                    'aadhar_card' => 'required|digits:12|unique:memberships,aadhar_card,' . $this->membership?->id,
                 ], [
                     'pancard.regex' => 'Please enter a valid PAN card number',
                     'aadhar_card.digits' => 'Please enter a valid 12 digit Aadhar number',
@@ -272,7 +328,7 @@ class Register extends Component
             case 7:
                 $imageRule = $this->existingImage ? 'nullable' : 'required';
                 $this->validate([
-                    'image' => $imageRule.'|image|max:1024|dimensions:min_width=200,min_height=200',
+                    'image' => $imageRule . '|image|max:1024|dimensions:min_width=200,min_height=200',
                     'terms_and_condition' => 'accepted',
                 ], [
                     'image.dimensions' => 'Image must be at least 200x200 pixels',
@@ -289,6 +345,10 @@ class Register extends Component
                 ->where('isVerified', true)
                 ->first();
 
+            $referrerByRefCode = Membership::where('referral_code', $this->referral_code)
+                ->where('isVerified', true)
+                ->first();
+
             if ($referrer) {
                 // Check available positions
                 $existingPositions = \App\Models\BinaryTree::where('parent_id', $referrer->id)
@@ -296,11 +356,24 @@ class Register extends Component
                     ->toArray();
 
                 if (count($existingPositions) >= 2) {
-                    $this->referrer_name = $referrer->name.' (No positions available)';
+                    $this->referrer_name = $referrer->name . ' (No positions available)';
                     $this->addError('referral_code', 'This member has no available positions');
                 } else {
-                    $this->referrer_name = $referrer->name.' ('.(2 - count($existingPositions)).' position(s) available)';
+                    $this->referrer_name = $referrer->name . ' (' . (2 - count($existingPositions)) . ' position(s) available)';
                 }
+
+
+            } elseif ($referrerByRefCode) {
+                $existingReferrer = ReferralTree::where('parent_id', $referrerByRefCode->id);
+                if ($existingReferrer) {
+                    $this->referrer_name = $referrerByRefCode->name;
+                } else {
+                    $this->referrer_name = $referrerByRefCode->name . ' (Not available)';
+                    $this->addError('referral_code', 'This member has no available ');
+                }
+
+
+
             } else {
                 $this->referrer_name = '';
             }
@@ -360,27 +433,76 @@ class Register extends Component
     private function generateSequentialToken()
     {
         $lastMembership = Membership::orderBy('id', 'desc')->first();
-        if (! $lastMembership) {
+        if (!$lastMembership) {
             return 'BSE1971';
         }
         $lastNumber = (int) str_replace('BSE', '', $lastMembership->token);
 
-        return 'BSE'.($lastNumber + 1);
+        return 'BSE' . ($lastNumber + 1);
     }
+    private function generateReferralCodeSingle()
+    {
+        // Auth user ka membership record
+        $member = Membership::where('user_id', auth()->id())->first();
+
+        // Safety check — agar record nahi mila
+        if (!$member || !$member->name) {
+            $prefix = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 2));
+        } else {
+            $name = $member->name;
+
+            // English letters remove (Hindi remove)
+            $clean = preg_replace('/[^A-Za-z]/', '', $name);
+
+            // Decide prefix
+            if (strlen($clean) < 2) {
+                // Hindi name or too short → random prefix
+                $prefix = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 2));
+            } else {
+                // English name → first 2 letters
+                $prefix = strtoupper(substr($clean, 0, 2));
+            }
+        }
+
+        // Generate a unique code
+        do {
+            $code = $prefix . rand(1000, 9999);
+            $exists = Membership::where('referral_code', $code)->exists();
+        } while ($exists);
+
+        return $code;
+    }
+
+
 
     public function register()
     {
         $this->validateStep($this->currentStep);
 
         $referer = null;
-        if ($this->referral_code) {
-            $referer = Membership::where('token', $this->referral_code)->where('isVerified', true)->first();
-            if (! $referer) {
-                $this->addError('referral_code', 'Invalid referral code');
+        $membershipId = null;
 
-                return;
+        if ($this->referral_code) {
+
+            // First check token
+            $referer = Membership::where('token', $this->referral_code)
+                ->where('isVerified', true)
+                ->first();
+            if (!$referer) {
+                $referer = null;
+            }
+
+            // If not token → check referral_code
+
+            $membershipId = Membership::where('referral_code', $this->referral_code)
+                ->where('isVerified', true)
+                ->first();
+
+            if (!$membershipId) {
+                $membershipId = null;
             }
         }
+
 
         $data = [
             'name' => $this->name,
@@ -408,6 +530,7 @@ class Register extends Component
             'aadhar_card' => $this->aadhar_card,
             'terms_and_condition' => $this->terms_and_condition,
             'referal_id' => $referer ? $referer->id : null,
+            'membership_id' => $membershipId ? $membershipId->id : null,
         ];
 
         if ($this->image) {
@@ -419,10 +542,11 @@ class Register extends Component
             array_merge($data, [
                 'token' => $this->generateSequentialToken(),
                 'user_id' => auth()->id(),
+                'referral_code' => $this->generateReferralCodeSingle(),
             ])
         );
 
-        if ($membership->isKycComplete() && ! $membership->isVerified) {
+        if ($membership->isKycComplete() && !$membership->isVerified) {
             $membership->isVerified = true;
             $membership->save();
         }
