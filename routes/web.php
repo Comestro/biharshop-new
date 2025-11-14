@@ -75,17 +75,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
-        $membership = auth()->user()->membership;
-        if (! $membership) {
-            return redirect()->route('membership.register');
-        }
-        if (! $membership->isKycComplete()) {
-            return redirect()->route('membership.register');
-        }
-        if (! $membership->isVerified) {
-            $membership->isVerified = true;
-            $membership->save();
-        }
         return redirect()->route('member.dashboard');
     })->name('dashboard');
 });

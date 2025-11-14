@@ -156,7 +156,7 @@ class Register extends Component
 
     protected function determineCurrentStep($membership)
     {
-        if (! $membership->name || ! $membership->email || ! $membership->mobile) {
+        if (! $membership->name || ! $membership->email || ! $membership->mobile || ! $membership->date_of_birth || ! $membership->gender) {
             return 1;
         }
         if (! $membership->father_name || ! $membership->mother_name) {

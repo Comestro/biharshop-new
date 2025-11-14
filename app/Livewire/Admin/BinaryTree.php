@@ -27,6 +27,8 @@ class BinaryTree extends Component
         'name' => '',
         'email' => '',
         'mobile' => '',
+        'password' => '',
+        'password_confirmation' => '',
     ];
     
 
@@ -181,20 +183,21 @@ class BinaryTree extends Component
 
         // Gather form values if present; otherwise generate defaults
         $this->validate([
-            'createForm.name' => 'nullable|string|max:255',
-            'createForm.email' => 'nullable|email|max:255',
+            'createForm.name' => 'required|string|max:255',
+            'createForm.email' => 'required|email|max:255|unique:users,email',
             'createForm.mobile' => 'nullable|string|max:20',
+            'createForm.password' => 'required|string|min:8|confirmed',
         ]);
 
         $token = uniqid('MEM');
-        $name = $this->createForm['name'] ?: 'New Member';
-        $email = $this->createForm['email'] ?: strtolower($token).'@example.com';
+        $name = $this->createForm['name'];
+        $email = $this->createForm['email'];
         $mobile = $this->createForm['mobile'] ?: null;
 
         $user = User::create([
             'name' => $name,
             'email' => $email,
-            'password' => bcrypt(Str::random(12)),
+            'password' => bcrypt($this->createForm['password']),
         ]);
 
         // Create membership linked to the user
@@ -240,7 +243,7 @@ class BinaryTree extends Component
         $this->showCreateModal = false;
         $this->createParentId = null;
         $this->createPosition = null;
-        $this->createForm = ['name' => '', 'email' => '', 'mobile' => ''];
+        $this->createForm = ['name' => '', 'email' => '', 'mobile' => '', 'password' => '', 'password_confirmation' => ''];
     }
 
     // Navigate back to previous parent

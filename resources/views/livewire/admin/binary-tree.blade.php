@@ -65,10 +65,105 @@
                 wire:ignore></div>
         </div>
     </main>
+
+<!-- Create Member Modal (rendered when Livewire flag is true) -->
+@if($showCreateModal)
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6" @click.stop>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Sign Up Member</h2>
+            <button class="text-gray-500 hover:text-gray-700" wire:click="cancelCreateAtEmpty">✕</button>
+        </div>
+        <form wire:submit.prevent="confirmCreateAtEmpty" class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Parent ID</label>
+                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" value="{{ $createParentId }}" readonly />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Position</label>
+                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100" value="{{ $createPosition }}" readonly />
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.name" placeholder="Member name" />
+                @error('createForm.name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.email" placeholder="email@example.com" />
+                @error('createForm.email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Mobile</label>
+                <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.mobile" placeholder="98########" />
+                @error('createForm.mobile') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.password" placeholder="Choose a strong password" />
+                @error('createForm.password') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                <input type="password" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.password_confirmation" placeholder="Re-enter password" />
+                @error('createForm.password_confirmation') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" class="px-4 py-2 rounded-lg border" wire:click="cancelCreateAtEmpty">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
 </div>
 
 <!-- D3 Script -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
+@script
+<script>
+    document.addEventListener('livewire:init', () => {
+        if (window.Livewire) {
+            const el = document.querySelector('[wire\\:id]');
+            if (el) {
+                const comp = Livewire.find(el.getAttribute('wire:id'));
+                if (comp) window.AdminBinaryTreeWire = comp;
+            }
+        }
+    });
+    window.addEventListener('admin-binary-tree:open-empty-slot', (e) => {
+        const d = e && e.detail ? e.detail : {};
+        if (!d.parentId || !d.position) return;
+        if (window.AdminBinaryTreeWire) {
+            window.AdminBinaryTreeWire.openCreateAtEmpty(d.parentId, d.position);
+        } else if (window.Livewire && typeof Livewire.dispatch === 'function') {
+            Livewire.dispatch('binaryTreeOpenCreateAtEmpty', { parentId: d.parentId, position: d.position });
+        }
+    });
+</script>
+@endscript
+<script>
+    document.addEventListener('livewire:init', () => {
+        if (!window.AdminBinaryTreeWire && window.Livewire) {
+            const el = document.querySelector('[wire\\:id]');
+            if (el) {
+                const comp = Livewire.find(el.getAttribute('wire:id'));
+                if (comp) window.AdminBinaryTreeWire = comp;
+            }
+        }
+    });
+    document.addEventListener('livewire:navigated', () => {
+        if (window.Livewire) {
+            const el = document.querySelector('[wire\\:id]');
+            if (el) {
+                const comp = Livewire.find(el.getAttribute('wire:id'));
+                if (comp) window.AdminBinaryTreeWire = comp;
+            }
+        }
+    });
+</script>
 <script>
     let currentZoom;
     let navigationStack = [];
@@ -174,8 +269,18 @@
                     if (m) {
                         const position = m[1];
                         const parentId = parseInt(m[2], 10);
-                        Livewire.dispatch('binaryTreeOpenCreateAtEmpty', { parentId, position });
                         console.log('Requested open create modal at empty', { parentId, position });
+                        window.dispatchEvent(new CustomEvent('admin-binary-tree:open-empty-slot', { detail: { parentId, position } }));
+                        if (window.AdminBinaryTreeWire) {
+                            window.AdminBinaryTreeWire.openCreateAtEmpty(parentId, position);
+                            try {
+                                window.AdminBinaryTreeWire.set('createParentId', parentId);
+                                window.AdminBinaryTreeWire.set('createPosition', position);
+                                window.AdminBinaryTreeWire.set('showCreateModal', true);
+                            } catch (_) {}
+                        } else {
+                            Livewire.dispatch('binaryTreeOpenCreateAtEmpty', { parentId, position });
+                        }
                     }
                     return;
                 }
@@ -478,7 +583,7 @@
             const q = e.target.value.trim();
             if (q) {
                 pendingGlobalSearchQuery = q;
-                Livewire.dispatch('binaryTreeGlobalSearchRequest', { query: q });
+                Livewire.dispatch('binaryTreeSearch', { query: q });
             }
         }
     });
@@ -487,11 +592,12 @@
         const q = document.getElementById('search-node').value.trim();
         if (q) {
             pendingGlobalSearchQuery = q;
-            Livewire.dispatch('binaryTreeGlobalSearchRequest', { query: q });
+            Livewire.dispatch('binaryTreeSearch', { query: q });
         }
     });
 
     document.addEventListener('livewire:init', function() {
+        try { window.AdminBinaryTreeWire = @this; } catch (e) {}
         const treeData = @json($treeData);
         if (treeData && treeData.length > 0) initBinaryTree(treeData);
         // Listen for Livewire dispatched browser events or Livewire JS events
@@ -512,6 +618,13 @@
                 if (pendingGlobalSearchQuery) {
                     searchNode(pendingGlobalSearchQuery);
                 }
+            }
+        });
+
+        window.addEventListener('admin-binary-tree:open-empty-slot', function(e) {
+            const d = e && e.detail ? e.detail : {};
+            if (window.AdminBinaryTreeWire && d.parentId && d.position) {
+                window.AdminBinaryTreeWire.openCreateAtEmpty(d.parentId, d.position);
             }
         });
     });
@@ -546,36 +659,3 @@
             updateBreadcrumbUI();
         });
     </script>
-
-<!-- Create Member Modal -->
-@if($showCreateModal)
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6" @click.stop>
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold">Add Member</h2>
-            <button class="text-gray-500 hover:text-gray-700" wire:click="cancelCreateAtEmpty">✕</button>
-        </div>
-        <form wire:submit.prevent="confirmCreateAtEmpty" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Name</label>
-                <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.name" placeholder="Member name" />
-                @error('createForm.name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.email" placeholder="email@example.com" />
-                @error('createForm.email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Mobile</label>
-                <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2" wire:model.defer="createForm.mobile" placeholder="98########" />
-                @error('createForm.mobile') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-            </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button type="button" class="px-4 py-2 rounded-lg border" wire:click="cancelCreateAtEmpty">Cancel</button>
-                <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white">Create</button>
-            </div>
-        </form>
-    </div>
-</div>
-@endif
