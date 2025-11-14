@@ -39,6 +39,7 @@
                 <x-global.loader wire:loading.flex wire:target="register" message="Registering..." />
                 <x-global.loader wire:loading.flex wire:target="nextStep" message="Processing..." />
                 <x-global.loader wire:loading.flex wire:target="previousStep" message="Loading previous step..." />
+                <x-global.loader wire:loading.flex wire:target="save" message="Saving..." />
                 <x-global.loader wire:loading.flex wire:target="pincode" message="Fetching address..." />
                 <x-global.loader wire:loading.flex wire:target="ifsc" message="Fetching bank details..." />
                 <!-- Step 1: Personal Information -->
@@ -48,21 +49,21 @@
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                            <input type="text" wire:model="name" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            <input type="text" wire:model.live="name" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             <p class="mt-1 text-xs text-gray-500">Must be at least 3 characters long</p>
                             @error('name') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" wire:model="email" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            <input type="email" wire:model.live="email" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             <p class="mt-1 text-xs text-gray-500">Must be a valid email address</p>
                             @error('email') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                            <input type="tel" wire:model="mobile" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            <input type="tel" wire:model.live="mobile" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             <p class="mt-1 text-xs text-gray-500">10 digit number starting with 6-9</p>
                             @error('mobile') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
@@ -366,9 +367,14 @@
                         </button>
                     @endif
 
-                    <button type="submit" class="ml-auto px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700">
-                        {{ $currentStep < 7 ? 'Next' : 'Complete Registration' }}
-                    </button>
+                    <div class="ml-auto flex gap-2">
+                        <button type="button" wire:click="save" class="px-4 py-2 text-sm font-medium text-teal-700 bg-teal-100 border border-teal-200 rounded-md hover:bg-teal-200">
+                            Save
+                        </button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700">
+                            {{ $currentStep < 7 ? 'Next' : 'Complete Registration' }}
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

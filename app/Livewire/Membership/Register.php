@@ -13,7 +13,7 @@ class Register extends Component
     use WithFileUploads;
 
     // Personal Info
-    public $currentStep = 1;
+    public $currentStep = 2;
 
     public $name;
 
@@ -192,7 +192,8 @@ class Register extends Component
 
     protected function determineCurrentStep($membership)
     {
-        if (! $membership->name || ! $membership->email || ! $membership->mobile || ! $membership->date_of_birth || ! $membership->gender) {
+        // dd($membership);
+        if (! $membership->date_of_birth || ! $membership->gender) {
             return 1;
         }
         if (!$membership->father_name || !$membership->mother_name) {
@@ -228,15 +229,54 @@ class Register extends Component
         $this->currentStep--;
     }
 
+    public function save()
+    {
+        $existingMembership = Membership::where('user_id', auth()->id())->first();
+        $data = [
+            'name' => $this->name,
+            'email' => $this->email,
+            'mobile' => $this->mobile,
+            'whatsapp' => $this->whatsapp,
+            'date_of_birth' => $this->date_of_birth,
+            'gender' => $this->gender,
+            'nationality' => $this->nationality,
+            'marital_status' => $this->marital_status,
+            'religion' => $this->religion,
+            'father_name' => $this->father_name,
+            'mother_name' => $this->mother_name,
+            'home_address' => $this->home_address,
+            'city' => $this->city,
+            'pincode' => $this->pincode,
+            'state' => $this->state,
+            'nominee_name' => $this->nominee_name,
+            'nominee_relation' => $this->nominee_relation,
+            'bank_name' => $this->bank_name,
+            'branch_name' => $this->branch_name,
+            'account_no' => $this->account_no,
+            'ifsc' => $this->ifsc,
+            'pancard' => $this->pancard,
+            'aadhar_card' => $this->aadhar_card,
+            'terms_and_condition' => $this->terms_and_condition,
+        ];
+        if ($this->image) {
+            $data['image'] = $this->image->store('member-photos', 'public');
+        }
+        $token = $existingMembership ? $existingMembership->token : $this->generateSequentialToken();
+        Membership::updateOrCreate(
+            ['user_id' => auth()->id()],
+            array_merge($data, [
+                'token' => $token,
+                'user_id' => auth()->id(),
+            ])
+        );
+    }
+
     protected function validateStep($step)
     {
         switch ($step) {
             case 1:
                 $this->validate([
                     'name' => 'required|string|min:3|max:100',
-                    'email' => 'required|email|unique:memberships,email,' . $this->membership?->id,
-                    'mobile' => 'required|regex:/^[6-9]\d{9}$/|unique:memberships,mobile,' . $this->membership?->id,
-                    'whatsapp' => 'nullable|regex:/^[6-9]\d{9}$/',
                     'date_of_birth' => 'required|date|before:today|after:1940-01-01',
                     'gender' => 'required|in:male,female,other',
                     
@@ -247,7 +287,7 @@ class Register extends Component
                     'date_of_birth.before' => 'Date of birth must be in the past',
                     'date_of_birth.after' => 'Please enter a valid date of birth',
                 ]);
-                
+                break;
 
             case 2:
                 $this->validate([
@@ -314,27 +354,37 @@ class Register extends Component
 
     public function updatedPincode($value)
     {
-        $this->reset(['city', 'state']); // Clear existing values
+        $this->reset(['city', 'state']);
 
-        if (strlen($value) === 6 && is_numeric($value)) {
-            try {
-                $response = Http::timeout(5)->get("https://api.postalpincode.in/pincode/{$value}");
+        $pin = preg_replace('/\D/', '', (string) $value);
+        if (strlen($pin) !== 6) {
+            $this->addError('pincode', 'Invalid PIN Code');
+            return;
+        }
 
-                if ($response->successful()) {
-                    $data = $response->json();
-
-                    if (isset($data[0]['Status']) && $data[0]['Status'] === 'Success') {
-                        $postOffice = $data[0]['PostOffice'][0];
-                        $this->city = $postOffice['District'];
-                        $this->state = $postOffice['State'];
-                        $this->dispatch('address-found');
-                    } else {
-                        $this->addError('pincode', 'Invalid PIN Code');
-                    }
-                }
-            } catch (\Exception $e) {
-                $this->addError('pincode', 'Unable to fetch address details');
+        $data = null;
+        try {
+            $response = Http::retry(3, 500)->acceptJson()->get("https://api.postalpincode.in/pincode/{$pin}");
+            if ($response->successful()) {
+                $data = $response->json();
             }
+        } catch (\Exception $e) {
+            try {
+                $fallback = Http::retry(2, 500)->acceptJson()->get("http://api.postalpincode.in/pincode/{$pin}");
+                if ($fallback->successful()) {
+                    $data = $fallback->json();
+                }
+            } catch (\Exception $e2) {}
+        }
+
+        if (is_array($data) && isset($data[0]) && ($data[0]['Status'] ?? null) === 'Success' && !empty($data[0]['PostOffice'])) {
+            $po = $data[0]['PostOffice'][0] ?? [];
+            $this->city = $po['District'] ?? '';
+            $this->state = $po['State'] ?? '';
+            $this->resetErrorBag();
+            $this->dispatch('address-found');
+        } else {
+            $this->addError('pincode', 'Invalid PIN Code');
         }
     }
 
