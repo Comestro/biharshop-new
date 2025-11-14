@@ -3,7 +3,6 @@
 namespace App\Livewire\Membership;
 
 use App\Models\Membership;
-use App\Models\ReferralTree;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -38,9 +37,6 @@ class Register extends Component
 
     public $mother_name;
 
-    public $referral_code;
-
-    public $referrer_name = '';
 
     // Address Details
     public $home_address;
@@ -243,21 +239,7 @@ class Register extends Component
                     'whatsapp' => 'nullable|regex:/^[6-9]\d{9}$/',
                     'date_of_birth' => 'required|date|before:today|after:1940-01-01',
                     'gender' => 'required|in:male,female,other',
-                    'referral_code' => [
-                        'nullable',
-                        function ($attribute, $value, $fail) {
-                            $exists = Membership::where('isVerified', true)
-                                ->where(function ($q) use ($value) {
-                                    $q->where('token', $value)
-                                        ->orWhere('referral_code', $value);
-                                })
-                                ->exists();
-
-                            if (!$exists) {
-                                $fail('The referral code is invalid or user is not verified.');
-                            }
-                        },
-                    ],
+                    
 
                 ], [
                     'mobile.regex' => 'Please enter a valid 10 digit mobile number',
@@ -265,17 +247,7 @@ class Register extends Component
                     'date_of_birth.before' => 'Date of birth must be in the past',
                     'date_of_birth.after' => 'Please enter a valid date of birth',
                 ]);
-                $checkRef = Membership::where('isVerified', true)
-                    ->where(function ($q) {
-                        $q->where('token', $this->referral_code)
-                            ->orWhere('referral_code', $this->referral_code);
-                    })
-                    ->first();
-
-                if ($this->referral_code && !$checkRef) {
-                    $this->addError('referral_code', 'Invalid referral code');
-                }
-                break;
+                
 
             case 2:
                 $this->validate([
@@ -338,49 +310,7 @@ class Register extends Component
         }
     }
 
-    public function updatedReferralCode()
-    {
-        if ($this->referral_code) {
-            $referrer = Membership::where('token', $this->referral_code)
-                ->where('isVerified', true)
-                ->first();
-
-            $referrerByRefCode = Membership::where('referral_code', $this->referral_code)
-                ->where('isVerified', true)
-                ->first();
-
-            if ($referrer) {
-                // Check available positions
-                $existingPositions = \App\Models\BinaryTree::where('parent_id', $referrer->id)
-                    ->pluck('position')
-                    ->toArray();
-
-                if (count($existingPositions) >= 2) {
-                    $this->referrer_name = $referrer->name . ' (No positions available)';
-                    $this->addError('referral_code', 'This member has no available positions');
-                } else {
-                    $this->referrer_name = $referrer->name . ' (' . (2 - count($existingPositions)) . ' position(s) available)';
-                }
-
-
-            } elseif ($referrerByRefCode) {
-                $existingReferrer = ReferralTree::where('parent_id', $referrerByRefCode->id);
-                if ($existingReferrer) {
-                    $this->referrer_name = $referrerByRefCode->name;
-                } else {
-                    $this->referrer_name = $referrerByRefCode->name . ' (Not available)';
-                    $this->addError('referral_code', 'This member has no available ');
-                }
-
-
-
-            } else {
-                $this->referrer_name = '';
-            }
-        } else {
-            $this->referrer_name = '';
-        }
-    }
+   
 
     public function updatedPincode($value)
     {
@@ -440,68 +370,15 @@ class Register extends Component
 
         return 'BSE' . ($lastNumber + 1);
     }
-    private function generateReferralCodeSingle()
-    {
-        // Auth user ka membership record
-        $member = Membership::where('user_id', auth()->id())->first();
-
-        // Safety check — agar record nahi mila
-        if (!$member || !$member->name) {
-            $prefix = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 2));
-        } else {
-            $name = $member->name;
-
-            // English letters remove (Hindi remove)
-            $clean = preg_replace('/[^A-Za-z]/', '', $name);
-
-            // Decide prefix
-            if (strlen($clean) < 2) {
-                // Hindi name or too short → random prefix
-                $prefix = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 2));
-            } else {
-                // English name → first 2 letters
-                $prefix = strtoupper(substr($clean, 0, 2));
-            }
-        }
-
-        // Generate a unique code
-        do {
-            $code = $prefix . rand(1000, 9999);
-            $exists = Membership::where('referral_code', $code)->exists();
-        } while ($exists);
-
-        return $code;
-    }
-
+ 
 
 
     public function register()
     {
         $this->validateStep($this->currentStep);
 
-        $referer = null;
         $membershipId = null;
 
-        if ($this->referral_code) {
-
-            // First check token
-            $referer = Membership::where('token', $this->referral_code)
-                ->where('isVerified', true)
-                ->first();
-            if (!$referer) {
-                $referer = null;
-            }
-
-            // If not token → check referral_code
-
-            $membershipId = Membership::where('referral_code', $this->referral_code)
-                ->where('isVerified', true)
-                ->first();
-
-            if (!$membershipId) {
-                $membershipId = null;
-            }
-        }
 
 
         $data = [
@@ -529,7 +406,6 @@ class Register extends Component
             'pancard' => $this->pancard,
             'aadhar_card' => $this->aadhar_card,
             'terms_and_condition' => $this->terms_and_condition,
-            'referal_id' => $referer ? $referer->id : null,
             'membership_id' => $membershipId ? $membershipId->id : null,
         ];
 
@@ -542,7 +418,6 @@ class Register extends Component
             array_merge($data, [
                 'token' => $this->generateSequentialToken(),
                 'user_id' => auth()->id(),
-                'referral_code' => $this->generateReferralCodeSingle(),
             ])
         );
 

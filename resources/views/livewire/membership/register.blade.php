@@ -74,15 +74,7 @@
                             @error('whatsapp') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Referral Code (Optional)</label>
-                            <input type="text" wire:model.live="referral_code" placeholder="Enter member ID of referrer" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
-                            @if($referrer_name)
-                                <p class="mt-1 text-sm text-teal-600">Referrer: {{ $referrer_name }}</p>
-                            @endif
-                            @error('referral_code') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
-                        </div>
-
+                       
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Date of Birth</label>
                             <input type="date" wire:model="date_of_birth" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
