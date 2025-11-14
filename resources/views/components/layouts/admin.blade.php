@@ -68,6 +68,10 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13a4 4 0 110-8 4 4 0 010 8zm7 7a4 4 0 110-8 4 4 0 010 8z"/></svg>
                     <span>Coupons</span>
                 </a>
+                <a href="{{ route('admin.manageplans') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-gray-100 {{ request()->routeIs('admin.manageplans') ? 'bg-gray-100' : '' }}">
+                    Plans
+                </a>
 
                 <div class="mt-auto pt-4 border-t">
                     <form method="POST" action="{{ route('logout') }}">
