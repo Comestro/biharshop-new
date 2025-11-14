@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\ReferralTree;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -55,6 +56,17 @@ class Members extends Component
                         'position' => $position
                     ]);
                 }
+            } elseif ($this->selectedMembership->membership_id) {
+                $membershipper = Membership::find($this->selectedMembership->membership_id);
+                if ($membershipper) {
+                    ReferralTree::create([
+                        'member_id' => $this->selectedMembership->id,
+                        'parent_id' => $this->selectedMembership->membership_id,
+                        'level' => $membershipper->level + 1 ?? 0
+                    ]);
+                }
+
+
             } else {
                 // If no referrer, find first member without full positions
                 $availableSponsor = Membership::where('isVerified', true)
@@ -75,7 +87,7 @@ class Members extends Component
 
             $this->showModal = false;
             session()->flash('message', 'Member verified and positioned successfully.');
-            
+
             $this->sendMembershipMessage($this->selectedMembership->mobile, $this->selectedMembership->name, $this->selectedMembership->token);
         }
     }
@@ -87,16 +99,16 @@ class Members extends Component
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ])->post('https://control.msg91.com/api/v5/flow', [
-            'template_id' => '683e9d01d6fc053f9a6f39d3', // replace with your approved template ID
-            'short_url' => 0, // 1 to enable short links, 0 to disable
-            'recipients' => [
-                [
-                    'mobiles' => '91' . $mobile,
-                    'name' => $name,
-                    'membershipid' => $membershipid,
-                ]
-            ]
-        ]);
+                    'template_id' => '683e9d01d6fc053f9a6f39d3', // replace with your approved template ID
+                    'short_url' => 0, // 1 to enable short links, 0 to disable
+                    'recipients' => [
+                        [
+                            'mobiles' => '91' . $mobile,
+                            'name' => $name,
+                            'membershipid' => $membershipid,
+                        ]
+                    ]
+                ]);
 
         if ($response->successful()) {
             return response()->json(['message' => 'SMS sent successfully']);

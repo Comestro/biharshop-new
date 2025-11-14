@@ -160,7 +160,7 @@
                         <img src="{{ Storage::url($selectedMembership->image) }}"
                              class="mt-2 h-32 w-32 object-cover rounded-lg">
                     </div>
-                    @endif
+                    @endif 
 
                     <div class="mt-8 flex justify-end space-x-4">
                         <button @click="showModal = false"
