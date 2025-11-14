@@ -1,29 +1,35 @@
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-b from-teal-50 to-white py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
+        <div class="mb-8 sm:mb-10">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Complete Your KYC</h1>
+                    <p class="mt-2 text-sm text-gray-600">Provide accurate details to verify your membership and unlock all features.</p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-100 text-teal-700 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Step {{ max(1, min(7, $currentStep)) }} of 7
+                    </span>
+                </div>
+            </div>
+        </div>
         @if($name)
             <div class="mb-4 p-4 rounded-lg bg-blue-50 text-blue-700">
                 Welcome back! You can continue your membership application from where you left off.
             </div>
         @endif
 
-        <!-- Progress Timeline -->
+        @php $steps = ['Personal Info','Family Details','Address','Nominee','Bank Details','Documents','Photo']; @endphp
         <div class="mb-8">
-            <div class="flex justify-between items-center">
-                @foreach (['Personal Info', 'Family Details', 'Address', 'Nominee', 'Bank Details', 'Documents', 'Photo'] as $index => $step)
-                    <div class="flex flex-col items-center">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center {{ $currentStep > ($index + 1) ? 'bg-teal-500' : ($currentStep == ($index + 1) ? 'bg-teal-600' : 'bg-gray-200') }} text-white">
-                            @if($currentStep > ($index + 1))
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            @else
-                                {{ $index + 1 }}
-                            @endif
-                        </div>
-                        <span class="text-xs mt-1">{{ $step }}</span>
-                    </div>
-                    @if($index < 6)
-                        <div class="flex-1 h-0.5 bg-gray-200"></div>
-                    @endif
-                @endforeach
+            <div class="relative">
+                <div class="h-2 w-full bg-gray-200 rounded-full"></div>
+                <div class="h-2 bg-teal-500 rounded-full absolute top-0 left-0" style="width: {{ (($currentStep-1)/6)*100 }}%"></div>
+                <div class="mt-3 grid grid-cols-7 gap-2">
+                    @foreach($steps as $i => $step)
+                        <div class="text-[11px] sm:text-xs text-gray-600 {{ $currentStep-1 >= $i ? 'font-semibold text-teal-700' : '' }}">{{ $step }}</div>
+                    @endforeach
+                </div>
             </div>
         </div>
 
@@ -42,41 +48,35 @@
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                            <input type="text" wire:model="name"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                            <input type="text" wire:model="name" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             <p class="mt-1 text-xs text-gray-500">Must be at least 3 characters long</p>
                             @error('name') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" wire:model="email"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
+                            <input type="email" wire:model="email" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             <p class="mt-1 text-xs text-gray-500">Must be a valid email address</p>
                             @error('email') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                            <input type="tel" wire:model="mobile"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
+                            <input type="tel" wire:model="mobile" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             <p class="mt-1 text-xs text-gray-500">10 digit number starting with 6-9</p>
                             @error('mobile') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">WhatsApp</label>
-                            <input type="tel" wire:model="whatsapp"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
+                            <input type="tel" wire:model="whatsapp" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             <p class="mt-1 text-xs text-gray-500">Optional. If different from mobile number</p>
                             @error('whatsapp') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Referral Code (Optional)</label>
-                            <input type="text" wire:model.live="referral_code"
-                                placeholder="Enter member ID of referrer"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
+                            <input type="text" wire:model.live="referral_code" placeholder="Enter member ID of referrer" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             @if($referrer_name)
                                 <p class="mt-1 text-sm text-teal-600">Referrer: {{ $referrer_name }}</p>
                             @endif
@@ -85,16 +85,14 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Date of Birth</label>
-                            <input type="date" wire:model="date_of_birth"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
+                            <input type="date" wire:model="date_of_birth" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                             <p class="mt-1 text-xs text-gray-500">Must be at least 18 years old</p>
                             @error('date_of_birth') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Gender</label>
-                            <select wire:model="gender"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2">
+                            <select wire:model="gender" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                                 <option value="">Select Gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>

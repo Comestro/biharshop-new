@@ -2,6 +2,24 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 space-y-6">
+                @php
+                    $kycIncomplete = !($membership->father_name && $membership->mother_name && $membership->home_address && $membership->city && $membership->state && $membership->pincode && $membership->bank_name && $membership->account_no && $membership->ifsc && $membership->pancard && $membership->aadhar_card && $membership->image && $membership->terms_and_condition);
+                @endphp
+
+                @if($kycIncomplete)
+                    <div class="mb-4 bg-blue-50 border-l-4 border-blue-500 p-4">
+                        <div class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10A8 8 0 112 10a8 8 0 0116 0zm-8-3a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                            </svg>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-700">Your KYC is incomplete. Please finish your profile to enable verification and payouts.</p>
+                                <a href="{{ route('membership.register') }}" class="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Complete KYC</a>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="flex items-center space-x-6">
                     @if($membership->image)
                         <img src="{{ Storage::url($membership->image) }}" 

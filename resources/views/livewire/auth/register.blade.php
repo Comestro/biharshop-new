@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Membership;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +12,7 @@ use Livewire\Volt\Component;
 new #[Layout('components.layouts.auth')] class extends Component {
     public string $name = '';
     public string $email = '';
+    public string $mobile = '';
     public string $password = '';
     public string $password_confirmation = '';
 
@@ -22,6 +24,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'mobile' => ['required', 'regex:/^[6-9]\d{9}$/'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -31,8 +34,39 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         Auth::login($user);
 
+        $existing = Membership::where(function ($q) use ($validated) {
+            $q->where('email', $validated['email'])
+              ->orWhere('mobile', $this->mobile);
+        })->first();
+
+        if ($existing) {
+            if (! $existing->user_id) {
+                $existing->user_id = $user->id;
+                $existing->save();
+            }
+        } else {
+            $token = $this->generateSequentialToken();
+            Membership::create([
+                'user_id' => $user->id,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'mobile' => $this->mobile,
+                'token' => $token,
+            ]);
+        }
+
         // Redirect to dashboard after registration
         redirect()->route('dashboard');
+    }
+
+    private function generateSequentialToken(): string
+    {
+        $lastMembership = Membership::orderBy('id', 'desc')->first();
+        if (! $lastMembership || ! $lastMembership->token) {
+            return 'BSE1971';
+        }
+        $lastNumber = (int) str_replace('BSE', '', $lastMembership->token);
+        return 'BSE' . ($lastNumber + 1);
     }
 }; ?>
 
@@ -67,6 +101,17 @@ new #[Layout('components.layouts.auth')] class extends Component {
                             placeholder="you@example.com">
                     </div>
                     @error('email') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Mobile / Contact -->
+                <div>
+                    <label for="mobile" class="block text-sm font-medium text-gray-700">Mobile</label>
+                    <div class="mt-1">
+                        <input wire:model="mobile" id="mobile" type="text" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            placeholder="98########">
+                    </div>
+                    @error('mobile') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Password -->

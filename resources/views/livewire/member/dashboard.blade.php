@@ -1,4 +1,32 @@
 <div>
+    @php
+        $kycIncomplete = !($membership->father_name && $membership->mother_name && $membership->home_address && $membership->city && $membership->state && $membership->pincode && $membership->bank_name && $membership->account_no && $membership->ifsc && $membership->pancard && $membership->aadhar_card && $membership->image && $membership->terms_and_condition);
+    @endphp
+
+    @if($kycIncomplete)
+        <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10A8 8 0 112 10a8 8 0 0116 0zm-8-3a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Complete Your KYC</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <p>Your profile is incomplete. Please provide your address, nominee, bank and document details to activate your membership.</p>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{{ route('membership.register') }}"
+                           class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            Complete KYC
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     @if(!$membership->isPaid)
         <div class="mb-6 bg-amber-50 border-l-4 border-amber-400 p-4">
             <div class="flex">

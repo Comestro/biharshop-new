@@ -113,16 +113,6 @@ class Register extends Component
             if ($existingMembership) {
                 $this->membership = $existingMembership;
 
-                // Redirect if membership exists but unpaid
-                if (! $existingMembership->isPaid) {
-                    return redirect()->route('membership.payment', $existingMembership);
-                }
-
-                if ($existingMembership->isPaid) {
-                    $this->isSubmitted = true;
-
-                    return;
-                }
                 // Load existing data
                 $this->name = $existingMembership->name;
                 $this->email = $existingMembership->email;
@@ -151,6 +141,15 @@ class Register extends Component
 
                 // Set the current step based on the completion level
                 $this->currentStep = $this->determineCurrentStep($existingMembership);
+                $isComplete = $existingMembership->isKycComplete();
+                if ($isComplete) {
+                    if ($existingMembership->isPaid) {
+                        $this->isSubmitted = true;
+                        return;
+                    }
+                    return redirect()->route('membership.payment', $existingMembership);
+                }
+                $this->isSubmitted = false;
             }
         }
     }
@@ -422,6 +421,11 @@ class Register extends Component
                 'user_id' => auth()->id(),
             ])
         );
+
+        if ($membership->isKycComplete() && ! $membership->isVerified) {
+            $membership->isVerified = true;
+            $membership->save();
+        }
 
         return redirect()->route('membership.payment', $membership);
     }

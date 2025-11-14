@@ -2,19 +2,15 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>BiharShop</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @include('partials.head', ['title' => 'BiharShop'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
     @livewireStyles
+    <style>[x-cloak]{display:none!important}</style>
 </head>
 
 <body class="font-sans antialiased">
     <!-- ====== BiharShop Navbar ====== -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="bg-white/90 backdrop-blur border-b sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
@@ -22,7 +18,7 @@
                 <a href="{{ route('home') }}" class="text-2xl font-bold text-teal-600">BiharShop</a>
 
                 <!-- Desktop Links -->
-                <div class="hidden md:flex items-center space-x-8 font-medium">
+                <div class="hidden md:flex items-center space-x-8 font-medium text-gray-700">
                     <a href="{{ route('home') }}" class="hover:text-teal-600 transition">Home</a>
                     <a href="{{ route('shop') }}" class="hover:text-teal-600 transition">Products</a>
                     <a href="#about" class="hover:text-teal-600 transition">About</a>
@@ -65,7 +61,7 @@
 
                             <!-- Dropdown -->
                             <div id="userMenu"
-                                class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden">
+                                class="hidden absolute right-0 mt-2 w-52 bg-white/95 backdrop-blur border border-gray-100 rounded-xl shadow-lg overflow-hidden">
                                 @if(auth()->user()->membership)
                                     <a href="{{ route('member.dashboard') }}"
                                         class="block px-4 py-2 text-sm hover:bg-gray-50">Member Panel</a>
@@ -85,8 +81,7 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}"
-                            class="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 font-medium transition">Login</a>
+                        <a href="{{ route('login') }}" class="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 font-medium transition">Login</a>
                     @endauth
 
                     <!-- Mobile Menu Button -->
@@ -106,11 +101,10 @@
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobileMenu"
-            class="hidden md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0 top-16 z-[9999]">
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0 top-16 z-[9999]">
             <div class="px-4 py-4 space-y-3 font-medium text-gray-700">
                 <a href="{{ route('home') }}" class="block hover:text-teal-600">Home</a>
-                <a href="#products" class="block hover:text-teal-600">Products</a>
+                <a href="{{ route('shop') }}" class="block hover:text-teal-600">Products</a>
                 <a href="#about" class="block hover:text-teal-600">About</a>
                 <a href="#contact" class="block hover:text-teal-600">Contact</a>
                 @auth
@@ -162,7 +156,7 @@
             });
         }
     </script>
-    <div class="min-h-screen bg-gray-100 text-black">
+    <div class="min-h-screen bg-gray-50 text-black">
 
         <div>
             <main>
@@ -170,7 +164,7 @@
             </main>
         </div>
         <!-- Footer with Admin Link -->
-        <footer class="bg-white border-t mt-16">
+        <footer class="bg-white/90 backdrop-blur border-t mt-16">
             <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <div class="flex space-x-6 mb-4 md:mb-0">
