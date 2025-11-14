@@ -6,5 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReferralTree extends Model
 {
-    //
+    protected $guarded = [];
+
 }
