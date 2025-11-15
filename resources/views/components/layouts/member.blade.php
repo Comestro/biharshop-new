@@ -177,13 +177,45 @@
                         $headerBalance = 0;
                         if ($mid) {
                             $credits = \App\Models\WalletTransaction::where('membership_id', $mid)
-                                ->whereIn('type', ['binary_commission', 'referral_commission'])
+                                ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission'])
                                 ->where('status', 'confirmed')
                                 ->sum('amount');
                             $debits = \App\Models\Withdrawal::where('membership_id', $mid)
                                 ->whereIn('status', ['pending', 'approved'])
                                 ->sum('amount');
-                            $headerBalance = $credits - $debits;
+                            $walletBalance = $credits - $debits;
+                            $leftChild = \App\Models\BinaryTree::where('parent_id', $mid)->where('position', 'left')->first();
+                            $rightChild = \App\Models\BinaryTree::where('parent_id', $mid)->where('position', 'right')->first();
+                            $leftDepth = 0;
+                            $rightDepth = 0;
+                            if ($leftChild) {
+                                $leftDepth = 1;
+                                $c = $leftChild->member_id;
+                                while (true) {
+                                    $n = \App\Models\BinaryTree::where('parent_id', $c)->where('position', 'left')->first();
+                                    if (!$n) break;
+                                    $leftDepth++;
+                                    $c = $n->member_id;
+                                }
+                            }
+                            if ($rightChild) {
+                                $rightDepth = 1;
+                                $c = $rightChild->member_id;
+                                while (true) {
+                                    $n = \App\Models\BinaryTree::where('parent_id', $c)->where('position', 'right')->first();
+                                    if (!$n) break;
+                                    $rightDepth++;
+                                    $c = $n->member_id;
+                                }
+                            }
+                            $maxDepth = max($leftDepth, $rightDepth);
+                            $minDepth = min($leftDepth, $rightDepth);
+                            $hasFirstPair = $leftChild && $rightChild && ($maxDepth >= 2 && $minDepth >= 1);
+                            $lockedDaily = $hasFirstPair ? 0 : \App\Models\WalletTransaction::where('membership_id', $mid)
+                                ->where('type', 'daily_commission')
+                                ->where('status', 'confirmed')
+                                ->sum('amount');
+                            $headerBalance = max($walletBalance - $lockedDaily, 0);
                         }
                     @endphp
                     <div class="flex items-center gap-3">
@@ -202,7 +234,7 @@
             </header>
 
             <!-- Main Content -->
-            <main class="flex-1 p-6 overflow-y-auto">
+            <main class="flex-1 md:p-6 overflow-y-auto">
                 {{ $slot }}
             </main>
 

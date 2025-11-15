@@ -1,4 +1,4 @@
-    <div class="w-full mx-auto">
+    <div class="w-full">
         <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <div class="p-6 sm:p-8 space-y-8">
                 @php

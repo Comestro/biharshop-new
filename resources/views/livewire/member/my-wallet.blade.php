@@ -16,7 +16,7 @@
                     </svg>
                 </div>
             </div>
-            <h3 class="text-3xl font-bold text-green-700">₹{{ number_format($walletBalance, 2) }}</h3>
+            <h3 class="text-3xl font-bold text-green-700">₹{{ number_format($availableBalance, 2) }}</h3>
             <p class="text-xs text-green-600 mt-1">Available for withdrawal</p>
         </div>
 
@@ -55,15 +55,20 @@
     <div class="mb-6">
         <div class="border-b border-gray-200">
             <div class="flex gap-2">
-                <button wire:click="$set('binaryComissionHistory', true)" 
+                <button wire:click="$set('activeCommissionTab','binary')"
                     class="px-6 py-3 text-sm font-semibold border-b-2 transition-colors
-                    {{ $binaryComissionHistory ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-600 hover:text-gray-900' }}">
-                    Upline Commission
+                    {{ $activeCommissionTab === 'binary' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-600 hover:text-gray-900' }}">
+                    Binary Commission
                 </button>
-                <button wire:click="$set('binaryComissionHistory', false)" 
+                <button wire:click="$set('activeCommissionTab','referral')"
                     class="px-6 py-3 text-sm font-semibold border-b-2 transition-colors
-                    {{ !$binaryComissionHistory ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-600 hover:text-gray-900' }}">
+                    {{ $activeCommissionTab === 'referral' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-600 hover:text-gray-900' }}">
                     Referral Commission
+                </button>
+                <button wire:click="$set('activeCommissionTab','daily')"
+                    class="px-6 py-3 text-sm font-semibold border-b-2 transition-colors
+                    {{ $activeCommissionTab === 'daily' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-600 hover:text-gray-900' }}">
+                    Daily Commission
                 </button>
             </div>
         </div>
@@ -71,11 +76,14 @@
 
     <!-- Commission Tables -->
     <div class="overflow-x-auto mb-8">
-        @if ($binaryComissionHistory)
+        @if ($activeCommissionTab === 'binary')
             <div class="mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Upline Commission History</h3>
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900">Binary Commission History</h3>
+                    <span class="text-sm text-gray-600">Total: ₹{{ number_format($binaryCommissionTotal, 2) }}</span>
+                </div>
+                <div class="border border-gray-200 rounded-lg overflow-x-auto w-full">
+                    <table class="w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Level</th>
@@ -128,10 +136,13 @@
             </div>
         @endif
 
-        @if (!$binaryComissionHistory)
+        @if ($activeCommissionTab === 'referral')
             <div class="mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Referral Commission History</h3>
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900">Referral Commission History</h3>
+                    <span class="text-sm text-gray-600">Total: ₹{{ number_format($referralCommissionTotal, 2) }}</span>
+                </div>
+                <div class="border border-gray-200 rounded-lg overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -166,53 +177,47 @@
                 </div>
             </div>
         @endif
-    </div>
 
-    <!-- Transactions Section -->
-    <div class="mb-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Transaction History</h3>
-        @if($kycComplete)
-            <div class="border border-gray-200 rounded-lg overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Type</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date & Time</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse ($transactions as $tx)
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-4 py-3 text-sm text-gray-900">{{ $tx['type'] }}</td>
-                                <td class="px-4 py-3 text-sm font-semibold text-green-700">₹{{ number_format($tx['amount'], 2) }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $tx['status'] }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-600">{{ \Carbon\Carbon::parse($tx['created_at'])->format('d M Y, h:i A') }}</td>
-                            </tr>
-                        @empty
+        @if ($activeCommissionTab === 'daily')
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900">Daily Commission History</h3>
+                    <span class="text-sm text-gray-600">Total: ₹{{ number_format($dailyCommissionTotal, 2) }}</span>
+                </div>
+                <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <td colspan="4" class="px-4 py-8 text-center text-gray-400">
-                                    <svg class="mx-auto h-12 w-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                    </svg>
-                                    No transactions recorded
-                                </td>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Amount</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date & Time</th>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        @else
-            <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-6 text-center">
-                <svg class="mx-auto h-12 w-12 text-yellow-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <p class="text-sm font-medium text-yellow-800">Complete your KYC to view transaction history</p>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse ($dailyCommissionTx as $tx)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-3 text-sm font-semibold text-green-700">₹{{ number_format($tx['amount'], 2) }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-700">{{ $tx['status'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">{{ \Carbon\Carbon::parse($tx['created_at'])->format('d M Y, h:i A') }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-4 py-8 text-center text-gray-400">
+                                        <svg class="mx-auto h-12 w-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        No daily commission yet
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         @endif
     </div>
 
+    
     <!-- Withdrawal Section -->
     <div>
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Withdrawal Requests</h3>
@@ -224,6 +229,22 @@
                         <input type="number" step="0.01" wire:model="withdrawAmount" 
                             class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 focus:border-indigo-500 focus:ring-indigo-500" 
                             placeholder="Enter amount">
+                        @if($withdrawPreview)
+                        <div class="mt-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg p-3">
+                            <div class="flex justify-between">
+                                <span>Service Charge (5%)</span>
+                                <span class="font-semibold">₹{{ number_format($withdrawPreview['service_charge'], 2) }}</span>
+                            </div>
+                            <div class="flex justify-between mt-1">
+                                <span>TDS (2%)</span>
+                                <span class="font-semibold">₹{{ number_format($withdrawPreview['tds'], 2) }}</span>
+                            </div>
+                            <div class="flex justify-between mt-1">
+                                <span>Net Amount</span>
+                                <span class="font-semibold text-green-700">₹{{ number_format($withdrawPreview['net_amount'], 2) }}</span>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                     <button wire:click="withdraw" 
                         class="w-full sm:w-auto mt-6 px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
@@ -232,7 +253,7 @@
                 </div>
             </div>
 
-            <div class="border border-gray-200 rounded-lg overflow-hidden">
+            <div class="border border-gray-200 rounded-lg overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -247,6 +268,8 @@
                                 <td class="px-4 py-3 text-sm">
                                     <span class="font-semibold text-red-700">₹{{ number_format($w['amount'], 2) }}</span>
                                     <span class="block text-xs text-gray-500 mt-0.5">
+                                        Service: ₹{{ number_format(($w['details']['service_charge'] ?? round($w['amount'] * 0.05, 2)), 2) }} | 
+                                        TDS: ₹{{ number_format(($w['details']['tds'] ?? round($w['amount'] * 0.02, 2)), 2) }} | 
                                         Net: ₹{{ number_format(($w['details']['net_amount'] ?? round($w['amount'] * 0.93, 2)), 2) }}
                                     </span>
                                 </td>

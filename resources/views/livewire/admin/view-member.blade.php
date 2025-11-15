@@ -80,6 +80,9 @@
                     <option value="network">Network Details</option>
                     <option value="wallet">Wallet</option>
                     <option value="tree">Tree</option>
+                    <option value="binary_commission">Binary Commission</option>
+                    <option value="referral_commission">Referral Commission</option>
+                    <option value="daily_commission">Daily Commission</option>
                 </select>
             </div>
 
@@ -127,6 +130,30 @@
                         Tree
                     </button>
 
+                    <button type="button" wire:click="setTab('binary_commission')" @class([
+                        'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
+                        'border-blue-500 text-blue-600' => $activeTab === 'binary_commission',
+                        'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
+                            $activeTab !== 'binary_commission',
+                    ])>
+                        Binary Commission
+                    </button>
+                    <button type="button" wire:click="setTab('referral_commission')" @class([
+                        'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
+                        'border-blue-500 text-blue-600' => $activeTab === 'referral_commission',
+                        'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
+                            $activeTab !== 'referral_commission',
+                    ])>
+                        Referral Commission
+                    </button>
+                    <button type="button" wire:click="setTab('daily_commission')" @class([
+                        'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
+                        'border-blue-500 text-blue-600' => $activeTab === 'daily_commission',
+                        'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
+                            $activeTab !== 'daily_commission',
+                    ])>
+                        Daily Commission
+                    </button>
                 </nav>
             </div>
 
@@ -329,6 +356,16 @@
                                     <h3 class="text-2xl font-bold text-teal-700">₹{{ number_format($walletBalance, 2) }}</h3>
                                 </div>
                                 <div class="p-4 rounded-md border border-slate-200 bg-white">
+                                    <p class="text-xs text-slate-500 uppercase">Locked Daily</p>
+                                    <h3 class="text-2xl font-bold text-amber-700">₹{{ number_format($lockedDaily, 2) }}</h3>
+                                </div>
+                                <div class="p-4 rounded-md border border-slate-200 bg-white">
+                                    <p class="text-xs text-slate-500 uppercase">Available To Withdraw</p>
+                                    <h3 class="text-2xl font-bold text-emerald-700">₹{{ number_format($availableBalance, 2) }}</h3>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div class="p-4 rounded-md border border-slate-200 bg-white">
                                     <p class="text-xs text-slate-500 uppercase">Paid Status</p>
                                     <h3 class="text-sm font-semibold">{{ $member->isPaid ? 'Paid' : 'Unpaid' }}</h3>
                                 </div>
@@ -383,10 +420,14 @@
                                     <tbody>
                                         @forelse ($withdrawals as $w)
                                             <tr class="hover:bg-slate-50">
-                                                <td class="px-3 py-2 border text-red-700">
-                                                    ₹{{ number_format($w['amount'], 2) }}
-                                                    <span class="text-xs text-slate-500 ml-1">Net: ₹{{ number_format(($w['details']['net_amount'] ?? round($w['amount'] * 0.93, 2)), 2) }}</span>
-                                                </td>
+                                            <td class="px-3 py-2 border text-red-700">
+                                                ₹{{ number_format($w['amount'], 2) }}
+                                                <span class="block text-xs text-slate-500 mt-0.5">
+                                                    Service: ₹{{ number_format(($w['details']['service_charge'] ?? round($w['amount'] * 0.05, 2)), 2) }} |
+                                                    TDS: ₹{{ number_format(($w['details']['tds'] ?? round($w['amount'] * 0.02, 2)), 2) }} |
+                                                    Net: ₹{{ number_format(($w['details']['net_amount'] ?? round($w['amount'] * 0.93, 2)), 2) }}
+                                                </span>
+                                            </td>
                                                 <td class="px-3 py-2 border">{{ $w['status'] }}</td>
                                                 <td class="px-3 py-2 border">{{ \Carbon\Carbon::parse($w['created_at'])->format('d M Y, h:i A') }}</td>
                                             </tr>
@@ -462,6 +503,145 @@
                                         @empty
                                             <tr>
                                                 <td colspan="3" class="text-center text-slate-400 py-3">No uplines</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if ($activeTab === 'binary_commission')
+                    <div class="space-y-6">
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Binary Commission Summary</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="p-4 rounded-md border border-slate-200 bg-white">
+                                    <p class="text-xs text-slate-500 uppercase">Total</p>
+                                    <h3 class="text-2xl font-bold text-teal-700">₹{{ number_format($binaryCommissionTotal, 2) }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Binary Commission Transactions</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm border border-slate-200 rounded-lg">
+                                    <thead class="bg-slate-100 text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 border">Level</th>
+                                            <th class="px-3 py-2 border">Left</th>
+                                            <th class="px-3 py-2 border">Right</th>
+                                            <th class="px-3 py-2 border">Percentage</th>
+                                            <th class="px-3 py-2 border">Amount</th>
+                                            <th class="px-3 py-2 border">Status</th>
+                                            <th class="px-3 py-2 border">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($binaryCommissionTx as $tx)
+                                            @php($m = $tx['meta'] ?? [])
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-3 py-2 border">{{ $m['level'] ?? '-' }}</td>
+                                                <td class="px-3 py-2 border">{{ $m['left_member'] ?? '-' }}</td>
+                                                <td class="px-3 py-2 border">{{ $m['right_member'] ?? '-' }}</td>
+                                                <td class="px-3 py-2 border">{{ isset($m['percentage']) ? $m['percentage'].'%' : '-' }}</td>
+                                                <td class="px-3 py-2 border text-teal-700">₹{{ number_format($tx['amount'], 2) }}</td>
+                                                <td class="px-3 py-2 border">{{ $tx['status'] }}</td>
+                                                <td class="px-3 py-2 border">{{ \Carbon\Carbon::parse($tx['created_at'])->format('d M Y, h:i A') }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center text-slate-400 py-3">No binary commissions.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if ($activeTab === 'referral_commission')
+                    <div class="space-y-6">
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Referral Commission Summary</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="p-4 rounded-md border border-slate-200 bg-white">
+                                    <p class="text-xs text-slate-500 uppercase">Total</p>
+                                    <h3 class="text-2xl font-bold text-teal-700">₹{{ number_format($referralCommissionTotal, 2) }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Referral Commission Transactions</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm border border-slate-200 rounded-lg">
+                                    <thead class="bg-slate-100 text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 border">Level</th>
+                                            <th class="px-3 py-2 border">Child</th>
+                                            <th class="px-3 py-2 border">Percentage</th>
+                                            <th class="px-3 py-2 border">Amount</th>
+                                            <th class="px-3 py-2 border">Status</th>
+                                            <th class="px-3 py-2 border">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($referralCommissionTx as $tx)
+                                            @php($m = $tx['meta'] ?? [])
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-3 py-2 border">{{ $m['level'] ?? '-' }}</td>
+                                                <td class="px-3 py-2 border">{{ $m['child_id'] ?? '-' }}</td>
+                                                <td class="px-3 py-2 border">{{ isset($m['percentage']) ? $m['percentage'].'%' : '-' }}</td>
+                                                <td class="px-3 py-2 border text-teal-700">₹{{ number_format($tx['amount'], 2) }}</td>
+                                                <td class="px-3 py-2 border">{{ $tx['status'] }}</td>
+                                                <td class="px-3 py-2 border">{{ \Carbon\Carbon::parse($tx['created_at'])->format('d M Y, h:i A') }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="6" class="text-center text-slate-400 py-3">No referral commissions.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if ($activeTab === 'daily_commission')
+                    <div class="space-y-6">
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Daily Commission Summary</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="p-4 rounded-md border border-slate-200 bg-white">
+                                    <p class="text-xs text-slate-500 uppercase">Total</p>
+                                    <h3 class="text-2xl font-bold text-teal-700">₹{{ number_format($dailyCommissionTotal, 2) }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 rounded-lg p-4">
+                            <h3 class="text-sm font-medium text-slate-900 mb-3">Daily Commission Transactions</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm border border-slate-200 rounded-lg">
+                                    <thead class="bg-slate-100 text-slate-700">
+                                        <tr>
+                                            <th class="px-3 py-2 border">Amount</th>
+                                            <th class="px-3 py-2 border">Status</th>
+                                            <th class="px-3 py-2 border">Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($dailyCommissionTx as $tx)
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-3 py-2 border text-teal-700">₹{{ number_format($tx['amount'], 2) }}</td>
+                                                <td class="px-3 py-2 border">{{ $tx['status'] }}</td>
+                                                <td class="px-3 py-2 border">{{ \Carbon\Carbon::parse($tx['created_at'])->format('d M Y, h:i A') }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-slate-400 py-3">No daily commissions.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>

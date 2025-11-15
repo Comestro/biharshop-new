@@ -10,6 +10,15 @@ use App\Models\Withdrawal;
 #[Layout('components.layouts.admin')]
 class ViewMember extends Component
 {
+    public $isWalletLocked = false;
+    public $lockedDaily = 0.00;
+    public $availableBalance = 0.00;
+    public $binaryCommissionTotal = 0.00;
+    public $referralCommissionTotal = 0.00;
+    public $dailyCommissionTotal = 0.00;
+    public $binaryCommissionTx = [];
+    public $referralCommissionTx = [];
+    public $dailyCommissionTx = [];
     public function approveMember()
     {
         if ($this->member && !$this->member->isVerified) {
@@ -36,7 +45,7 @@ class ViewMember extends Component
     public $binaryUplines = [];
     public $referralUplines = [];
    
-    protected $validTabs = ['personal', 'financial', 'network', 'wallet', 'tree'];
+    protected $validTabs = ['personal', 'financial', 'network', 'wallet', 'tree', 'binary_commission', 'referral_commission', 'daily_commission'];
     protected $listeners = ['treeNodeSelected' => 'navigateToMember'];
 
     public function mount($id)
@@ -51,6 +60,7 @@ class ViewMember extends Component
         // Calculate team sizes
         $this->calculateTeamSizes();
         $this->loadWalletData();
+        $this->loadCommissionData();
         $this->loadUplines();
     }
     
@@ -100,7 +110,7 @@ class ViewMember extends Component
     protected function loadWalletData()
     {
         $credits = WalletTransaction::where('membership_id', $this->member->id)
-            ->whereIn('type', ['binary_commission', 'referral_commission'])
+            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission'])
             ->where('status', 'confirmed')
             ->sum('amount');
 
@@ -109,6 +119,14 @@ class ViewMember extends Component
             ->sum('amount');
 
         $this->walletBalance = $credits - $debits;
+        $this->isWalletLocked = !$this->hasFirstPair($this->member->id);
+        $this->lockedDaily = $this->isWalletLocked
+            ? WalletTransaction::where('membership_id', $this->member->id)
+                ->where('type', 'daily_commission')
+                ->where('status', 'confirmed')
+                ->sum('amount')
+            : 0.00;
+        $this->availableBalance = max($this->walletBalance - $this->lockedDaily, 0);
 
         $this->transactions = WalletTransaction::where('membership_id', $this->member->id)
             ->orderBy('created_at', 'desc')
@@ -133,7 +151,9 @@ class ViewMember extends Component
         ])->findOrFail($this->member->id);
         $this->calculateTeamSizes();
         $this->generateBinaryCommissions();
+        $this->generateDailyCashback();
         $this->loadWalletData();
+        $this->loadCommissionData();
         $this->loadUplines();
     }
 
@@ -240,6 +260,41 @@ class ViewMember extends Component
     {
         $this->binaryUplines = $this->getBinaryUplines($this->member->id);
         $this->referralUplines = $this->getReferralUplines($this->member->id);
+    }
+
+    protected function loadCommissionData()
+    {
+        $this->binaryCommissionTotal = WalletTransaction::where('membership_id', $this->member->id)
+            ->where('type', 'binary_commission')
+            ->where('status', 'confirmed')
+            ->sum('amount');
+        $this->referralCommissionTotal = WalletTransaction::where('membership_id', $this->member->id)
+            ->where('type', 'referral_commission')
+            ->where('status', 'confirmed')
+            ->sum('amount');
+        $this->dailyCommissionTotal = WalletTransaction::where('membership_id', $this->member->id)
+            ->where('type', 'daily_commission')
+            ->where('status', 'confirmed')
+            ->sum('amount');
+
+        $this->binaryCommissionTx = WalletTransaction::where('membership_id', $this->member->id)
+            ->where('type', 'binary_commission')
+            ->orderBy('created_at', 'desc')
+            ->limit(200)
+            ->get()
+            ->toArray();
+        $this->referralCommissionTx = WalletTransaction::where('membership_id', $this->member->id)
+            ->where('type', 'referral_commission')
+            ->orderBy('created_at', 'desc')
+            ->limit(200)
+            ->get()
+            ->toArray();
+        $this->dailyCommissionTx = WalletTransaction::where('membership_id', $this->member->id)
+            ->where('type', 'daily_commission')
+            ->orderBy('created_at', 'desc')
+            ->limit(200)
+            ->get()
+            ->toArray();
     }
 
     protected function getBinaryUplines($memberId)
@@ -361,5 +416,54 @@ class ViewMember extends Component
     public function render()
     {
         return view('livewire.admin.view-member');
+    }
+
+    protected function hasFirstPair($memberId)
+    {
+        $left = BinaryTree::where('parent_id', $memberId)->where('position', 'left')->first();
+        $right = BinaryTree::where('parent_id', $memberId)->where('position', 'right')->first();
+        if (!$left || !$right) {
+            return false;
+        }
+        [$leftDepth] = $this->getDirectionalDepth($left->member_id, 'left');
+        [$rightDepth] = $this->getDirectionalDepth($right->member_id, 'right');
+        $maxDepth = max($leftDepth, $rightDepth);
+        $minDepth = min($leftDepth, $rightDepth);
+        return $maxDepth >= 2 && $minDepth >= 1;
+    }
+
+    protected function generateDailyCashback()
+    {
+        if (!($this->member->payment_status === 'success' || $this->member->isPaid)) {
+            return;
+        }
+        $start = $this->member->created_at->copy()->startOfDay();
+        $end = now()->copy()->startOfDay();
+        $eligibleDays = min(30, $start->diffInDays($end) + 1);
+
+        for ($i = 0; $i < $eligibleDays; $i++) {
+            $date = $start->copy()->addDays($i);
+            $existsForDate = WalletTransaction::where('membership_id', $this->member->id)
+                ->where('type', 'daily_commission')
+                ->whereDate('created_at', $date->toDateString())
+                ->exists();
+            if ($existsForDate) {
+                continue;
+            }
+            $totalReceived = WalletTransaction::where('membership_id', $this->member->id)
+                ->where('type', 'daily_commission')
+                ->sum('amount');
+            if ($totalReceived >= 480) {
+                break;
+            }
+            WalletTransaction::create([
+                'membership_id' => $this->member->id,
+                'type' => 'daily_commission',
+                'amount' => 16,
+                'status' => 'confirmed',
+                'created_at' => $date,
+                'updated_at' => $date,
+            ]);
+        }
     }
 }

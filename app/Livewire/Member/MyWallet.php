@@ -17,14 +17,22 @@ class MyWallet extends Component
     public $walletBalance = 0.00;
     public $memberId;
     public $isWalletLocked = false;
+    public $lockedDaily = 0.00;
+    public $availableBalance = 0.00;
     public $commissionHistory = [];
     public $referralComissionHistory = [];
     public $binaryComissionHistory = true;
+    public $activeCommissionTab = 'binary';
+    public $binaryCommissionTotal = 0.00;
+    public $referralCommissionTotal = 0.00;
+    public $dailyCommissionTotal = 0.00;
+    public $dailyCommissionTx = [];
     public $kycComplete = false;
     public $isVerified = false;
     public $transactions = [];
     public $withdrawals = [];
     public $withdrawAmount = null;
+    public $withdrawPreview = null;
 
     public function mount()
     {
@@ -36,6 +44,7 @@ class MyWallet extends Component
         $this->generateReferralCommissions($this->memberId);
         $this->loadWallet();
         $this->loadReferralHistory();
+        $this->loadCommissionData();
     }
 
     // binary wala
@@ -292,13 +301,21 @@ class MyWallet extends Component
     private function loadWallet()
     {
         $credits = WalletTransaction::where('membership_id', $this->memberId)
-            ->whereIn('type', ['binary_commission', 'referral_commission'])
+            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission'])
             ->where('status', 'confirmed')
             ->sum('amount');
         $debits = Withdrawal::where('membership_id', $this->memberId)
             ->whereIn('status', ['pending', 'approved'])
             ->sum('amount');
         $this->walletBalance = $credits - $debits;
+        $this->isWalletLocked = !$this->hasFirstPair($this->memberId);
+        $this->lockedDaily = $this->isWalletLocked
+            ? WalletTransaction::where('membership_id', $this->memberId)
+                ->where('type', 'daily_commission')
+                ->where('status', 'confirmed')
+                ->sum('amount')
+            : 0.00;
+        $this->availableBalance = max($this->walletBalance - $this->lockedDaily, 0);
         $this->transactions = WalletTransaction::where('membership_id', $this->memberId)
             ->orderBy('created_at', 'desc')
             ->limit(100)
@@ -337,7 +354,8 @@ class MyWallet extends Component
         if (!$this->kycComplete) {
             return;
         }
-        if ($this->withdrawAmount > $this->walletBalance) {
+        $this->loadWallet();
+        if ($this->withdrawAmount > $this->availableBalance) {
             return;
         }
         $gross = round($this->withdrawAmount, 2);
@@ -357,7 +375,65 @@ class MyWallet extends Component
             ]
         ]);
         $this->withdrawAmount = null;
+        $this->withdrawPreview = null;
         $this->loadWallet();
+        $this->loadCommissionData();
+    }
+
+    private function hasFirstPair($memberId)
+    {
+        $left = \App\Models\BinaryTree::where('parent_id', $memberId)->where('position', 'left')->first();
+        $right = \App\Models\BinaryTree::where('parent_id', $memberId)->where('position', 'right')->first();
+        if (!$left || !$right) {
+            return false;
+        }
+        [$leftDepth] = $this->getDirectionalDepth($left->member_id, 'left');
+        [$rightDepth] = $this->getDirectionalDepth($right->member_id, 'right');
+        $maxDepth = max($leftDepth, $rightDepth);
+        $minDepth = min($leftDepth, $rightDepth);
+        return $maxDepth >= 2 && $minDepth >= 1;
+    }
+
+    private function loadCommissionData()
+    {
+        $this->binaryCommissionTotal = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'binary_commission')
+            ->where('status', 'confirmed')
+            ->sum('amount');
+        $this->referralCommissionTotal = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'referral_commission')
+            ->where('status', 'confirmed')
+            ->sum('amount');
+        $this->dailyCommissionTotal = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'daily_commission')
+            ->where('status', 'confirmed')
+            ->sum('amount');
+
+        $this->dailyCommissionTx = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'daily_commission')
+            ->orderBy('created_at', 'desc')
+            ->limit(200)
+            ->get()
+            ->toArray();
+    }
+
+    public function updatedWithdrawAmount()
+    {
+        $amount = floatval($this->withdrawAmount ?? 0);
+        if ($amount <= 0) {
+            $this->withdrawPreview = null;
+            return;
+        }
+        $gross = round($amount, 2);
+        $service = round($gross * 0.05, 2);
+        $tds = round($gross * 0.02, 2);
+        $net = max(round($gross - $service - $tds, 2), 0);
+        $this->withdrawPreview = [
+            'gross_amount' => $gross,
+            'service_charge' => $service,
+            'tds' => $tds,
+            'net_amount' => $net,
+        ];
     }
 
 
