@@ -128,7 +128,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             }
         } else {
             $token = $this->generateSequentialToken();
-            Membership::create([
+            $newMember = Membership::create([
                 'user_id' => $user->id,
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -136,8 +136,15 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 'token' => $token,
                 'referal_id' => $referer ? $referer->id : null,
                 'membership_id' => $membershipId ? $membershipId->id : null,
-
             ]);
+            if ($membershipId) {
+                ReferralTree::create([
+                    'member_id' => $newMember->id,
+                    'parent_id' => $membershipId ? $membershipId->id : null,
+
+                ]);
+
+            }
         }
 
         // Redirect to dashboard after registration
