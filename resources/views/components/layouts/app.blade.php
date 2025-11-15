@@ -10,7 +10,7 @@
 
 <body class="font-sans antialiased">
     <!-- ====== BiharShop Navbar ====== -->
-    <nav class="bg-white/90 backdrop-blur border-b sticky top-0 z-50">
+    <nav class="bg-white/90 backdrop-blur sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
@@ -27,8 +27,7 @@
                         @if(auth()->user()->membership)
                             <a href="{{ route('member.dashboard') }}" class="hover:text-teal-600 transition">Member Panel</a>
                         @else
-                            <a href="{{ route('membership.register') }}" class="hover:text-teal-600 transition">Become
-                                Member</a>
+                            <a href="{{ route('register') }}" class="inline-flex items-center px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Join Network</a>
                         @endif
                         @if(auth()->guard('admin')->check())
                             <a href="{{ route('admin.dashboard') }}" class="hover:text-teal-600 transition">Admin Panel</a>
@@ -48,6 +47,15 @@
                             class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full px-1.5">0</span>
                     </a>
 
+                    @guest
+                        <a href="{{ route('register') }}" class="hidden md:inline-flex items-center px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Join Network</a>
+                    @endguest
+                    @auth
+                        @if(!auth()->user()->membership)
+                            <a href="{{ route('register') }}" class="hidden md:inline-flex items-center px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Join Network</a>
+                        @endif
+                    @endauth
+
                     <!-- Auth / User -->
                     @auth
                         <div class="relative">
@@ -66,8 +74,8 @@
                                     <a href="{{ route('member.dashboard') }}"
                                         class="block px-4 py-2 text-sm hover:bg-gray-50">Member Panel</a>
                                 @else
-                                    <a href="{{ route('membership.register') }}"
-                                        class="block px-4 py-2 text-sm hover:bg-gray-50">Become Member</a>
+                                    <a href="{{ route('register') }}"
+                                        class="block px-4 py-2 text-sm hover:bg-gray-50">Join Network</a>
                                 @endif
                                 @if(auth()->guard('admin')->check())
                                     <a href="{{ route('admin.dashboard') }}"
@@ -111,7 +119,7 @@
                     @if(auth()->user()->membership)
                         <a href="{{ route('member.dashboard') }}" class="block hover:text-teal-600">Member Panel</a>
                     @else
-                        <a href="{{ route('membership.register') }}" class="block hover:text-teal-600">Become Member</a>
+                        <a href="{{ route('register') }}" class="block bg-teal-600 text-white text-center rounded-md py-2 hover:bg-teal-700">Join Network</a>
                     @endif
                     @if(auth()->guard('admin')->check())
                         <a href="{{ route('admin.dashboard') }}" class="block hover:text-teal-600">Admin Panel</a>
@@ -121,6 +129,7 @@
                         <button type="submit" class="w-full text-left hover:text-teal-600">Logout</button>
                     </form>
                 @else
+                    <a href="{{ route('register') }}" class="block bg-teal-600 text-white text-center rounded-md py-2 hover:bg-teal-700">Join Network</a>
                     <a href="{{ route('login') }}"
                         class="block bg-teal-600 text-white text-center rounded-md py-2 hover:bg-teal-700">Login</a>
                 @endauth
@@ -164,7 +173,7 @@
             </main>
         </div>
         <!-- Footer with Admin Link -->
-        <footer class="bg-white/90 backdrop-blur border-t mt-16">
+        <footer class="bg-white/90 backdrop-blur mt-16">
             <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <div class="flex space-x-6 mb-4 md:mb-0">

@@ -10,7 +10,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
+new class extends Component {
     #[Locked]
     public string $token = '';
     public string $email = '';
@@ -68,46 +68,34 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Reset password')" :description="__('Please enter your new password below')" />
-
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
-
-    <form wire:submit="resetPassword" class="flex flex-col gap-6">
-        <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email')"
-            type="email"
-            required
-            autocomplete="email"
-        />
-
-        <!-- Password -->
-        <flux:input
-            wire:model="password"
-            :label="__('Password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('Password')"
-        />
-
-        <!-- Confirm Password -->
-        <flux:input
-            wire:model="password_confirmation"
-            :label="__('Confirm password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('Confirm password')"
-        />
-
-        <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
-                {{ __('Reset password') }}
-            </flux:button>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 via-emerald-700 to-cyan-800 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 bg-white rounded-xl overflow-hidden shadow-xl">
+            <div class="p-8 md:p-10 bg-teal-50 border-r border-teal-100">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-teal-900">Secure Your Account</h2>
+                <p class="mt-2 text-sm text-teal-800">Update your password safely and keep your profile protected.</p>
+                <div class="mt-6 space-y-3 text-sm text-teal-900">
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Strong password requirements</div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> One-click reset link</div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Seamless login after reset</div>
+                </div>
+                <div class="mt-8">
+                    <a href="{{ route('login') }}" class="inline-flex items-center px-5 py-2.5 bg-white text-teal-700 border border-teal-200 rounded-md font-medium hover:bg-gray-50 transition">Back to Login</a>
+                </div>
+            </div>
+            <div class="p-8 md:p-10">
+                <h2 class="text-2xl font-extrabold text-gray-900">Reset password</h2>
+                <p class="mt-1 text-sm text-gray-600">Please enter your new password below</p>
+                <x-auth-session-status class="mt-4 text-center" :status="session('status')" />
+                <form wire:submit="resetPassword" class="mt-6 flex flex-col gap-6">
+                    <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+                    <flux:input wire:model="password" :label="__('Password')" type="password" required autocomplete="new-password" :placeholder="__('Password')" />
+                    <flux:input wire:model="password_confirmation" :label="__('Confirm password')" type="password" required autocomplete="new-password" :placeholder="__('Confirm password')" />
+                    <div>
+                        <flux:button type="submit" variant="primary" class="w-full">{{ __('Reset password') }}</flux:button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </form>
+    </div>
 </div>

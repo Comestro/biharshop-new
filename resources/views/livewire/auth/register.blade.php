@@ -10,7 +10,7 @@ use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
+new class extends Component {
     public string $name = '';
     public string $email = '';
     public string $mobile = '';
@@ -155,23 +155,31 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                Join BiharShop and start your journey
-            </p>
-        </div>
-
-        <div class="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <form wire:submit="register" class="space-y-6">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 via-emerald-700 to-cyan-800 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 bg-white rounded-xl overflow-hidden shadow-xl">
+            <div class="p-8 md:p-10 bg-teal-50 border-r border-teal-100">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-teal-900">Grow with BiharShop Network</h2>
+                <p class="mt-2 text-sm text-teal-800">Register to start building your team and earning.</p>
+                <div class="mt-6 space-y-3 text-sm text-teal-900">
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Verified referrals and position availability</div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Binary and referral trees</div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Transparent withdrawal charges</div>
+                </div>
+                <div class="mt-8">
+                    <a href="{{ route('login') }}" class="inline-flex items-center px-5 py-2.5 bg-white text-teal-700 border border-teal-200 rounded-md font-medium hover:bg-gray-50 transition">Already a member? Sign in</a>
+                </div>
+            </div>
+            <div class="p-8 md:p-10">
+                <h2 class="text-2xl font-extrabold text-gray-900">Create your account</h2>
+                <p class="mt-1 text-sm text-gray-600">Join BiharShop and start your journey</p>
+                <form wire:submit="register" class="mt-6 space-y-6">
                 <!-- Name -->
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
                     <div class="mt-1">
                         <input wire:model="name" id="name" type="text" required autofocus
-                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                             placeholder="John Doe">
                     </div>
                     @error('name') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
@@ -182,7 +190,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
                     <div class="mt-1">
                         <input wire:model="email" id="email" type="email" required
-                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                             placeholder="you@example.com">
                     </div>
                     @error('email') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
@@ -193,7 +201,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     <label for="mobile" class="block text-sm font-medium text-gray-700">Mobile</label>
                     <div class="mt-1">
                         <input wire:model="mobile" id="mobile" type="text" required
-                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                             placeholder="98########">
                     </div>
                     @error('mobile') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
@@ -211,11 +219,12 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 </div>
 
                 <!-- Password -->
-                <div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                     <div class="mt-1">
                         <input wire:model="password" id="password" type="password" required
-                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                             placeholder="••••••••">
                     </div>
                     @error('password') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
@@ -227,24 +236,25 @@ new #[Layout('components.layouts.auth')] class extends Component {
                         password</label>
                     <div class="mt-1">
                         <input wire:model="password_confirmation" id="password_confirmation" type="password" required
-                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                             placeholder="••••••••">
                     </div>
                 </div>
+            </div>             
 
                 <!-- Terms & Privacy Policy -->
                 <div class="flex items-center">
                     <input id="terms" name="terms" type="checkbox" required
-                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded">
                     <label for="terms" class="ml-2 block text-sm text-gray-900">
-                        I agree to the <a href="#" class="text-indigo-600 hover:text-indigo-500">Terms</a>
-                        and <a href="#" class="text-indigo-600 hover:text-indigo-500">Privacy Policy</a>
+                        I agree to the <a href="#" class="text-teal-600 hover:text-teal-500">Terms</a>
+                        and <a href="#" class="text-teal-600 hover:text-teal-500">Privacy Policy</a>
                     </label>
                 </div>
 
                 <div>
                     <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         Create Account
                     </button>
                 </div>
@@ -262,7 +272,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
                 <div class="mt-6">
                     <a href="{{ route('login') }}"
-                        class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         Sign in instead
                     </a>
                 </div>

@@ -48,9 +48,9 @@ Route::middleware(['auth'])->group(function () {
 
 // Route::middleware(['auth'])->group(function () {
 //     // Membership routes
-//     Route::get('/membership/register/{sponsor_id?}', Register::class)->name('membership.register');
+    Route::get('/membership/register/{sponsor_id?}', Register::class)->name('membership.register');
 //     Route::get('/membership/position/{membership_id}', BinaryPosition::class)->name('membership.position');
-//     Route::get('/membership/payment/{membership}', Payment::class)->name('membership.payment');
+    Route::get('/membership/payment/{membership}', Payment::class)->name('membership.payment');
 //     Route::get('/member/dashboard', \App\Livewire\Membership\Dashboard::class)->name('member.dashboard');
 //     Route::get('/membership/select-position/{membership}', BinaryPosition::class)->name('membership.select-position');
 // });

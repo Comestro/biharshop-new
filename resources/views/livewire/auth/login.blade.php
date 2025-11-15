@@ -11,7 +11,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
+new class extends Component {
     #[Validate('required|string|email')]
     public string $email = '';
 
@@ -74,23 +74,31 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Welcome back</h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                Please sign in to your account
-            </p>
-        </div>
-
-        <div class="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <form wire:submit="login" class="space-y-6">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 via-emerald-700 to-cyan-800 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 bg-white rounded-xl overflow-hidden shadow-xl">
+            <div class="p-8 md:p-10 bg-teal-50 border-r border-teal-100">
+                <h2 class="text-2xl md:text-3xl font-extrabold text-teal-900">Join the BiharShop Network</h2>
+                <p class="mt-2 text-sm text-teal-800">Build your team, earn commissions, and grow with us.</p>
+                <div class="mt-6 space-y-3 text-sm text-teal-900">
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Daily commission tracking</div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Binary and referral earnings</div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Simple withdrawals with fee preview</div>
+                </div>
+                <div class="mt-8">
+                    <a href="{{ route('register') }}" class="inline-flex items-center px-5 py-2.5 bg-teal-600 text-white rounded-md font-medium hover:bg-teal-700 transition">Join Network</a>
+                </div>
+            </div>
+            <div class="p-8 md:p-10">
+                <h2 class="text-2xl font-extrabold text-gray-900">Welcome back</h2>
+                <p class="mt-1 text-sm text-gray-600">Sign in to continue</p>
+                <form wire:submit="login" class="mt-6 space-y-6">
                 <!-- Email Address -->
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
                     <div class="mt-1">
                         <input wire:model="email" id="email" type="email" required 
-                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
                     </div>
                     @error('email') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
                 </div>
@@ -100,7 +108,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                     <div class="mt-1 relative">
                         <input wire:model="password" id="password" type="password" required
-                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
                     </div>
                     @error('password') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
                 </div>
@@ -121,36 +129,29 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 </div>
 
                 <div>
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         Sign in
                     </button>
                 </div>
-            </form>
-
-            @if (Route::has('register'))
-                <div class="mt-6">
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-300"></div>
-                        </div>
-                        <div class="relative flex justify-center text-sm">
-                            <span class="px-2 bg-white text-gray-500">New to BiharShop?</span>
-                        </div>
-                    </div>
-
+                </form>
+                @if (Route::has('register'))
                     <div class="mt-6">
-                        <a href="{{ route('register') }}" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                            Create an account
-                        </a>
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-2 bg-white text-gray-500">New to BiharShop?</span>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <a href="{{ route('register') }}" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Create an account</a>
+                        </div>
                     </div>
+                @endif
+                <div class="mt-6 text-center">
+                    <a href="{{ route('admin.login') }}" class="text-sm text-teal-600 hover:text-teal-500">Login as Administrator</a>
                 </div>
-            @endif
-
-            <!-- Admin Login Link -->
-            <div class="mt-6 text-center">
-                <a href="{{ route('admin.login') }}" class="text-sm text-teal-600 hover:text-teal-500">
-                    Login as Administrator
-                </a>
             </div>
         </div>
     </div>

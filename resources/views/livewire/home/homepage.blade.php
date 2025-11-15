@@ -2,81 +2,108 @@
 
     <!-- Hero Section with Search -->
     <div class="relative bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-800 overflow-hidden">
-        <!-- Background Pattern -->
-        <div class="absolute inset-0 opacity-10">
-            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <defs>
-                    <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5" />
-                    </pattern>
-                </defs>
-                <rect width="100" height="100" fill="url(#grid)" />
-            </svg>
-        </div>
+      
 
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
-            <div class="text-center">
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6">
-                    Welcome to <span class="text-yellow-400">BiharShop</span>
-                </h1>
-                <p class="mt-4 text-xl md:text-2xl text-indigo-100 max-w-2xl mx-auto">
-                    Discover a world of authentic products at unbeatable prices.
-                </p>
-
-                <!-- Search Bar -->
-                <div class="mt-10 max-w-3xl mx-auto">
-                    <div class="flex items-center bg-white rounded-lg overflow-hidden shadow-xl p-1">
-                        <div class="flex-1 px-4">
-                            <input wire:model.live.debounce.300ms="search" type="search"
-                                placeholder="What are you looking for?"
-                                class="w-full py-3 text-gray-800 placeholder-gray-500 border-none focus:outline-none focus:ring-0 text-lg">
-                        </div>
-                        <button
-                            class="px-8 py-3 bg-teal-600 text-white font-medium text-lg rounded-md hover:bg-teal-700 transition-colors duration-200 mx-1">
-                            <span class="hidden md:inline">Search</span>
-                            <svg class="w-6 h-6 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </button>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+            <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-10">
+                <div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6">
+                        Grow Your <span class="text-yellow-400">Network</span> and Earnings
+                    </h1>
+                    <p class="mt-3 text-lg md:text-xl text-indigo-100 max-w-xl">
+                        Join BiharShop’s MLM program, invite your team, and earn daily through binary and referral commissions.
+                    </p>
+                    <div class="mt-8 flex items-center gap-4">
+                        <a href="{{ route('register') }}" class="px-6 py-3 bg-yellow-400 text-teal-900 font-semibold rounded-md hover:bg-yellow-300 transition">Join Network</a>
+                        <a href="{{ route('shop') }}" class="px-6 py-3 bg-white/20 backdrop-blur text-white font-semibold rounded-md hover:bg-white/30 transition">Explore Products</a>
                     </div>
-                    <!-- Popular Searches -->
-                    <div class="mt-4 flex items-center justify-center space-x-4 text-sm text-indigo-100">
-                        <span>Popular:</span>
-                        <a href="#" class="hover:text-white">Electronics</a>
-                        <a href="#" class="hover:text-white">Fashion</a>
-                        <a href="#" class="hover:text-white">Home</a>
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0z"/></svg>
+                            Daily commissions
+                        </span>
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5-5 5M6 7l5 5-5 5"/></svg>
+                            Binary & referral
+                        </span>
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"/></svg>
+                            Easy withdrawals
+                        </span>
+                    </div>
+
+                    <div class="mt-10 max-w-xl">
+                        <div class="flex items-center bg-white/90 rounded-lg overflow-hidden shadow-xl p-1">
+                            <div class="flex-1 px-4">
+                                <input wire:model.live.debounce.300ms="search" type="search" placeholder="Search products or categories" class="w-full py-3 text-gray-800 placeholder-gray-500 border-none focus:outline-none focus:ring-0 text-lg">
+                            </div>
+                            <button class="px-6 py-3 bg-teal-600 text-white font-medium text-lg rounded-md hover:bg-teal-700 transition-colors duration-200 mx-1">
+                                <span class="hidden md:inline">Search</span>
+                                <svg class="w-6 h-6 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Stats -->
-                <div class="mt-16 grid grid-cols-2 gap-5 md:grid-cols-4 lg:gap-8">
-                    <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
-                        <p class="text-3xl font-bold text-white">2000+</p>
-                        <p class="mt-1 text-indigo-100">Products</p>
+                <div class="hidden lg:block">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-indigo-100">Step 1</p>
+                                <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"/></svg>
+                            </div>
+                            <h3 class="mt-2 text-lg font-semibold text-white">Join</h3>
+                            <p class="mt-1 text-sm text-indigo-100">Register and set your referral sponsor.</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-indigo-100">Step 2</p>
+                                <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5-5 5"/></svg>
+                            </div>
+                            <h3 class="mt-2 text-lg font-semibold text-white">Refer</h3>
+                            <p class="mt-1 text-sm text-indigo-100">Grow your binary tree with direct referrals.</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-indigo-100">Step 3</p>
+                                <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2"/></svg>
+                            </div>
+                            <h3 class="mt-2 text-lg font-semibold text-white">Earn</h3>
+                            <p class="mt-1 text-sm text-indigo-100">Receive daily, binary, and referral commissions.</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm text-indigo-100">Step 4</p>
+                                <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"/></svg>
+                            </div>
+                            <h3 class="mt-2 text-lg font-semibold text-white">Withdraw</h3>
+                            <p class="mt-1 text-sm text-indigo-100">Request withdrawals with transparent charges.</p>
+                        </div>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
-                        <p class="text-3xl font-bold text-white">500+</p>
-                        <p class="mt-1 text-indigo-100">Sellers</p>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
-                        <p class="text-3xl font-bold text-white">10K+</p>
-                        <p class="mt-1 text-indigo-100">Customers</p>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
-                        <p class="text-3xl font-bold text-white">24/7</p>
-                        <p class="mt-1 text-indigo-100">Support</p>
-                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 grid grid-cols-2 gap-5 md:grid-cols-4 lg:gap-8">
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
+                    <p class="text-3xl font-bold text-white">2000+</p>
+                    <p class="mt-1 text-indigo-100">Products</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
+                    <p class="text-3xl font-bold text-white">500+</p>
+                    <p class="mt-1 text-indigo-100">Sellers</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
+                    <p class="text-3xl font-bold text-white">10K+</</p>
+                    <p class="mt-1 text-indigo-100">Customers</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-6">
+                    <p class="text-3xl font-bold text-white">24/7</p>
+                    <p class="mt-1 text-indigo-100">Support</p>
                 </div>
             </div>
         </div>
 
-        <!-- Wave Shape Divider -->
-        <div class="absolute bottom-0 left-0 right-0">
-            <svg class="fill-gray-100" viewBox="0 0 1920 80" preserveAspectRatio="none">
-                <path d="M0,0 C480,80 960,80 1440,80 C1920,80 1920,80 1920,80 L1920,0 L0,0 Z"></path>
-            </svg>
-        </div>
+      
     </div>
 
     <!-- Categories -->
