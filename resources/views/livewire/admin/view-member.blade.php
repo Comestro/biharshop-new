@@ -1,5 +1,4 @@
-<div class="py-12 bg-gray-50">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+<div class="w-full">
         <!-- Back Button -->
         <div class="mb-6">
             <a href="{{ route('admin.members') }}" class="inline-flex items-center text-slate-600 hover:text-slate-800">
@@ -38,6 +37,13 @@
                                     {{ $member->isVerified ? 'Verified' : ($member->isPaid ? 'Pending' : 'Unpaid') }}
                                 </span>
                             </div>
+                            @if(!$member->isVerified && $member->isPaid)
+                            <div class="mt-4">
+                                <button wire:click="approveMember" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                    Approve Member
+                                </button>
+                            </div>
+                            @endif
                         </div>
                     </div>
 
@@ -80,7 +86,7 @@
             <!-- Desktop Tabs -->
             <div class="hidden sm:block border-b border-slate-200">
                 <nav class="flex -mb-px">
-                    <button wire:click="setTab('personal')" @class([
+                    <button type="button" wire:click="setTab('personal')" @class([
                         'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
                         'border-blue-500 text-blue-600' => $activeTab === 'personal',
                         'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
@@ -88,7 +94,7 @@
                     ])>
                         Personal Information
                     </button>
-                    <button wire:click="setTab('financial')" @class([
+                    <button type="button" wire:click="setTab('financial')" @class([
                         'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
                         'border-blue-500 text-blue-600' => $activeTab === 'financial',
                         'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
@@ -96,7 +102,7 @@
                     ])>
                         Financial Details
                     </button>
-                    <button wire:click="setTab('network')" @class([
+                    <button type="button" wire:click="setTab('network')" @class([
                         'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
                         'border-blue-500 text-blue-600' => $activeTab === 'network',
                         'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
@@ -104,7 +110,7 @@
                     ])>
                         Network Details
                     </button>
-                    <button wire:click="setTab('wallet')" @class([
+                    <button type="button" wire:click="setTab('wallet')" @class([
                         'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
                         'border-blue-500 text-blue-600' => $activeTab === 'wallet',
                         'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
@@ -112,7 +118,7 @@
                     ])>
                         Wallet
                     </button>
-                    <button wire:click="setTab('tree')" @class([
+                    <button type="button" wire:click="setTab('tree')" @class([
                         'px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap',
                         'border-blue-500 text-blue-600' => $activeTab === 'tree',
                         'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' =>
@@ -377,7 +383,10 @@
                                     <tbody>
                                         @forelse ($withdrawals as $w)
                                             <tr class="hover:bg-slate-50">
-                                                <td class="px-3 py-2 border text-red-700">₹{{ number_format($w['amount'], 2) }}</td>
+                                                <td class="px-3 py-2 border text-red-700">
+                                                    ₹{{ number_format($w['amount'], 2) }}
+                                                    <span class="text-xs text-slate-500 ml-1">Net: ₹{{ number_format(($w['details']['net_amount'] ?? round($w['amount'] * 0.93, 2)), 2) }}</span>
+                                                </td>
                                                 <td class="px-3 py-2 border">{{ $w['status'] }}</td>
                                                 <td class="px-3 py-2 border">{{ \Carbon\Carbon::parse($w['created_at'])->format('d M Y, h:i A') }}</td>
                                             </tr>
@@ -397,7 +406,9 @@
                     <div class="space-y-6">
                         <div class="bg-slate-50 rounded-lg p-4">
                             <h3 class="text-sm font-medium text-slate-900 mb-3">Binary Tree</h3>
-                            <livewire:admin.binary-tree :root_id="$member->id" />
+                            <div wire:ignore>
+                                <livewire:admin.binary-tree :root_id="$member->id" />
+                            </div>
                         </div>
 
                         <div class="bg-slate-50 rounded-lg p-4">
@@ -461,7 +472,6 @@
                 @endif
             </div>
         </div>
-    </div>
     
 
 </div>

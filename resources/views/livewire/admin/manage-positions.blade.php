@@ -1,5 +1,5 @@
 <div>
-    <div class="py-12 bg-gray-50" x-data="{
+    <div x-data="{
         showPositionModal: false,
         showTreeModal: false,
         init() {
@@ -9,7 +9,6 @@
             })
         }
      }">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if(session('message'))
                 <div class="mb-4 mx-4 sm:mx-0 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">
                     {{ session('message') }}
@@ -151,7 +150,6 @@
             </div>
 
         </div>
-    </div>
 
     <x-global.loader wire:loading.flex wire:target="updatePosition" message="Updating position..." />
     <x-global.loader wire:loading.flex wire:target="selectMember" message="Loading member..." />

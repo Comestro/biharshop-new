@@ -10,6 +10,7 @@ use Livewire\WithPagination;
 use App\Models\Membership;
 use App\Models\BinaryTree;
 use Illuminate\Support\Facades\Http;
+
 #[Layout('components.layouts.admin')]
 class Members extends Component
 {
@@ -17,91 +18,16 @@ class Members extends Component
 
     public $statusFilter = 'all';
     public $search = '';
-    public $selectedMembership = null;
-    public $showModal = false;
+    // Removed selectedMembership and showModal
 
     protected $queryString = [
         'statusFilter' => ['except' => 'all'],
         'search' => ['except' => '']
     ];
 
-    public function showMemberDetails($id)
-    {
-        $this->selectedMembership = Membership::find($id);
-        $this->showModal = true;
-    }
+    // Removed showMemberDetails
 
-    public function approveMember()
-    {
-        if ($this->selectedMembership) {
-            $this->selectedMembership->update([
-                'isVerified' => true
-            ]);
-
-            // Handle binary position if referral exists
-            if ($this->selectedMembership->referal_id) {
-                $referrer = Membership::find($this->selectedMembership->referal_id);
-
-                // Check available positions under referrer
-                $existingPositions = BinaryTree::where('parent_id', $referrer->id)
-                    ->pluck('position')
-                    ->toArray();
-
-                // Assign to first available position
-                $position = !in_array('left', $existingPositions) ? 'left' : (!in_array('right', $existingPositions) ? 'right' : null);
-
-                if ($position) {
-                    BinaryTree::create([
-                        'member_id' => $this->selectedMembership->id,
-                        'parent_id' => $referrer->id,
-                        'position' => $position
-                    ]);
-                    ReferralTree::firstOrCreate([
-                        'member_id' => $this->selectedMembership->id,
-                        'parent_id' => $referrer->id,
-                    ], [
-                        'level' => 0
-                    ]);
-                    $this->recordBinaryCommissions($referrer->id);
-                }
-            } elseif ($this->selectedMembership->membership_id) {
-                $membershipper = Membership::find($this->selectedMembership->membership_id);
-                if ($membershipper) {
-                    ReferralTree::create([
-                        'member_id' => $this->selectedMembership->id,
-                        'parent_id' => $this->selectedMembership->membership_id,
-                        'level' => $membershipper->level + 1 ?? 0
-                    ]);
-                }
-
-
-            } else {
-                // If no referrer, find first member without full positions
-                $availableSponsor = Membership::where('isVerified', true)
-                    ->where('id', '!=', $this->selectedMembership->id)
-                    ->whereDoesntHave('binaryChildren', function ($q) {
-                        $q->whereIn('position', ['left', 'right']);
-                    })
-                    ->first();
-
-                if ($availableSponsor) {
-                    BinaryTree::create([
-                        'member_id' => $this->selectedMembership->id,
-                        'parent_id' => $availableSponsor->id,
-                        'position' => 'left'
-                    ]);
-                    $this->recordBinaryCommissions($availableSponsor->id);
-                }
-            }
-
-            $this->showModal = false;
-            session()->flash('message', 'Member verified and positioned successfully.');
-
-            $this->distributeReferralCommissions($this->selectedMembership);
-
-            $this->sendMembershipMessage($this->selectedMembership->mobile, $this->selectedMembership->name, $this->selectedMembership->token);
-        }
-    }
+    // Removed approveMember logic (moved to ViewMember.php)
 
     private function recordBinaryCommissions($memberId)
     {

@@ -1,8 +1,11 @@
-<div x-data="{ showModal: @entangle('showModal') }" class="p-0 lg:p-6">
+<div x-data="{ showModal: @entangle('showModal') }" class="w-full">
 
+    <div class="flex flex-1">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">Coupons Management</h1>
+    </div>
     <div class="flex justify-between items-center mb-4">
         <input type="text" wire:model.live="search" placeholder="Search Coupon Code..."
-            class="border rounded-md px-3 py-2 w-1/3 focus:ring-2 focus:ring-blue-500">
+            class="border border-slate-300 rounded-md px-3 py-2 w-1/3 focus:ring-2 focus:ring-blue-500">
         <button wire:click="create" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Add
             Coupon</button>
     </div>
@@ -14,7 +17,7 @@
     @endif
 
     <div class="overflow-x-auto bg-white rounded-lg shadow">
-        <table class="w-full text-left border">
+        <table class="w-full text-left">
             <thead class="bg-gray-100 text-gray-700">
                 <tr>
                     <th class="p-3">Code</th>

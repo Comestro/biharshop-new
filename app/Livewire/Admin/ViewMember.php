@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire\Admin;
 
 use Livewire\Attributes\Layout;
@@ -11,6 +10,21 @@ use App\Models\Withdrawal;
 #[Layout('components.layouts.admin')]
 class ViewMember extends Component
 {
+    public function approveMember()
+    {
+        if ($this->member && !$this->member->isVerified) {
+            $this->member->isVerified = true;
+            $this->member->save();
+            session()->flash('message', 'Member approved successfully.');
+            // Optionally refresh member data
+            $this->member = Membership::with([
+                'referrer',
+                'referrals',
+                'binaryPosition.parent',
+                'children.member'
+            ])->findOrFail($this->member->id);
+        }
+    }
     public $member;
     public $activeTab = 'tree';
     public $leftTeamSize = 0;

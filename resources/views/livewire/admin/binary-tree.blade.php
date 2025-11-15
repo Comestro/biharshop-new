@@ -59,7 +59,7 @@
 
     <!-- Tree Container -->
     <main class="flex-1 ">
-        <div class="bg-white border rounded-b-2xl shadow-sm overflow-hidden">
+        <div class="bg-white rounded-b-2xl shadow-sm overflow-hidden">
             <div id="binary-tree-container"
                 class="w-full h-[100vh]  bg-[radial-gradient(circle_at_center,_#f8fafc_1px,_transparent_1px)] [background-size:24px_24px] transition-all"
                 wire:ignore></div>

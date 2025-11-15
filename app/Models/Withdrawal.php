@@ -10,6 +10,7 @@ class Withdrawal extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'details' => 'array',
     ];
 
     public function membership()

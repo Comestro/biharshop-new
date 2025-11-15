@@ -33,6 +33,7 @@ class MyWallet extends Component
         $this->isVerified = auth()->user()->membership->isVerified;
 
         $this->calculateCommission($this->memberId);
+        $this->generateReferralCommissions($this->memberId);
         $this->loadWallet();
         $this->loadReferralHistory();
     }
@@ -212,6 +213,8 @@ class MyWallet extends Component
     {
         $levels = [3, 2, 1, 1, 1];
 
+        $base = Membership::find($memberId)?->plan?->price ?? $amount;
+
         $commissions = [];
         $current = $memberId;
         $total = 0;
@@ -226,7 +229,7 @@ class MyWallet extends Component
             $parentId = $parent->parent_id;
 
             $percent = $levels[$i];
-            $calc = ($amount * $percent) / 100;
+            $calc = ($base * $percent) / 100;
 
             $commissions[] = [
                 'level' => $i + 1,
@@ -245,6 +248,45 @@ class MyWallet extends Component
             'total' => $total,
             'levels' => $commissions,
         ];
+    }
+
+    private function generateReferralCommissions($memberId)
+    {
+        $levels = [3, 2, 1, 1, 1];
+        $base = Membership::find($memberId)?->plan?->price ?? 3000;
+        $childToken = $this->getToken($memberId);
+
+        $current = $memberId;
+        for ($i = 0; $i < 5; $i++) {
+            $parent = ReferralTree::where('member_id', $current)->first();
+            if (!$parent || !$parent->parent_id) break;
+            $parentId = $parent->parent_id;
+
+            $percent = $levels[$i];
+            $amount = ($base * $percent) / 100;
+
+            $exists = WalletTransaction::where('membership_id', $parentId)
+                ->where('type', 'referral_commission')
+                ->where('meta->child_id', $childToken)
+                ->where('meta->level', $i + 1)
+                ->exists();
+
+            if (!$exists) {
+                WalletTransaction::create([
+                    'membership_id' => $parentId,
+                    'type' => 'referral_commission',
+                    'amount' => $amount,
+                    'status' => 'confirmed',
+                    'meta' => [
+                        'level' => $i + 1,
+                        'child_id' => $childToken,
+                        'percentage' => $percent
+                    ]
+                ]);
+            }
+
+            $current = $parentId;
+        }
     }
 
     private function loadWallet()
@@ -298,10 +340,21 @@ class MyWallet extends Component
         if ($this->withdrawAmount > $this->walletBalance) {
             return;
         }
+        $gross = round($this->withdrawAmount, 2);
+        $service = round($gross * 0.05, 2);
+        $tds = round($gross * 0.02, 2);
+        $net = max(round($gross - $service - $tds, 2), 0);
+
         Withdrawal::create([
             'membership_id' => $this->memberId,
-            'amount' => $this->withdrawAmount,
-            'status' => 'pending'
+            'amount' => $gross,
+            'status' => 'pending',
+            'details' => [
+                'gross_amount' => $gross,
+                'service_charge' => $service,
+                'tds' => $tds,
+                'net_amount' => $net
+            ]
         ]);
         $this->withdrawAmount = null;
         $this->loadWallet();

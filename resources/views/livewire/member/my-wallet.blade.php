@@ -166,7 +166,10 @@
                 <tbody>
                     @forelse ($withdrawals as $w)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-3 py-2 border text-red-700">₹{{ number_format($w['amount'], 2) }}</td>
+                            <td class="px-3 py-2 border text-red-700">
+                                ₹{{ number_format($w['amount'], 2) }}
+                                <span class="text-xs text-slate-500 ml-1">Net: ₹{{ number_format(($w['details']['net_amount'] ?? round($w['amount'] * 0.93, 2)), 2) }}</span>
+                            </td>
                             <td class="px-3 py-2 border">{{ $w['status'] }}</td>
                             <td class="px-3 py-2 border">{{ \Carbon\Carbon::parse($w['created_at'])->format('d M Y, h:i A') }}</td>
                         </tr>
