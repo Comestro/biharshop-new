@@ -6,8 +6,12 @@ use App\Models\Membership;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 use Livewire\WithFileUploads;
 
+
+
+#[Layout("components.layouts.member")]
 class Register extends Component
 {
     use WithFileUploads;
