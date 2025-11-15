@@ -4,6 +4,8 @@ namespace App\Livewire\Member;
 
 use Livewire\Component;
 use App\Models\Membership;
+use App\Models\WalletTransaction;
+use App\Models\Withdrawal;
 
 class Dashboard extends Component
 {
@@ -12,6 +14,7 @@ class Dashboard extends Component
     public $treeMembers;
     public $leftTeamSize;
     public $rightTeamSize;
+    public $walletBalance = 0.0;
 
     public function mount()
     {
@@ -30,6 +33,14 @@ class Dashboard extends Component
         $this->treeMembers = 0; // Initialize to 0
         $this->leftTeamSize = 0;
         $this->rightTeamSize = 0;
+        $credits = WalletTransaction::where('membership_id', $this->membership->id)
+            ->whereIn('type', ['binary_commission', 'referral_commission'])
+            ->where('status', 'confirmed')
+            ->sum('amount');
+        $debits = Withdrawal::where('membership_id', $this->membership->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->sum('amount');
+        $this->walletBalance = $credits - $debits;
         
         if ($this->membership->binaryPosition) {
             // Get left and right legs first

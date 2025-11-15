@@ -7,117 +7,214 @@
     <title>Member Panel - {{ config('app.name') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     @livewireStyles
+    <style>
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+        .sidebar-enter {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">
     <x-global.loader />
 
-    <div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
+    <div x-data="{ sidebarOpen: false }" class=" flex">
+        <!-- Backdrop for mobile -->
+        <div x-show="sidebarOpen" 
+             @click="sidebarOpen = false"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"></div>
+
         <!-- Sidebar -->
-        <div class="fixed inset-y-0 left-0 z-30 w-64 transform bg-teal-700 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 transition ease-in-out duration-300"
+        <aside class="fixed inset-y-0 left-0 z-30 w-72 transform bg-indigo-600 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out"
             :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
 
-            <!-- Logo -->
-            <div class="flex items-center justify-center h-16 bg-teal-800">
-                <span class="text-white text-2xl font-bold">Member Panel</span>
+            <!-- Logo Section -->
+            <div class="flex items-center justify-center h-20 px-6 bg-indigo-700">
+                <div class="text-center">
+                    <h1 class="text-white text-2xl font-bold tracking-wide">Member Panel</h1>
+                    <p class="text-indigo-200 text-xs mt-1">Welcome back!</p>
+                </div>
+            </div>
+
+              @php
+                $mem = auth()->user()->membership ?? null;
+                $parentName = '-';
+                $parentToken = '-';
+                $parentId = '-';
+                if ($mem) {
+                    $pos = \App\Models\BinaryTree::where('member_id', $mem->id)->first();
+                    $parent = null;
+                    if ($pos && $pos->parent_id) {
+                        $parent = \App\Models\Membership::find($pos->parent_id);
+                    } elseif ($mem->referal_id) {
+                        $parent = \App\Models\Membership::find($mem->referal_id);
+                    }
+                    if ($parent) { $parentName = $parent->name; $parentToken = $parent->token; $parentId = $parent->id; }
+                }
+            @endphp
+            <div class="px-4 py-3 bg-indigo-50 border-b border-indigo-100">
+                <div class="text-indigo-900 font-semibold text-sm">Sponsor</div>
+                <div class="mt-1 text-sm text-indigo-800">{{ $parentName }}</div>
+                <div class="mt-0.5 text-xs text-indigo-700">Token: {{ $parentToken }}</div>
+                <div class="mt-0.5 text-xs text-indigo-700">ID: {{ $parentId }}</div>
             </div>
 
             <!-- Navigation -->
-            <nav class="mt-4 space-y-2 px-4">
+            <nav class="mt-8 px-4 space-y-2">
                 <a href="{{ route('member.dashboard') }}"
-                    class="flex items-center px-4 py-2 text-white rounded-lg {{ request()->routeIs('member.dashboard') ? 'bg-teal-800' : 'hover:bg-teal-600' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    Dashboard
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.dashboard') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.dashboard') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">Dashboard</span>
                 </a>
 
                 <a href="{{ route('member.wallet') }}"
-                    class="flex items-center px-4 py-2 text-white rounded-lg {{ request()->routeIs('member.wallet') ? 'bg-teal-800' : 'hover:bg-teal-600' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    Wallet
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.wallet') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.wallet') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">Wallet</span>
                 </a>
 
                 <a href="{{ route('member.profile') }}"
-                    class="flex items-center px-4 py-2 text-white rounded-lg {{ request()->routeIs('member.profile') ? 'bg-indigo-800' : 'hover:bg-indigo-600' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    Profile
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.profile') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.profile') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">Profile</span>
                 </a>
 
                 <a href="{{ route('member.tree') }}"
-                    class="flex items-center px-4 py-2 text-white rounded-lg {{ request()->routeIs('member.tree') ? 'bg-indigo-800' : 'hover:bg-indigo-600' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                    </svg>
-                    My Tree
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.tree') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.tree') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">My Tree</span>
                 </a>
 
                 <a href="{{ route('member.referrals') }}"
-                    class="flex items-center px-4 py-2 text-white rounded-lg {{ request()->routeIs('member.referrals') ? 'bg-indigo-800' : 'hover:bg-indigo-600' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    My Referrals
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.referrals') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.referrals') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">My Referrals</span>
                 </a>
             </nav>
 
-            <!-- Logout -->
-            <div class="absolute bottom-0 w-full p-4">
+            <!-- Logout Button -->
+            <div class=" px-4 w-full">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
-                        class="w-full flex items-center px-4 py-2 text-white rounded-lg hover:bg-indigo-600">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Logout
+                        class="w-full group flex items-center px-4 py-3 text-white rounded-lg hover:bg-indigo-500 transition-all duration-200">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-500 group-hover:bg-indigo-700 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                        </div>
+                        <span class="ml-3 font-medium">Logout</span>
                     </button>
                 </form>
             </div>
-        </div>
+        </aside>
 
-        <!-- Content -->
-        <div class="flex-1">
-            <!-- Top Navigation -->
-            <div class="bg-white shadow">
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-h-screen">
+            <!-- Top Navigation Bar -->
+            <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div class="flex justify-between items-center px-6 py-4">
-                    <!-- Sidebar Toggle (Mobile) -->
-                    <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Mobile Menu Button -->
+                    <button @click="sidebarOpen = !sidebarOpen" 
+                            class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
 
-                    <!-- Center Info (Member ID) -->
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-500">Member ID:</span>
-                        <span class="text-sm font-semibold text-gray-800">
-                            {{ auth()->user()->membership->isVerified ? auth()->user()->membership->token : 'N/A' }}
-                        </span>
+                    <!-- Member ID Card -->
+                    <div class="flex items-center gap-3 px-4 py-2 bg-indigo-50 rounded-lg border border-indigo-200">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                        </svg>
+                        <div>
+                            <p class="text-xs text-gray-600 font-medium">Member ID</p>
+                            <p class="text-sm font-bold text-gray-900">
+                                {{ auth()->user()->membership->isVerified ? auth()->user()->membership->token : 'N/A' }}
+                            </p>
+                        </div>
                     </div>
 
-                    <!-- Wallet Balance (Right) -->
+                    <!-- Wallet Balance Card -->
+                    @php
+                        $mid = auth()->user()->membership->id ?? null;
+                        $headerBalance = 0;
+                        if ($mid) {
+                            $credits = \App\Models\WalletTransaction::where('membership_id', $mid)
+                                ->whereIn('type', ['binary_commission', 'referral_commission'])
+                                ->where('status', 'confirmed')
+                                ->sum('amount');
+                            $debits = \App\Models\Withdrawal::where('membership_id', $mid)
+                                ->whereIn('status', ['pending', 'approved'])
+                                ->sum('amount');
+                            $headerBalance = $credits - $debits;
+                        }
+                    @endphp
+                    <div class="flex items-center gap-3">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs text-gray-600 font-medium">Available Balance</p>
+                            <p class="text-lg font-bold text-indigo-600">
+                                ₹{{ number_format($headerBalance, 2) }}
+                            </p>
+                        </div>
+                        <a href="{{ route('member.wallet') }}" 
+                           class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                            Wallet
+                        </a>
+                    </div>
                 </div>
-            </div>
-
+            </header>
 
             <!-- Main Content -->
-            <div class="p-6">
+            <main class="flex-1 p-6 overflow-y-auto">
                 {{ $slot }}
-            </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-white border-t border-gray-200 py-4 px-6">
+                <p class="text-center text-sm text-gray-500">
+                    © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+                </p>
+            </footer>
         </div>
     </div>
+
     @livewireScripts
 </body>
 
