@@ -252,40 +252,70 @@ class MyWallet extends Component
 
     private function generateReferralCommissions($memberId)
     {
+        
         $levels = [3, 2, 1, 1, 1];
-        $base = Membership::find($memberId)?->plan?->price ?? 3000;
-        $childToken = $this->getToken($memberId);
+        $childId = $memberId;
+        $childToken = $this->getToken($childId);
 
-        $current = $memberId;
+        // 1️⃣ F ka current wallet calculate
+        $credits = WalletTransaction::where('membership_id', $childId)
+            ->whereIn('type', ['binary_commission', 'referral_commission'])
+            ->where('status', 'confirmed')
+            ->sum('amount');
+
+        // only approved withdrawals minus
+        $debits = Withdrawal::where('membership_id', $childId)
+            ->where('status', 'approved')
+            ->sum('amount');
+
+        $childWallet = max($credits - $debits, 0);
+
+        if ($childWallet <= 0) {
+            return; // No income = No commission
+        }
+
+        // 2️⃣ Start upline chain
+        $current = $childId;
+
         for ($i = 0; $i < 5; $i++) {
+
+            // find parent upline
             $parent = ReferralTree::where('member_id', $current)->first();
-            if (!$parent || !$parent->parent_id) break;
-            $parentId = $parent->parent_id;
+            if (!$parent || !$parent->parent_id)
+                break;
+
+            $uplineId = $parent->parent_id;
 
             $percent = $levels[$i];
-            $amount = ($base * $percent) / 100;
+            $amount = ($childWallet * $percent) / 100;
 
-            $exists = WalletTransaction::where('membership_id', $parentId)
-                ->where('type', 'referral_commission')
-                ->where('meta->child_id', $childToken)
-                ->where('meta->level', $i + 1)
-                ->exists();
+            if ($amount <= 0) {
+                $current = $uplineId;
+                continue;
+            }
 
-            if (!$exists) {
-                WalletTransaction::create([
-                    'membership_id' => $parentId,
+            // 3️⃣ UPDATE or INSERT (final correct usage)
+            WalletTransaction::updateOrCreate(
+                [
+                    'membership_id' => $uplineId,
                     'type' => 'referral_commission',
+                    'meta->child_id' => $childToken,
+                    'meta->level' => $i + 1
+                ],
+                [
                     'amount' => $amount,
                     'status' => 'confirmed',
                     'meta' => [
                         'level' => $i + 1,
                         'child_id' => $childToken,
-                        'percentage' => $percent
+                        'percentage' => $percent,
+                        'base_wallet' => $childWallet
                     ]
-                ]);
-            }
+                ]
+            );
 
-            $current = $parentId;
+            // move up
+            $current = $uplineId;
         }
     }
 
