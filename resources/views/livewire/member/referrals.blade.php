@@ -5,6 +5,14 @@
             <h2 class="text-xl font-medium text-gray-900">My Referrals</h2>
             <p class="mt-1 text-sm text-gray-500">Manage and track your direct referrals.</p>
         </div>
+        @if ($membershipId != auth()->user()->membership->id)
+            <div class="mb-6">
+                <button wire:click="backLevel"
+                    class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-md border bg-teal-700 text-white cursor-pointer">
+                    <- Back </span>
+            </div>
+
+        @endif
 
         <!-- Table Container -->
         <div class="border rounded-lg overflow-hidden">
@@ -21,14 +29,15 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Contact
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Position
-                            </th>
+
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Joined Date
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                View Next
                             </th>
                         </tr>
                     </thead>
@@ -36,25 +45,16 @@
                         @forelse($referrals as $referral)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $referral->token }}
+                                    {{ $referral->member->token }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $referral->name }}
+                                    {{ $referral->member->name }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <div>{{ $referral->email }}</div>
-                                    <div>{{ $referral->mobile }}</div>
+                                    <div>{{ $referral->member->email }}</div>
+                                    <div>{{ $referral->member->mobile }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    @if($referral->binaryPosition)
-                                        <span class="capitalize px-2 py-1 text-xs rounded-full
-                                            {{ $referral->binaryPosition->position === 'left' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
-                                            {{ $referral->binaryPosition->position }}
-                                        </span>
-                                    @else
-                                        <span class="text-gray-400">Not Positioned</span>
-                                    @endif
-                                </td>
+
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $referral->created_at->format('d M Y') }}
                                 </td>
@@ -68,6 +68,13 @@
                                         {{ $referral->isVerified ? 'Active' : ($referral->isPaid ? 'Pending' : 'Incomplete') }}
                                     </span>
                                 </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button wire:click="nextLevel({{ $referral->member->id }})"
+                                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-md border bg-teal-700 text-white cursor-pointer">
+                                        Next ->
+                                    </button>
+                                </td>
                             </tr>
                         @empty
                             <tr>
@@ -79,7 +86,7 @@
                     </tbody>
                 </table>
             </div>
-            
+
             @if($referrals->hasPages())
                 <div class="px-4 py-3 border-t">
                     {{ $referrals->links() }}
