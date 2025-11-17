@@ -24,7 +24,7 @@
         <div class="mb-8">
             <div class="relative">
                 <div class="h-2 w-full bg-gray-200 rounded-full"></div>
-                <div class="h-2 bg-indigo-500 rounded-full absolute top-0 left-0" style="width: {{ (($currentStep-1)/6)*100 }}%"></div>
+                <div class="h-2 bg-indigo-500 rounded-full absolute top-0 left-0" style="width: {{ max(0, (($currentStep-1)/6)*100) }}%"></div>
                 <div class="mt-3 grid grid-cols-7 gap-2">
                     @foreach($steps as $i => $step)
                         <div class="text-[11px] sm:text-xs text-gray-600 {{ $currentStep-1 >= $i ? 'font-semibold text-indigo-700' : '' }}">{{ $step }}</div>
@@ -40,8 +40,22 @@
                 <x-global.loader wire:loading.flex wire:target="nextStep" message="Processing..." />
                 <x-global.loader wire:loading.flex wire:target="previousStep" message="Loading previous step..." />
                 <x-global.loader wire:loading.flex wire:target="save" message="Saving..." />
-                <x-global.loader wire:loading.flex wire:target="pincode" message="Fetching address..." />
                 <x-global.loader wire:loading.flex wire:target="ifsc" message="Fetching bank details..." />
+                <!-- Step 0: E-PIN Assignment -->
+                @if($currentStep === 0)
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-6">Assign Your E-PIN</h3>
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">E-PIN</label>
+                            <input type="text" wire:model.live="e_pin" maxlength="6" class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2" placeholder="Enter 6-digit E-PIN">
+                            @error('e_pin') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
+                            <p class="mt-1 text-xs text-gray-500">E-PIN must belong to your account and be unused</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Step 1: Personal Information -->
                 @if($currentStep === 1)
                 <div>
@@ -160,25 +174,7 @@
                             @error('home_address') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
                         </div>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">PIN Code</label>
-                                <div class="relative">
-                                    <input type="text"
-                                        wire:model.blur="pincode"
-                                        maxlength="6"
-                                        pattern="[0-9]{6}"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border px-3 py-2"
-                                        placeholder="Enter 6 digit PIN code">
-                                    <div wire:loading wire:target="pincode" class="absolute right-2 top-3">
-                                        <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <p class="mt-1 text-xs text-gray-500">Enter PIN code to auto-fill city and state</p>
-                                @error('pincode') <span class="mt-1 text-sm text-red-600">{{ $message }}</span> @enderror
-                            </div>
+                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">City</label>
                                 <input type="text"

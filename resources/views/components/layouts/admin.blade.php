@@ -4,9 +4,8 @@
 <head>
     @include('partials.head', ['title' => 'Admin - ' . config('app.name')])
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     @livewireStyles
 </head>
 
@@ -147,6 +146,17 @@
                     <span>Withdrawals</span>
                 </a>
 
+                {{-- epins --}}
+                <a href="{{ route('admin.epins') }}"
+                    class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors
+                    {{ request()->routeIs('admin.epins') ? 'bg-blue-50 text-blue-600 font-medium' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 8v4m0-4H9m3 0h3"/>
+                    </svg>
+                    <span>ePins</span>
+                </a>
+
                 <!-- Logout -->
                 <div class="mt-auto pt-4 border-t border-gray-200">
                     <form method="POST" action="{{ route('logout') }}">
@@ -189,7 +199,7 @@
             </div>
         </header>
 
-        <main class="px-5 py-3">
+        <main class="px-5 py-3 text-black">
             {{ $slot }}
         </main>
     </div>

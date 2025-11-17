@@ -27,6 +27,12 @@ class Login extends Component
         if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
             if (Auth::attempt(['email' => $identifier, 'password' => $this->password], $this->remember)) {
                 session()->regenerate();
+                $member = Auth::user()->membership ?? null;
+                if (! $member || ($member->used_pin_count ?? 0) <= 0) {
+                    Auth::logout();
+                    $this->addError('email', 'E-PIN not assigned. Please redeem an E-PIN to access your account.');
+                    return;
+                }
                 if (Auth::user()->is_admin) {
                     return redirect()->intended(route('admin.dashboard'));
                 }
@@ -41,6 +47,12 @@ class Login extends Component
             if ($membership && $membership->user && Hash::check($this->password, $membership->user->password)) {
                 Auth::login($membership->user, $this->remember);
                 session()->regenerate();
+                $member = Auth::user()->membership ?? null;
+                if (! $member || ($member->used_pin_count ?? 0) <= 0) {
+                    Auth::logout();
+                    $this->addError('email', 'E-PIN not assigned. Please redeem an E-PIN to access your account.');
+                    return;
+                }
                 if (Auth::user()->is_admin) {
                     return redirect()->intended(route('admin.dashboard'));
                 }

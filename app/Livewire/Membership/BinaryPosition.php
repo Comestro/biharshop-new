@@ -69,6 +69,10 @@ class BinaryPosition extends Component
 
     public function selectPosition()
     {
+        if ((Membership::find($this->membership->id)?->used_pin_count ?? 0) <= 0) {
+            session()->flash('message', 'E-PIN is required before selecting binary position.');
+            return redirect()->route('member.epins');
+        }
         $this->validate([
             'position' => 'required|in:left,right'
         ]);

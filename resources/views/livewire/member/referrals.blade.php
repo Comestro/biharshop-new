@@ -1,5 +1,15 @@
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        @php
+            $mem = auth()->user()->membership;
+            $token = $mem?->token;
+        @endphp
+        @if($token)
+        <div class="mb-6 flex flex-wrap items-center gap-3">
+            <a href="{{ route('register') }}?epin={{ $token }}" class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm">Share Direct Join (E-PIN)</a>
+            <span class="text-sm text-gray-600">Your token: {{ $token }}</span>
+        </div>
+        @endif
         <!-- Header -->
         <div class="mb-6">
             <h2 class="text-xl font-medium text-gray-900">My Referrals</h2>

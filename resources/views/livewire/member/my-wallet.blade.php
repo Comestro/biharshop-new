@@ -1,5 +1,5 @@
 <div class="bg-white border border-gray-200 rounded-lg p-6">
-    @if($isVerified)
+        @if($kycComplete)
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-gray-900">Commission Summary</h2>
         <p class="text-sm text-gray-600 mt-1">Track your earnings and manage withdrawals</p>

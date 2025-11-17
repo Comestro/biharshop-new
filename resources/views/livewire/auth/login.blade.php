@@ -58,6 +58,14 @@ new class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
+        $member = Auth::user()->membership ?? null;
+        if (! $member || ($member->used_pin_count ?? 0) <= 0) {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'E-PIN not assigned. Please redeem an E-PIN to access your account.',
+            ]);
+        }
+
         if (Auth::user()->is_admin) {
             redirect()->intended(route('admin.dashboard'));
             return;

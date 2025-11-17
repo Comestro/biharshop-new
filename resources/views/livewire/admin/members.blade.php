@@ -1,4 +1,5 @@
 <div>
+    
     <div x-data="{ showModal: @entangle('showModal') }">
             @if(session()->has('message'))
             <div class="mb-4 mx-4 sm:mx-0 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">

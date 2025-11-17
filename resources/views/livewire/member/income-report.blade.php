@@ -18,12 +18,10 @@
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Everest Income</th>
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Direct Sponsor Income</th>
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Matching Income</th>
-                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Diamond Club</th>
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Daily Income</th>
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Gross Income</th>
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">TDS Amount</th>
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Admin Charge</th>
-                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Retopup Deduction</th>
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Total Deduction</th>
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Previous Income</th>
                             <th class="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Net Income</th>
@@ -39,12 +37,10 @@
                             <td class="px-3 py-3 text-sm">₹{{ number_format($row['everest'], 2) }}</td>
                             <td class="px-3 py-3 text-sm">₹{{ number_format($row['direct_sponsor'], 2) }}</td>
                             <td class="px-3 py-3 text-sm">₹{{ number_format($row['matching'], 2) }}</td>
-                            <td class="px-3 py-3 text-sm">₹{{ number_format($row['diamond'], 2) }}</td>
                             <td class="px-3 py-3 text-sm">₹{{ number_format($row['daily'], 2) }}</td>
                             <td class="px-3 py-3 text-sm font-semibold text-green-700">₹{{ number_format($row['gross'], 2) }}</td>
                             <td class="px-3 py-3 text-sm">₹{{ number_format($row['tds'], 2) }}</td>
                             <td class="px-3 py-3 text-sm">₹{{ number_format($row['admin'], 2) }}</td>
-                            <td class="px-3 py-3 text-sm">₹{{ number_format($row['retopup'], 2) }}</td>
                             <td class="px-3 py-3 text-sm">₹{{ number_format($row['total_deduction'], 2) }}</td>
                             <td class="px-3 py-3 text-sm">₹{{ number_format($row['previous_income'], 2) }}</td>
                             <td class="px-3 py-3 text-sm font-semibold text-indigo-700">₹{{ number_format($row['net_income'], 2) }}</td>

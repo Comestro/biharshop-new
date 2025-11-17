@@ -27,4 +27,5 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::get('/coupons', AddCoupon::class)->name('admin.coupons');
     Route::get('/manage-plans', ManagePlan::class)->name('admin.manageplans');
     Route::get('/withdrawals', \App\Livewire\Admin\Withdrawals::class)->name('admin.withdrawals');
+    Route::get('/epins', \App\Livewire\Admin\EPinsManager::class)->name('admin.epins');
 });

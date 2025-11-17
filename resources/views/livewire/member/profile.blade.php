@@ -2,7 +2,7 @@
         <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <div class="p-6 sm:p-8 space-y-8">
                 @php
-                    $kycIncomplete = !($membership->father_name && $membership->mother_name && $membership->home_address && $membership->city && $membership->state && $membership->pincode && $membership->bank_name && $membership->account_no && $membership->ifsc && $membership->pancard && $membership->aadhar_card && $membership->image && $membership->terms_and_condition);
+                    $kycIncomplete = !($membership->father_name && $membership->mother_name && $membership->home_address && $membership->city && $membership->state && $membership->bank_name && $membership->account_no && $membership->ifsc && $membership->pancard && $membership->aadhar_card && $membership->image && $membership->terms_and_condition);
                 @endphp
 
                 @if($kycIncomplete)

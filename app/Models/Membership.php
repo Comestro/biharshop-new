@@ -46,9 +46,9 @@ class Membership extends Model
     public function isKycComplete(): bool
     {
         $required = [
-            'name','email','mobile','date_of_birth','gender','nationality','marital_status','father_name','mother_name',
-            'home_address','city','pincode','state','nominee_name','nominee_relation','bank_name','branch_name','account_no','ifsc',
-            'pancard','aadhar_card','image'
+            'name','mobile','date_of_birth','gender','nationality','marital_status','father_name','mother_name',
+            'home_address','city','state','nominee_name','nominee_relation','bank_name','branch_name','account_no','ifsc',
+            'pancard','aadhar_card'
         ];
         foreach ($required as $field) {
             if (empty($this->{$field})) {

@@ -29,7 +29,6 @@ class MyWallet extends Component
     public $dailyCommissionTx = [];
     public $binaryTx = [];
     public $kycComplete = false;
-    public $isVerified = false;
     public $transactions = [];
     public $withdrawals = [];
     public $withdrawAmount = null;
@@ -40,7 +39,7 @@ class MyWallet extends Component
     {
         $this->memberId = auth()->user()->membership->id;
         $this->kycComplete = auth()->user()->membership->isKycComplete();
-        $this->isVerified = auth()->user()->membership->isVerified;
+        
 
         $this->calculateCommission($this->memberId);
         $this->generateReferralCommissions($this->memberId);
@@ -293,6 +292,7 @@ class MyWallet extends Component
             ->whereIn('status', ['pending', 'approved'])
             ->sum('amount');
         $this->walletBalance = $credits - $debits;
+        $pinCount = (Membership::find($this->memberId)?->used_pin_count ?? 0);
         $this->isWalletLocked = $this->hasFirstPair($this->memberId);
         $this->lockedDaily = $this->isWalletLocked
             ? WalletTransaction::where('membership_id', $this->memberId)
@@ -300,7 +300,7 @@ class MyWallet extends Component
                 ->where('status', 'confirmed')
                 ->sum('amount')
             : 0.00;
-        $this->availableBalance = max($this->walletBalance - $this->lockedDaily, 0);
+        $this->availableBalance = $pinCount >= 2 ? max($this->walletBalance - $this->lockedDaily, 0) : 0.00;
         $this->transactions = WalletTransaction::where('membership_id', $this->memberId)
             ->orderBy('created_at', 'desc')
             ->limit(100)

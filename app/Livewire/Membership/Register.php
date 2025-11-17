@@ -3,6 +3,8 @@
 namespace App\Livewire\Membership;
 
 use App\Models\Membership;
+use App\Models\BinaryTree;
+use App\Models\ReferralTree;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -17,7 +19,7 @@ class Register extends Component
     use WithFileUploads;
 
     // Personal Info
-    public $currentStep = 2;
+    public $currentStep = 0;
 
     public $name;
 
@@ -47,7 +49,6 @@ class Register extends Component
 
     public $city;
 
-    public $pincode;
 
     public $state;
 
@@ -80,6 +81,9 @@ class Register extends Component
     public $isSubmitted = false;
 
     public $membership = null;
+    public $e_pin = '';
+    public $tokenFromPin = null;
+    public $token = null;
 
     protected $validationAttributes = [
         'terms_and_condition' => 'terms and conditions',
@@ -167,7 +171,6 @@ class Register extends Component
                 $this->mother_name = $existingMembership->mother_name;
                 $this->home_address = $existingMembership->home_address;
                 $this->city = $existingMembership->city;
-                $this->pincode = $existingMembership->pincode;
                 $this->state = $existingMembership->state;
                 $this->nominee_name = $existingMembership->nominee_name;
                 $this->nominee_relation = $existingMembership->nominee_relation;
@@ -179,8 +182,9 @@ class Register extends Component
                 $this->aadhar_card = $existingMembership->aadhar_card;
                 $this->existingImage = $existingMembership->image;
 
-                // Set the current step based on the completion level
-                $this->currentStep = $this->determineCurrentStep($existingMembership);
+                // Gate by E-PIN assignment first
+                $hasAssignedPin = \App\Models\EPin::where('used_by_membership_id', $existingMembership->id)->exists();
+                $this->currentStep = $hasAssignedPin ? $this->determineCurrentStep($existingMembership) : 0;
                 $isComplete = $existingMembership->isKycComplete();
                 if ($isComplete) {
                     if ($existingMembership->isPaid) {
@@ -191,12 +195,19 @@ class Register extends Component
                 }
                 $this->isSubmitted = false;
             }
+
+            // token
+            if($existingMembership->token) {
+                $this->token = $existingMembership->token;
+            }
         }
     }
 
     protected function determineCurrentStep($membership)
     {
-        // dd($membership);
+        if (!$membership->token) {
+            return 0;            
+        }
         if (! $membership->date_of_birth || ! $membership->gender) {
             return 1;
         }
@@ -224,7 +235,10 @@ class Register extends Component
 
     public function nextStep()
     {
-        $this->validateStep($this->currentStep);
+        $result = $this->validateStep($this->currentStep);
+        if ($result === false) {
+            return;
+        }
         $this->currentStep++;
     }
 
@@ -250,7 +264,6 @@ class Register extends Component
             'mother_name' => $this->mother_name,
             'home_address' => $this->home_address,
             'city' => $this->city,
-            'pincode' => $this->pincode,
             'state' => $this->state,
             'nominee_name' => $this->nominee_name,
             'nominee_relation' => $this->nominee_relation,
@@ -265,7 +278,8 @@ class Register extends Component
         if ($this->image) {
             $data['image'] = $this->image->store('member-photos', 'public');
         }
-        $token = $existingMembership ? $existingMembership->token : $this->generateSequentialToken();
+        // Use the pin as token if available, otherwise fallback to existing or sequential
+        $token = $this->tokenFromPin ?? ($existingMembership ? $existingMembership->token : $this->generateSequentialToken());
         Membership::updateOrCreate(
             ['user_id' => auth()->id()],
             array_merge($data, [
@@ -278,6 +292,21 @@ class Register extends Component
     protected function validateStep($step)
     {
         switch ($step) {
+            case 0:
+                $this->validate([
+                    'e_pin' => 'required|regex:/^\d{6}$/|exists:epins,code',
+                ]);
+                $pin = \App\Models\EPin::where('code', $this->e_pin)
+                    ->where('status','!=','used')
+                    ->first();
+
+                if (! $pin) {
+                    $this->addError('e_pin', 'Invalid E-PIN or not assigned to your account');
+                    return false;
+                }
+                // Store the valid pin code for later use as token
+                $this->tokenFromPin = $pin->code;
+                break;
             case 1:
                 $this->validate([
                     'name' => 'required|string|min:3|max:100',
@@ -308,7 +337,6 @@ class Register extends Component
                     'home_address' => 'required|string|min:10|max:255',
                     'city' => 'required|string|max:50',
                     'state' => 'required|string|max:50',
-                    'pincode' => 'required|digits:6',
                 ]);
                 break;
 
@@ -354,43 +382,7 @@ class Register extends Component
         }
     }
 
-   
 
-    public function updatedPincode($value)
-    {
-        $this->reset(['city', 'state']);
-
-        $pin = preg_replace('/\D/', '', (string) $value);
-        if (strlen($pin) !== 6) {
-            $this->addError('pincode', 'Invalid PIN Code');
-            return;
-        }
-
-        $data = null;
-        try {
-            $response = Http::retry(3, 500)->acceptJson()->get("https://api.postalpincode.in/pincode/{$pin}");
-            if ($response->successful()) {
-                $data = $response->json();
-            }
-        } catch (\Exception $e) {
-            try {
-                $fallback = Http::retry(2, 500)->acceptJson()->get("http://api.postalpincode.in/pincode/{$pin}");
-                if ($fallback->successful()) {
-                    $data = $fallback->json();
-                }
-            } catch (\Exception $e2) {}
-        }
-
-        if (is_array($data) && isset($data[0]) && ($data[0]['Status'] ?? null) === 'Success' && !empty($data[0]['PostOffice'])) {
-            $po = $data[0]['PostOffice'][0] ?? [];
-            $this->city = $po['District'] ?? '';
-            $this->state = $po['State'] ?? '';
-            $this->resetErrorBag();
-            $this->dispatch('address-found');
-        } else {
-            $this->addError('pincode', 'Invalid PIN Code');
-        }
-    }
 
     public function updatedIfsc($value)
     {
@@ -429,11 +421,10 @@ class Register extends Component
 
     public function register()
     {
-        $this->validateStep($this->currentStep);
-
-        $membershipId = null;
-
-
+        $result = $this->validateStep($this->currentStep);
+        if ($result === false) {
+            return;
+        }
 
         $data = [
             'name' => $this->name,
@@ -449,7 +440,6 @@ class Register extends Component
             'mother_name' => $this->mother_name,
             'home_address' => $this->home_address,
             'city' => $this->city,
-            'pincode' => $this->pincode,
             'state' => $this->state,
             'nominee_name' => $this->nominee_name,
             'nominee_relation' => $this->nominee_relation,
@@ -460,28 +450,79 @@ class Register extends Component
             'pancard' => $this->pancard,
             'aadhar_card' => $this->aadhar_card,
             'terms_and_condition' => $this->terms_and_condition,
-            'membership_id' => $membershipId ? $membershipId->id : null,
         ];
 
         if ($this->image) {
             $data['image'] = $this->image->store('member-photos', 'public');
         }
 
+        // Choose token: prefer validated pin, then input pin, else sequential
+        $token = $this->tokenFromPin ?? $this->e_pin ?? $this->generateSequentialToken();
+
+        // Persist membership with token and mark as paid right away for E-PIN
         $membership = Membership::updateOrCreate(
             ['user_id' => auth()->id()],
             array_merge($data, [
-                'token' => $this->generateSequentialToken(),
+                'token' => $token,
                 'user_id' => auth()->id(),
+                'isPaid' => true,
+                'status' => true,
             ])
         );
 
+        // Update E-PIN usage
+        if ($token) {
+            $pin = \App\Models\EPin::where('code', $token)->first();
+            if ($pin && (string)($pin->status ?? '') !== 'used') {
+                $membership->used_pin_count = ($membership->used_pin_count ?? 0) + 1;
+                $membership->save();
+                $pin->update([
+                    'used_by_membership_id' => $membership->id,
+                    'status' => 'used',
+                    'used_at' => now(),
+                ]);
+            }
+        }
+
+        // Create referral link if missing and sponsor known
+        if (!ReferralTree::where('member_id', $membership->id)->exists() && $membership->referal_id) {
+            ReferralTree::create(['member_id' => $membership->id, 'parent_id' => $membership->referal_id]);
+        }
+
+        // Place in binary tree once referral known
+        if (!BinaryTree::where('member_id', $membership->id)->exists() && $membership->referal_id) {
+            $this->placeInBinaryTree($membership->referal_id, $membership->id);
+        }
+
+        // Verify upon KYC completion
         if ($membership->isKycComplete() && !$membership->isVerified) {
             $membership->isVerified = true;
             $membership->save();
         }
 
-        return redirect()->route('membership.payment', $membership);
+        return redirect()->route('dashboard');
     }
+
+    // private function placeInBinaryTree($parentId, $newMemberId)
+    // {
+    //     $queue = [$parentId];
+    //     while (!empty($queue)) {
+    //         $current = array_shift($queue);
+    //         $children = BinaryTree::where('parent_id', $current)->get();
+    //         $left = $children->firstWhere('position', 'left');
+    //         $right = $children->firstWhere('position', 'right');
+    //         if (!$left) {
+    //             BinaryTree::create(['member_id' => $newMemberId, 'parent_id' => $current, 'position' => 'left']);
+    //             return;
+    //         }
+    //         if (!$right) {
+    //             BinaryTree::create(['member_id' => $newMemberId, 'parent_id' => $current, 'position' => 'right']);
+    //             return;
+    //         }
+    //         $queue[] = $left->member_id;
+    //         $queue[] = $right->member_id;
+    //     }
+    // }
 
     public function render()
     {

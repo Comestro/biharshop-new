@@ -125,6 +125,19 @@
                     <span class="ml-3 font-medium">My Referrals</span>
                 </a>
 
+                @php $myToken = auth()->user()->membership->token ?? null; @endphp
+                @if($myToken)
+                <a href="{{ route('member.welcome-letter') }}"
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.welcome-letter') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.welcome-letter') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 7l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">Welcome Letter</span>
+                </a>
+                @endif
+
                 <a href="{{ route('member.income-report') }}"
                     class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.income-report') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
                     <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.income-report') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
@@ -133,6 +146,16 @@
                         </svg>
                     </div>
                     <span class="ml-3 font-medium">Income Report</span>
+                </a>
+
+                <a href="{{ route('member.epins') }}"
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.epins') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.epins') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8M5 3a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2H5z" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">E-PINs</span>
                 </a>
             </nav>
 
@@ -169,7 +192,7 @@
                     </button>
 
                     <!-- Member ID Card -->
-                    <div class="flex items-center gap-3 px-4 py-2 bg-indigo-50 rounded-lg border border-indigo-200">
+                    {{-- <div class="flex items-center gap-3 px-4 py-2 bg-indigo-50 rounded-lg border border-indigo-200">
                         <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                         </svg>
@@ -179,7 +202,7 @@
                                 {{ auth()->user()->membership->isVerified ? auth()->user()->membership->token : 'N/A' }}
                             </p>
                         </div>
-                    </div>
+                    </div> --}}
 
                     <!-- Wallet Balance Card -->
                     @php

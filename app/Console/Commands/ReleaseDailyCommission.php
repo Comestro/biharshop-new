@@ -30,9 +30,7 @@ class ReleaseDailyCommission extends Command
     {
         \Log::info("Daily 16 rupees credit started...");
 
-        $members = Membership::where('isPaid', true)
-            ->where('isVerified', true)
-            ->get();
+        $members = Membership::whereNotNull('token')->get();
 
         $processedMembers = 0;
         $createdCredits = 0;

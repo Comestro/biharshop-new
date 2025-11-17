@@ -5,7 +5,6 @@
     @include('partials.head', ['title' => 'BiharShop'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     @livewireStyles
-    <style>[x-cloak]{display:none!important}</style>
 </head>
 
 <body class="font-sans antialiased">
