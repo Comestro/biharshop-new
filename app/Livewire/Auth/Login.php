@@ -4,6 +4,8 @@ namespace App\Livewire\Auth;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Membership;
 
 class Login extends Component
 {
@@ -12,7 +14,7 @@ class Login extends Component
     public $remember = false;
 
     protected $rules = [
-        'email' => 'required|email',
+        'email' => 'required',
         'password' => 'required'
     ];
 
@@ -20,15 +22,30 @@ class Login extends Component
     {
         $this->validate();
 
-        if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
-            session()->regenerate();
-            
-            // Check if user is admin
-            if (Auth::user()->is_admin) {
-                return redirect()->intended(route('admin.dashboard'));
+        $identifier = trim($this->email);
+
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            if (Auth::attempt(['email' => $identifier, 'password' => $this->password], $this->remember)) {
+                session()->regenerate();
+                if (Auth::user()->is_admin) {
+                    return redirect()->intended(route('admin.dashboard'));
+                }
+                return redirect()->intended(route('member.dashboard'));
             }
-            
-            return redirect()->intended(route('member.dashboard'));
+        } else {
+            $membership = Membership::where('token', $identifier)
+                ->orWhere('mobile', $identifier)
+                ->orWhere('email', $identifier)
+                ->first();
+
+            if ($membership && $membership->user && Hash::check($this->password, $membership->user->password)) {
+                Auth::login($membership->user, $this->remember);
+                session()->regenerate();
+                if (Auth::user()->is_admin) {
+                    return redirect()->intended(route('admin.dashboard'));
+                }
+                return redirect()->intended(route('member.dashboard'));
+            }
         }
 
         $this->addError('email', 'These credentials do not match our records.');

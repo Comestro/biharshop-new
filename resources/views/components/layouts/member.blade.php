@@ -124,6 +124,16 @@
                     </div>
                     <span class="ml-3 font-medium">My Referrals</span>
                 </a>
+
+                <a href="{{ route('member.income-report') }}"
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.income-report') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.income-report') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">Income Report</span>
+                </a>
             </nav>
 
             <!-- Logout Button -->

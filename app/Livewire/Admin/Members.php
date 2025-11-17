@@ -129,8 +129,14 @@ class Members extends Component
 
     private function distributeReferralCommissions(Membership $member)
     {
-        $amount = $member->plan?->price ?? 3000;
         $levels = [3, 2, 1, 1, 1];
+        $earnings = WalletTransaction::where('membership_id', $member->id)
+            ->whereIn('type', ['binary_commission', 'daily_commission'])
+            ->where('status', 'confirmed')
+            ->sum('amount');
+        if ($earnings <= 0) {
+            return;
+        }
 
         $currentId = $member->id;
         for ($i = 0; $i < 5; $i++) {
@@ -139,18 +145,19 @@ class Members extends Component
             $parentId = $parent->parent_id;
 
             $percent = $levels[$i];
-            $calc = ($amount * $percent) / 100;
-
-            $exists = WalletTransaction::where('membership_id', $parentId)
+            $target = ($earnings * $percent) / 100;
+            $existing = WalletTransaction::where('membership_id', $parentId)
                 ->where('type', 'referral_commission')
                 ->where('meta->child_id', $member->token)
                 ->where('meta->level', $i + 1)
-                ->exists();
-            if (!$exists) {
+                ->sum('amount');
+            $delta = max($target - $existing, 0);
+
+            if ($delta > 0) {
                 WalletTransaction::create([
                     'membership_id' => $parentId,
                     'type' => 'referral_commission',
-                    'amount' => $calc,
+                    'amount' => $delta,
                     'status' => 'confirmed',
                     'meta' => [
                         'level' => $i + 1,

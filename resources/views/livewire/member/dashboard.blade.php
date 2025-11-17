@@ -47,8 +47,8 @@
                         </a>
                     </div>
                 </div>
-            </div>
-        </div>
+    </div>
+    </div>
     @endif
 
     <!-- Member Header with Photo -->
@@ -89,7 +89,50 @@
         </div>
     </div>
 
+    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 mb-6">
+        @php
+            $planPerDay = 16;
+            $planDays = 30;
+            $planTotal = $planPerDay * $planDays;
+            $mid = $membership->id ?? null;
+            $dailyAchieved = 0;
+            if ($mid) {
+                $dailyAchieved = \App\Models\WalletTransaction::where('membership_id', $mid)
+                    ->where('type', 'daily_commission')
+                    ->where('status', 'confirmed')
+                    ->sum('amount');
+            }
+            $dailyRemaining = max(0, $planTotal - $dailyAchieved);
+            $daysAchieved = min($planDays, (int) floor($dailyAchieved / $planPerDay));
+            $progressPct = min(100, $planTotal > 0 ? round(($dailyAchieved / $planTotal) * 100) : 0);
+        @endphp
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">Daily Cashback Ads</div>
+                <h3 class="mt-2 text-lg font-semibold text-emerald-900">₹{{ number_format($planPerDay, 2) }} per day for {{ $planDays }} days (₹{{ number_format($planTotal, 2) }} total)</h3>
+                <div class="mt-3 h-3 bg-emerald-100 rounded-full overflow-hidden">
+                    <div class="h-3 bg-emerald-500" style="width: {{ $progressPct }}%"></div>
+                </div>
+                <p class="mt-1 text-xs text-emerald-800">Progress: {{ $progressPct }}%</p>
+            </div>
+            <div class="grid grid-cols-3 gap-4 w-full lg:w-auto">
+                <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
+                    <p class="text-xs font-medium text-emerald-700">Achieved</p>
+                    <p class="mt-1 text-xl font-bold text-emerald-900">₹{{ number_format($dailyAchieved, 2) }}</p>
+                </div>
+                <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
+                    <p class="text-xs font-medium text-emerald-700">Remaining</p>
+                    <p class="mt-1 text-xl font-bold text-emerald-900">₹{{ number_format($dailyRemaining, 2) }}</p>
+                </div>
+                <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
+                    <p class="text-xs font-medium text-emerald-700">Days</p>
+                    <p class="mt-1 text-xl font-bold text-emerald-900">{{ $daysAchieved }} / {{ $planDays }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
         <!-- Direct Referrals Card -->

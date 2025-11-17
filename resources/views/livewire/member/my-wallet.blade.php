@@ -6,7 +6,7 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-green-50 border border-green-200 rounded-lg p-6">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Total Commission</p>
@@ -35,6 +35,19 @@
             <p class="text-xs {{ $isWalletLocked ? 'text-green-600' : 'text-red-600' }} mt-1">
                 {{ $isWalletLocked ? 'Account is active' : 'Account inactive' }}
             </p>
+        </div>
+
+        <div class="bg-teal-50 border border-teal-200 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Total Earnings</p>
+                <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-teal-700">₹{{ number_format($totalEarnings, 2) }}</h3>
+            <p class="text-xs text-teal-600 mt-1">Binary + Referral + Daily</p>
         </div>
 
         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
@@ -92,33 +105,33 @@
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Right Member</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Percentage</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Commission</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Details</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date & Time</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse ($commissionHistory as $row)
+                            @forelse ($binaryTx as $tx)
                                 <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-4 py-3 text-sm text-gray-900">{{ $row['level'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-900">{{ data_get($tx['meta'],'level','-') }}</td>
                                     <td class="px-4 py-3 text-sm">
-                                        @if ($row['status'] === 'Paid')
+                                        @if (($tx['status'] ?? '') === 'confirmed')
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                 Paid
                                             </span>
-                                        @elseif ($row['status'] === 'Pending')
+                                        @elseif (($tx['status'] ?? '') === 'pending')
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                                 Pending
                                             </span>
                                         @else
-                                            <span class="text-gray-500">{{ $row['status'] }}</span>
+                                            <span class="text-gray-500">{{ $tx['status'] ?? '-' }}</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3 text-sm font-medium text-blue-600">{{ $row['left_member'] }}</td>
-                                    <td class="px-4 py-3 text-sm font-medium text-purple-600">{{ $row['right_member'] }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-700">{{ $row['percentage'] }}</td>
+                                    <td class="px-4 py-3 text-sm font-medium text-blue-600">{{ data_get($tx['meta'],'left_member','N/A') }}</td>
+                                    <td class="px-4 py-3 text-sm font-medium text-purple-600">{{ data_get($tx['meta'],'right_member','N/A') }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-700">{{ data_get($tx['meta'],'percentage','-') }}%</td>
                                     <td class="px-4 py-3 text-sm font-semibold text-green-700">
-                                        ₹{{ number_format($row['commission'], 2) }}
+                                        ₹{{ number_format(($tx['amount'] ?? 0), 2) }}
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-gray-600">{{ $row['detail'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600">{{ \Carbon\Carbon::parse($tx['created_at'])->format('d M Y, h:i A') }}</td>
                                 </tr>
                             @empty
                                 <tr>

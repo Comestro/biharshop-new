@@ -62,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/member/tree', \App\Livewire\Member\Tree::class)->name('member.tree');
     Route::get('/member/referrals', \App\Livewire\Member\Referrals::class)->name('member.referrals');
     Route::get('/member/wallet', \App\Livewire\Member\MyWallet::class)->name('member.wallet');
+    Route::get('/member/income-report', \App\Livewire\Member\IncomeReport::class)->name('member.income-report');
     Route::get('/member/select-position/{membership}', \App\Livewire\Member\BinaryPosition::class)->name('member.select-position');
 });
 

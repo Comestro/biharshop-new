@@ -2,6 +2,8 @@
 
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Membership;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -12,7 +14,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 
 new class extends Component {
-    #[Validate('required|string|email')]
+    #[Validate('required|string')]
     public string $email = '';
 
     #[Validate('required|string')]
@@ -29,9 +31,25 @@ new class extends Component {
 
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
-            RateLimiter::hit($this->throttleKey());
+        $identifier = trim($this->email);
 
+        $authenticated = false;
+
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            $authenticated = Auth::attempt(['email' => $identifier, 'password' => $this->password], $this->remember);
+        } else {
+            $membership = Membership::where('token', $identifier)
+                ->orWhere('mobile', $identifier)
+                ->orWhere('email', $identifier)
+                ->first();
+            if ($membership && $membership->user && Hash::check($this->password, $membership->user->password)) {
+                Auth::login($membership->user, $this->remember);
+                $authenticated = true;
+            }
+        }
+
+        if (! $authenticated) {
+            RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
@@ -40,8 +58,11 @@ new class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        // Instead of return, use redirect() helper
-        redirect()->intended(route('dashboard'));
+        if (Auth::user()->is_admin) {
+            redirect()->intended(route('admin.dashboard'));
+            return;
+        }
+        redirect()->intended(route('member.dashboard'));
     }
 
     /**
@@ -93,11 +114,11 @@ new class extends Component {
                 <h2 class="text-2xl font-extrabold text-gray-900">Welcome back</h2>
                 <p class="mt-1 text-sm text-gray-600">Sign in to continue</p>
                 <form wire:submit="login" class="mt-6 space-y-6">
-                <!-- Email Address -->
+                <!-- Identifier -->
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email / Member ID / Mobile</label>
                     <div class="mt-1">
-                        <input wire:model="email" id="email" type="email" required 
+                        <input wire:model="email" id="email" type="text" required 
                             class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
                     </div>
                     @error('email') <span class="text-sm text-red-600">{{ $message }}</span> @enderror

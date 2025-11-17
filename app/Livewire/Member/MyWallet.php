@@ -27,12 +27,14 @@ class MyWallet extends Component
     public $referralCommissionTotal = 0.00;
     public $dailyCommissionTotal = 0.00;
     public $dailyCommissionTx = [];
+    public $binaryTx = [];
     public $kycComplete = false;
     public $isVerified = false;
     public $transactions = [];
     public $withdrawals = [];
     public $withdrawAmount = null;
     public $withdrawPreview = null;
+    public $totalEarnings = 0.00;
 
     public function mount()
     {
@@ -50,6 +52,7 @@ class MyWallet extends Component
     // binary wala
     private function calculateCommission($memberId)
     {
+        $this->commissionHistory = [];
         $baseAmount = Auth::user()->membership->plan?->price ?? 3000;
         $wallet = 0.0;
 
@@ -62,8 +65,8 @@ class MyWallet extends Component
                 'status' => 'No Pair',
                 'percentage' => '-',
                 'commission' => 0,
-                'left_member' => '❌ No left member',
-                'right_member' => '❌ No right member',
+                'left_member' => 'No left member',
+                'right_member' => 'No right member',
                 'detail' => 'No binary started yet.',
             ];
             return;
@@ -88,22 +91,24 @@ class MyWallet extends Component
         $leftTokens = array_map(fn($id) => $this->getToken($id), $leftMembers);
         $rightTokens = array_map(fn($id) => $this->getToken($id), $rightMembers);
 
-        $maxDepth = max($leftDepth, $rightDepth);
-        $minDepth = min($leftDepth, $rightDepth);
+        $leftCount = 1 + $this->countSubtree($left->member_id);
+        $rightCount = 1 + $this->countSubtree($right->member_id);
         $todayCount = WalletTransaction::where('membership_id', $this->memberId)
             ->where('type', 'binary_commission')
             ->whereDate('created_at', now()->toDateString())
             ->count();
         $capRemaining = max(25 - $todayCount, 0);
 
-        if ($maxDepth >= 2 && $minDepth >= 1) {
+        $initialExists = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'binary_commission')
+            ->where('meta->level', 1)
+            ->exists();
+
+        if ((($leftCount >= 2 && $rightCount >= 1) || ($rightCount >= 2 && $leftCount >= 1)) && ! $initialExists) {
             $commission = ($baseAmount * 16) / 100;
-            $recorded = WalletTransaction::where('membership_id', $this->memberId)
-                ->where('type', 'binary_commission')
-                ->where('meta->level', 1)
-                ->exists();
             $status = 'Pending';
-            if (!$recorded && $capRemaining > 0) {
+            if ($capRemaining > 0) {
+                $side = ($leftCount >= 2 && $leftCount >= $rightCount) ? 'left' : 'right';
                 WalletTransaction::create([
                     'membership_id' => $this->memberId,
                     'type' => 'binary_commission',
@@ -113,13 +118,11 @@ class MyWallet extends Component
                         'level' => 1,
                         'left_member' => $leftTokens[0] ?? 'N/A',
                         'right_member' => $rightTokens[0] ?? 'N/A',
-                        'percentage' => 16
+                        'percentage' => 16,
+                        'initial_side' => $side
                     ]
                 ]);
                 $capRemaining--;
-                $status = 'Paid';
-                $wallet += $commission;
-            } elseif ($recorded) {
                 $status = 'Paid';
                 $wallet += $commission;
             }
@@ -134,45 +137,52 @@ class MyWallet extends Component
             ];
         }
 
-        // 12% matched levels
-        $pairs = $minDepth;
-        if ($pairs > 1) {
-            for ($i = 2; $i <= $pairs; $i++) {
-                $commission = ($baseAmount * 12) / 100;
-                $recorded = WalletTransaction::where('membership_id', $this->memberId)
-                    ->where('type', 'binary_commission')
-                    ->where('meta->level', $i)
-                    ->exists();
-                $status = 'Pending';
-                if (!$recorded && $capRemaining > 0) {
-                    WalletTransaction::create([
-                        'membership_id' => $this->memberId,
-                        'type' => 'binary_commission',
-                        'amount' => $commission,
-                        'status' => 'confirmed',
-                        'meta' => [
-                            'level' => $i,
-                            'left_member' => $leftTokens[$i - 1] ?? 'N/A',
-                            'right_member' => $rightTokens[$i - 1] ?? 'N/A',
-                            'percentage' => 12
-                        ]
-                    ]);
-                    $capRemaining--;
-                    $status = 'Paid';
-                    $wallet += $commission;
-                } elseif ($recorded) {
-                    $status = 'Paid';
-                    $wallet += $commission;
+        $initialTx = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'binary_commission')
+            ->where('meta->level', 1)
+            ->first();
+        $paidMatches = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'binary_commission')
+            ->where('meta->level', '>=', 2)
+            ->count();
+        if ($initialTx) {
+            $side = $initialTx->meta['initial_side'] ?? (($leftCount >= $rightCount) ? 'left' : 'right');
+            $consLeft = $side === 'left' ? 2 : 1;
+            $consRight = $side === 'left' ? 1 : 2;
+            $availLeft = max($leftCount - $consLeft, 0);
+            $availRight = max($rightCount - $consRight, 0);
+            $targetMatches = min($availLeft, $availRight);
+            if ($targetMatches > $paidMatches) {
+                for ($i = $paidMatches + 1; $i <= $targetMatches; $i++) {
+                    $commission = ($baseAmount * 12) / 100;
+                    $status = 'Pending';
+                    if ($capRemaining > 0) {
+                        WalletTransaction::create([
+                            'membership_id' => $this->memberId,
+                            'type' => 'binary_commission',
+                            'amount' => $commission,
+                            'status' => 'confirmed',
+                            'meta' => [
+                                'level' => $i + 1,
+                                'left_member' => 'N/A',
+                                'right_member' => 'N/A',
+                                'percentage' => 12
+                            ]
+                        ]);
+                        $capRemaining--;
+                        $status = 'Paid';
+                        $wallet += $commission;
+                    }
+                    $this->commissionHistory[] = [
+                        'level' => $i + 1,
+                        'status' => $status,
+                        'percentage' => '12%',
+                        'commission' => $commission,
+                        'left_member' => 'N/A',
+                        'right_member' => 'N/A',
+                        'detail' => 'Pair matched'
+                    ];
                 }
-                $this->commissionHistory[] = [
-                    'level' => $i,
-                    'status' => $status,
-                    'percentage' => '12%',
-                    'commission' => $commission,
-                    'left_member' => $leftTokens[$i - 1] ?? 'N/A',
-                    'right_member' => $rightTokens[$i - 1] ?? 'N/A',
-                    'detail' => 'Pair matched'
-                ];
             }
         }
 
@@ -215,54 +225,29 @@ class MyWallet extends Component
         return Membership::find($memberId)?->token ?? 'N/A';
     }
 
-
-
-    // referral wala
-    private function calculateReferralCommission($memberId, $amount = 3000)
+    private function countSubtree($memberId)
     {
-        $levels = [3, 2, 1, 1, 1];
-
-        $base = Membership::find($memberId)?->plan?->price ?? $amount;
-
-        $commissions = [];
-        $current = $memberId;
-        $total = 0;
-
-        for ($i = 0; $i < 5; $i++) {
-
-            $parent = ReferralTree::where('member_id', $current)->first();
-
-            if (!$parent || !$parent->parent_id)
-                break;
-
-            $parentId = $parent->parent_id;
-
-            $percent = $levels[$i];
-            $calc = ($base * $percent) / 100;
-
-            $commissions[] = [
-                'level' => $i + 1,
-                'upline_id' => $this->getToken($parentId),
-                'percentage' => $percent,
-                'commission' => $calc,
-            ];
-            // Display-only; actual referral commission distribution occurs when a member is verified
-
-            $total += $calc;
-
-            $current = $parentId;
+        $count = 0;
+        $children = \App\Models\BinaryTree::where('parent_id', $memberId)->get();
+        foreach ($children as $child) {
+            $count++;
+            $count += $this->countSubtree($child->member_id);
         }
-
-        return [
-            'total' => $total,
-            'levels' => $commissions,
-        ];
+        return $count;
     }
+
 
     private function generateReferralCommissions($memberId)
     {
         $levels = [3, 2, 1, 1, 1];
-        $base = Membership::find($memberId)?->plan?->price ?? 3000;
+        $earnings = WalletTransaction::where('membership_id', $memberId)
+            ->whereIn('type', ['binary_commission', 'daily_commission'])
+            ->where('status', 'confirmed')
+            ->sum('amount');
+        if ($earnings <= 0) {
+            return;
+        }
+
         $childToken = $this->getToken($memberId);
 
         $current = $memberId;
@@ -272,19 +257,19 @@ class MyWallet extends Component
             $parentId = $parent->parent_id;
 
             $percent = $levels[$i];
-            $amount = ($base * $percent) / 100;
-
-            $exists = WalletTransaction::where('membership_id', $parentId)
+            $target = ($earnings * $percent) / 100;
+            $existing = WalletTransaction::where('membership_id', $parentId)
                 ->where('type', 'referral_commission')
                 ->where('meta->child_id', $childToken)
                 ->where('meta->level', $i + 1)
-                ->exists();
+                ->sum('amount');
+            $delta = max($target - $existing, 0);
 
-            if (!$exists) {
+            if ($delta > 0) {
                 WalletTransaction::create([
                     'membership_id' => $parentId,
                     'type' => 'referral_commission',
-                    'amount' => $amount,
+                    'amount' => $delta,
                     'status' => 'confirmed',
                     'meta' => [
                         'level' => $i + 1,
@@ -308,7 +293,7 @@ class MyWallet extends Component
             ->whereIn('status', ['pending', 'approved'])
             ->sum('amount');
         $this->walletBalance = $credits - $debits;
-        $this->isWalletLocked = !$this->hasFirstPair($this->memberId);
+        $this->isWalletLocked = $this->hasFirstPair($this->memberId);
         $this->lockedDaily = $this->isWalletLocked
             ? WalletTransaction::where('membership_id', $this->memberId)
                 ->where('type', 'daily_commission')
@@ -387,6 +372,7 @@ class MyWallet extends Component
         if (!$left || !$right) {
             return false;
         }
+        // dd($left, $right);
         [$leftDepth] = $this->getDirectionalDepth($left->member_id, 'left');
         [$rightDepth] = $this->getDirectionalDepth($right->member_id, 'right');
         $maxDepth = max($leftDepth, $rightDepth);
@@ -400,14 +386,23 @@ class MyWallet extends Component
             ->where('type', 'binary_commission')
             ->where('status', 'confirmed')
             ->sum('amount');
+
         $this->referralCommissionTotal = WalletTransaction::where('membership_id', $this->memberId)
             ->where('type', 'referral_commission')
             ->where('status', 'confirmed')
             ->sum('amount');
+
         $this->dailyCommissionTotal = WalletTransaction::where('membership_id', $this->memberId)
             ->where('type', 'daily_commission')
             ->where('status', 'confirmed')
             ->sum('amount');
+
+        $this->binaryTx = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'binary_commission')
+            ->orderBy('created_at', 'desc')
+            ->limit(200)
+            ->get()
+            ->toArray();
 
         $this->dailyCommissionTx = WalletTransaction::where('membership_id', $this->memberId)
             ->where('type', 'daily_commission')
@@ -415,6 +410,8 @@ class MyWallet extends Component
             ->limit(200)
             ->get()
             ->toArray();
+
+        $this->totalEarnings = round(($this->binaryCommissionTotal + $this->referralCommissionTotal + $this->dailyCommissionTotal), 2);
     }
 
     public function updatedWithdrawAmount()

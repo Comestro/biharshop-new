@@ -30,8 +30,12 @@ class ReleaseDailyCommission extends Command
     {
         \Log::info("Daily 16 rupees credit started...");
 
-        $members = Membership::where('payment_status', 'success')->get();
+        $members = Membership::where('isPaid', true)
+            ->where('isVerified', true)
+            ->get();
 
+        $processedMembers = 0;
+        $createdCredits = 0;
         foreach ($members as $member) {
             $start = $member->created_at->copy()->startOfDay();
             $end = now()->copy()->startOfDay();
@@ -62,10 +66,13 @@ class ReleaseDailyCommission extends Command
                         'updated_at' => $date,
                     ]);
                 });
+                $createdCredits++;
             }
+            $processedMembers++;
         }
 
-        \Log::info("Daily 16 rupees commission done.");
+        \Log::info("Daily 16 rupees commission done. Members: {$processedMembers}, Credits: {$createdCredits}");
+        $this->info("Daily commission credited for {$processedMembers} members. Rows created: {$createdCredits}");
     }
 
 }
