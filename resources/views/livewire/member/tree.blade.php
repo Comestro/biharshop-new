@@ -1,1 +1,1 @@
-  <livewire:admin.binary-tree :root_id="auth()->user()->membership->id"/>
+  <livewire:member.member-tree-component :root_id="auth()->user()->membership->id"/>

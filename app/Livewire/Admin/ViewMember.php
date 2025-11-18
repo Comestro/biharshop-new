@@ -44,7 +44,7 @@ class ViewMember extends Component
     public $withdrawals = [];
     public $binaryUplines = [];
     public $referralUplines = [];
-   
+
     protected $validTabs = ['personal', 'financial', 'network', 'wallet', 'tree', 'binary_commission', 'referral_commission', 'daily_commission'];
     protected $listeners = ['treeNodeSelected' => 'navigateToMember'];
 
@@ -56,54 +56,54 @@ class ViewMember extends Component
             'binaryPosition.parent',
             'children.member'
         ])->findOrFail($id);
-        
+
         // Calculate team sizes
         $this->calculateTeamSizes();
         $this->loadWalletData();
         $this->loadCommissionData();
         $this->loadUplines();
     }
-    
+
     protected function calculateTeamSizes()
     {
         $this->leftTeamSize = 0;
         $this->rightTeamSize = 0;
-        
+
         if ($this->member) {
             // Get left and right legs first
             $leftChild = BinaryTree::where('parent_id', $this->member->id)
                 ->where('position', 'left')
                 ->first();
-                
+
             $rightChild = BinaryTree::where('parent_id', $this->member->id)
                 ->where('position', 'right')
                 ->first();
-            
+
             // Count members in left leg
             if ($leftChild) {
                 $this->leftTeamSize = 1 + $this->countTreeMembers($leftChild->member_id);
             }
-            
+
             // Count members in right leg
             if ($rightChild) {
                 $this->rightTeamSize = 1 + $this->countTreeMembers($rightChild->member_id);
             }
-            
+
             // Calculate total team size
             $this->totalTeamSize = $this->leftTeamSize + $this->rightTeamSize;
         }
     }
-    
+
     protected function countTreeMembers($memberId)
     {
         $count = 0;
         $children = BinaryTree::where('parent_id', $memberId)->get();
-        
+
         foreach ($children as $child) {
             $count++; // Count this child
             $count += $this->countTreeMembers($child->member_id); // Add all descendants
         }
-        
+
         return $count;
     }
 
@@ -155,6 +155,63 @@ class ViewMember extends Component
         $this->loadWalletData();
         $this->loadCommissionData();
         $this->loadUplines();
+        $this->insertReferralComission($this->member->id);
+
+    }
+    private function insertReferralComission($memberId)
+    {
+        $levels = [3, 2, 1, 1, 1];
+        $childId = $memberId;
+        $childToken = $this->getToken($childId);
+
+        $credits = WalletTransaction::where('membership_id', $childId)
+            ->whereIn('type', ['binary_commission'])
+            ->where('status', 'confirmed')
+            ->sum('amount');
+
+        $childWallet = max($credits, 0);
+
+        if ($childWallet <= 0) {
+            return;
+        }
+
+        $current = $childId;
+
+        for ($i = 0; $i < 5; $i++) {
+
+            $parent = BinaryTree::where('member_id', $current)->first();
+
+            if (!$parent || !$parent->parent_id)
+                break;
+
+            $uplineId = $parent->parent_id;
+
+            $percent = $levels[$i];
+            $amount = ($childWallet * $percent) / 100;
+
+            if ($amount > 0) {
+                WalletTransaction::updateOrCreate(
+                    [
+                        'membership_id' => $uplineId,
+                        'type' => 'referral_commission',
+                        'meta->child_id' => $childToken,
+                        'meta->level' => $i + 1
+                    ],
+                    [
+                        'amount' => $amount,
+                        'status' => 'confirmed',
+                        'meta' => [
+                            'level' => $i + 1,
+                            'child_id' => $childToken,
+                            'percentage' => $percent,
+                            'base_wallet' => $childWallet
+                        ]
+                    ]
+                );
+            }
+
+            $current = $uplineId;
+        }
     }
 
     protected function generateBinaryCommissions()
@@ -242,7 +299,8 @@ class ViewMember extends Component
             $next = BinaryTree::where('parent_id', $current)
                 ->where('position', $direction)
                 ->first();
-            if (!$next) break;
+            if (!$next)
+                break;
             $depth++;
             $current = $next->member_id;
             $chain[] = $current;
@@ -252,7 +310,8 @@ class ViewMember extends Component
 
     protected function getToken($memberId)
     {
-        if (!$memberId) return 'N/A';
+        if (!$memberId)
+            return 'N/A';
         return Membership::find($memberId)?->token ?? 'N/A';
     }
 
@@ -304,9 +363,11 @@ class ViewMember extends Component
         $level = 1;
         while (true) {
             $pos = BinaryTree::where('member_id', $current)->first();
-            if (!$pos || !$pos->parent_id) break;
+            if (!$pos || !$pos->parent_id)
+                break;
             $parent = Membership::find($pos->parent_id);
-            if (!$parent) break;
+            if (!$parent)
+                break;
             $list[] = [
                 'level' => $level,
                 'name' => $parent->name,
@@ -315,7 +376,8 @@ class ViewMember extends Component
             ];
             $current = $parent->id;
             $level++;
-            if ($level > 10) break;
+            if ($level > 10)
+                break;
         }
         return $list;
     }
@@ -327,9 +389,11 @@ class ViewMember extends Component
         $level = 1;
         while (true) {
             $ref = \App\Models\ReferralTree::where('member_id', $current)->first();
-            if (!$ref || !$ref->parent_id) break;
+            if (!$ref || !$ref->parent_id)
+                break;
             $parent = Membership::find($ref->parent_id);
-            if (!$parent) break;
+            if (!$parent)
+                break;
             $list[] = [
                 'level' => $level,
                 'name' => $parent->name,
@@ -337,7 +401,8 @@ class ViewMember extends Component
             ];
             $current = $parent->id;
             $level++;
-            if ($level > 10) break;
+            if ($level > 10)
+                break;
         }
         return $list;
     }
@@ -369,10 +434,12 @@ class ViewMember extends Component
 
     protected function processNode($memberId, $parentId, &$flatData)
     {
-        if (!$memberId) return;
+        if (!$memberId)
+            return;
 
         $member = Membership::find($memberId);
-        if (!$member) return;
+        if (!$member)
+            return;
 
         $flatData[] = [
             'id' => $member->id,
@@ -413,10 +480,6 @@ class ViewMember extends Component
         }
     }
 
-    public function render()
-    {
-        return view('livewire.admin.view-member');
-    }
 
     protected function hasFirstPair($memberId)
     {
@@ -465,5 +528,9 @@ class ViewMember extends Component
                 'updated_at' => $date,
             ]);
         }
+    }
+    public function render()
+    {
+        return view('livewire.admin.view-member');
     }
 }
