@@ -40,7 +40,7 @@ class MyWallet extends Component
         $this->memberId = auth()->user()->membership->id;
         $this->kycComplete = auth()->user()->membership->isKycComplete();
         
-
+        $this->generateDailyCommission($this->memberId);
         $this->calculateCommission($this->memberId);
         $this->generateReferralCommissions($this->memberId);
         $this->loadWallet();
@@ -292,15 +292,14 @@ class MyWallet extends Component
             ->whereIn('status', ['pending', 'approved'])
             ->sum('amount');
         $this->walletBalance = $credits - $debits;
-        $pinCount = (Membership::find($this->memberId)?->used_pin_count ?? 0);
-        $this->isWalletLocked = $this->hasFirstPair($this->memberId);
+        $this->isWalletLocked = !$this->hasFirstPair($this->memberId);
         $this->lockedDaily = $this->isWalletLocked
             ? WalletTransaction::where('membership_id', $this->memberId)
                 ->where('type', 'daily_commission')
                 ->where('status', 'confirmed')
                 ->sum('amount')
             : 0.00;
-        $this->availableBalance = $pinCount >= 2 ? max($this->walletBalance - $this->lockedDaily, 0) : 0.00;
+        $this->availableBalance = max($this->walletBalance - $this->lockedDaily, 0);
         $this->transactions = WalletTransaction::where('membership_id', $this->memberId)
             ->orderBy('created_at', 'desc')
             ->limit(100)
@@ -311,6 +310,36 @@ class MyWallet extends Component
             ->limit(100)
             ->get()
             ->toArray();
+    }
+
+    private function generateDailyCommission($memberId)
+    {
+        $m = Membership::find($memberId);
+        if (!$m || !$m->created_at) return;
+        $start = $m->created_at->copy()->startOfDay();
+        $end = now()->copy()->startOfDay();
+        $eligibleDays = min(30, $start->diffInDays($end) + 1);
+        $totalReceived = WalletTransaction::where('membership_id', $memberId)
+            ->where('type', 'daily_commission')
+            ->sum('amount');
+        for ($i = 0; $i < $eligibleDays; $i++) {
+            if ($totalReceived >= 480) break;
+            $date = $start->copy()->addDays($i);
+            $existsForDate = WalletTransaction::where('membership_id', $memberId)
+                ->where('type', 'daily_commission')
+                ->whereDate('created_at', $date->toDateString())
+                ->exists();
+            if ($existsForDate) continue;
+            WalletTransaction::create([
+                'membership_id' => $memberId,
+                'type' => 'daily_commission',
+                'amount' => 16,
+                'status' => 'confirmed',
+                'created_at' => $date,
+                'updated_at' => $date,
+            ]);
+            $totalReceived += 16;
+        }
     }
 
     private function loadReferralHistory()

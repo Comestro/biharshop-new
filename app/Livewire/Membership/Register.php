@@ -19,7 +19,7 @@ class Register extends Component
     use WithFileUploads;
 
     // Personal Info
-    public $currentStep = 0;
+    public $currentStep = 1;
 
     public $name;
 
@@ -81,8 +81,6 @@ class Register extends Component
     public $isSubmitted = false;
 
     public $membership = null;
-    public $e_pin = '';
-    public $tokenFromPin = null;
     public $token = null;
 
     protected $validationAttributes = [
@@ -156,7 +154,6 @@ class Register extends Component
             $existingMembership = Membership::where('user_id', auth()->id())->first();
             if ($existingMembership) {
                 $this->membership = $existingMembership;
-
                 // Load existing data
                 $this->name = $existingMembership->name;
                 $this->email = $existingMembership->email;
@@ -182,9 +179,7 @@ class Register extends Component
                 $this->aadhar_card = $existingMembership->aadhar_card;
                 $this->existingImage = $existingMembership->image;
 
-                // Gate by E-PIN assignment first
-                $hasAssignedPin = \App\Models\EPin::where('used_by_membership_id', $existingMembership->id)->exists();
-                $this->currentStep = $hasAssignedPin ? $this->determineCurrentStep($existingMembership) : 0;
+                $this->currentStep = $this->determineCurrentStep($existingMembership);
                 $isComplete = $existingMembership->isKycComplete();
                 if ($isComplete) {
                     if ($existingMembership->isPaid) {
@@ -206,7 +201,7 @@ class Register extends Component
     protected function determineCurrentStep($membership)
     {
         if (!$membership->token) {
-            return 0;            
+            return 1;            
         }
         if (! $membership->date_of_birth || ! $membership->gender) {
             return 1;
@@ -278,8 +273,8 @@ class Register extends Component
         if ($this->image) {
             $data['image'] = $this->image->store('member-photos', 'public');
         }
-        // Use the pin as token if available, otherwise fallback to existing or sequential
-        $token = $this->tokenFromPin ?? ($existingMembership ? $existingMembership->token : $this->generateSequentialToken());
+        // Use existing token if available, otherwise fallback to sequential
+        $token = $existingMembership ? $existingMembership->token : $this->generateSequentialToken();
         Membership::updateOrCreate(
             ['user_id' => auth()->id()],
             array_merge($data, [
@@ -292,21 +287,6 @@ class Register extends Component
     protected function validateStep($step)
     {
         switch ($step) {
-            case 0:
-                $this->validate([
-                    'e_pin' => 'required|regex:/^\d{6}$/|exists:epins,code',
-                ]);
-                $pin = \App\Models\EPin::where('code', $this->e_pin)
-                    ->where('status','!=','used')
-                    ->first();
-
-                if (! $pin) {
-                    $this->addError('e_pin', 'Invalid E-PIN or not assigned to your account');
-                    return false;
-                }
-                // Store the valid pin code for later use as token
-                $this->tokenFromPin = $pin->code;
-                break;
             case 1:
                 $this->validate([
                     'name' => 'required|string|min:3|max:100',
@@ -456,8 +436,8 @@ class Register extends Component
             $data['image'] = $this->image->store('member-photos', 'public');
         }
 
-        // Choose token: prefer validated pin, then input pin, else sequential
-        $token = $this->tokenFromPin ?? $this->e_pin ?? $this->generateSequentialToken();
+        // Choose token: use existing token if set, otherwise sequential
+        $token = $this->token ?? $this->generateSequentialToken();
 
         // Persist membership with token and mark as paid right away for E-PIN
         $membership = Membership::updateOrCreate(
@@ -470,19 +450,7 @@ class Register extends Component
             ])
         );
 
-        // Update E-PIN usage
-        if ($token) {
-            $pin = \App\Models\EPin::where('code', $token)->first();
-            if ($pin && (string)($pin->status ?? '') !== 'used') {
-                $membership->used_pin_count = ($membership->used_pin_count ?? 0) + 1;
-                $membership->save();
-                $pin->update([
-                    'used_by_membership_id' => $membership->id,
-                    'status' => 'used',
-                    'used_at' => now(),
-                ]);
-            }
-        }
+        // E-PIN updates are handled during account creation
 
         // Create referral link if missing and sponsor known
         if (!ReferralTree::where('member_id', $membership->id)->exists() && $membership->referal_id) {
