@@ -1,107 +1,47 @@
-<div class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        @php
-            $mem = auth()->user()->membership;
-            $token = $mem?->token;
-        @endphp
-        @if($token)
-        <div class="mb-6 flex flex-wrap items-center gap-3">
-            <a href="{{ route('register') }}?epin={{ $token }}" class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm">Share Direct Join (E-PIN)</a>
-            <span class="text-sm text-gray-600">Your token: {{ $token }}</span>
-        </div>
-        @endif
-        <!-- Header -->
-        <div class="mb-6">
-            <h2 class="text-xl font-medium text-gray-900">My Referrals</h2>
-            <p class="mt-1 text-sm text-gray-500">Manage and track your direct referrals.</p>
-        </div>
-        @if ($membershipId != auth()->user()->membership->id)
-            <div class="mb-6">
-                <button wire:click="backLevel"
-                    class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-md border bg-teal-700 text-white cursor-pointer">
-                    <- Back </span>
-            </div>
+<div class="p-6 bg-white shadow rounded-xl">
 
-        @endif
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-5">
+        <h2 class="text-lg font-bold text-gray-800">Referral List</h2>
 
-        <!-- Table Container -->
-        <div class="border rounded-lg overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Member ID
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Name
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Contact
-                            </th>
-
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Joined Date
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                View Next
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($referrals as $referral)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $referral->member->token }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $referral->member->name }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <div>{{ $referral->member->email }}</div>
-                                    <div>{{ $referral->member->mobile }}</div>
-                                </td>
-
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $referral->created_at->format('d M Y') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span @class([
-                                        'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                                        'bg-green-100 text-green-800' => $referral->isVerified,
-                                        'bg-yellow-100 text-yellow-800' => !$referral->isVerified && $referral->isPaid,
-                                        'bg-gray-100 text-gray-800' => !$referral->isPaid,
-                                    ])>
-                                        {{ $referral->isVerified ? 'Active' : ($referral->isPaid ? 'Pending' : 'Incomplete') }}
-                                    </span>
-                                </td>
-
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <button wire:click="nextLevel({{ $referral->member->id }})"
-                                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-md border bg-teal-700 text-white cursor-pointer">
-                                        Next ->
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                                    No referrals found
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if($referrals->hasPages())
-                <div class="px-4 py-3 border-t">
-                    {{ $referrals->links() }}
-                </div>
-            @endif
-        </div>
+        <select wire:model.live="level" class="px-3 py-2 border rounded-lg bg-white text-sm focus:ring focus:ring-blue-300">
+            <option value="1">Level 1</option>
+            <option value="2">Level 2</option>
+            <option value="3">Level 3</option>
+            <option value="4">Level 4</option>
+            <option value="5">Level 5</option>
+        </select>
     </div>
+
+    <!-- Data Table -->
+    <div class="overflow-x-auto border rounded-xl">
+        <table class="min-w-full text-sm">
+            <thead class="bg-gray-100">
+                <tr class="text-gray-700">
+                    <th class="px-4 py-3 text-left">Name</th>
+                    <th class="px-4 py-3 text-left">Token</th>
+                    <th class="px-4 py-3 text-left">Email</th>
+                    <th class="px-4 py-3 text-left">Joined</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @forelse($referrals as $row)
+                    <tr class="border-t">
+                        <td class="px-4 py-2">{{ $row->name }}</td>
+                        <td class="px-4 py-2">{{ $row->token }}</td>
+                        <td class="px-4 py-2">{{ $row->email }}</td>
+                        <td class="px-4 py-2">{{ $row->created_at->format('d M Y') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="px-4 py-4 text-center text-gray-500">
+                            No referrals found for Level {{ $level }}.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
 </div>

@@ -2,42 +2,56 @@
 
 namespace App\Livewire\Member;
 
-use App\Models\ReferralTree;
-use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Livewire\WithPagination;
+use App\Models\ReferralTree;
 use App\Models\Membership;
+use Livewire\Attributes\Layout;
+
 #[Layout('components.layouts.member')]
+
 class Referrals extends Component
 {
-    use WithPagination;
-    public $membershipId = null;
+    public $level = 1;
+    public $referrals = [];
 
     public function mount()
     {
-        $this->membershipId = auth()->user()->membership->id;
+        $this->loadReferrals();
     }
-    public function nextLevel($id)
-    {
-        $this->membershipId = $id;
-    }
-    public function backLevel()
-    {
-        $membershipId = ReferralTree::where('member_id', $this->membershipId)->first();
-        $backMembershipId = ReferralTree::where('member_id', $membershipId->parent_id)->first();
 
-        $this->membershipId = $backMembershipId->parent_id ?? auth()->user()->membership->id;
+    public function updatedLevel()
+    {
+        $this->loadReferrals();
     }
+
+    public function loadReferrals()
+    {
+        $userId = auth()->id();
+
+        // BFS level-by-level traversal
+        $current = [$userId];
+
+        for ($i = 1; $i <= $this->level; $i++) {
+
+            $next = ReferralTree::whereIn('parent_id', $current)
+                ->pluck('member_id')
+                ->toArray();
+
+            // On exact level → return those members
+            if ($i == $this->level) {
+                $this->referrals = Membership::whereIn('id', $next)->get();
+                return;
+            }
+
+            // Prepare next depth
+            $current = $next;
+        }
+
+        $this->referrals = [];
+    }
+
     public function render()
     {
-
-        // dd($this->membershipId);
-        $referrals = ReferralTree::where('parent_id', $this->membershipId)
-            ->latest()
-            ->paginate(10);
-
-        return view('livewire.member.referrals', [
-            'referrals' => $referrals
-        ]);
+        return view('livewire.member.referrals');
     }
 }

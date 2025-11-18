@@ -39,13 +39,16 @@ class MyWallet extends Component
     {
         $this->memberId = auth()->user()->membership->id;
         $this->kycComplete = auth()->user()->membership->isKycComplete();
-        
+
 
         $this->calculateCommission($this->memberId);
-        $this->generateReferralCommissions($this->memberId);
         $this->loadWallet();
         $this->loadReferralHistory();
         $this->loadCommissionData();
+        // $this->generateReferralCommissions($this->memberId);
+        $this->insertReferralComission($this->memberId);
+        
+
     }
 
     // binary wala
@@ -103,7 +106,7 @@ class MyWallet extends Component
             ->where('meta->level', 1)
             ->exists();
 
-        if ((($leftCount >= 2 && $rightCount >= 1) || ($rightCount >= 2 && $leftCount >= 1)) && ! $initialExists) {
+        if ((($leftCount >= 2 && $rightCount >= 1) || ($rightCount >= 2 && $leftCount >= 1)) && !$initialExists) {
             $commission = ($baseAmount * 16) / 100;
             $status = 'Pending';
             if ($capRemaining > 0) {
@@ -227,7 +230,7 @@ class MyWallet extends Component
     private function countSubtree($memberId)
     {
         $count = 0;
-        $children = \App\Models\BinaryTree::where('parent_id', $memberId)->get();
+        $children = BinaryTree::where('parent_id', $memberId)->get();
         foreach ($children as $child) {
             $count++;
             $count += $this->countSubtree($child->member_id);
@@ -236,49 +239,108 @@ class MyWallet extends Component
     }
 
 
-    private function generateReferralCommissions($memberId)
+    // private function generateReferralCommissions($memberId)
+    // {
+    //     $levels = [3, 2, 1, 1, 1];
+    //     $earnings = WalletTransaction::where('membership_id', $memberId)
+    //         ->whereIn('type', ['binary_commission', 'daily_commission'])
+    //         ->where('status', 'confirmed')
+    //         ->sum('amount');
+    //     if ($earnings <= 0) {
+    //         return;
+    //     }
+
+    //     $childToken = $this->getToken($memberId);
+
+    //     $current = $memberId;
+    //     for ($i = 0; $i < 5; $i++) {
+    //         $parent = ReferralTree::where('member_id', $current)->first();
+    //         if (!$parent || !$parent->parent_id)
+    //             break;
+    //         $parentId = $parent->parent_id;
+
+    //         $percent = $levels[$i];
+    //         $target = ($earnings * $percent) / 100;
+    //         $existing = WalletTransaction::where('membership_id', $parentId)
+    //             ->where('type', 'referral_commission')
+    //             ->where('meta->child_id', $childToken)
+    //             ->where('meta->level', $i + 1)
+    //             ->sum('amount');
+    //         $delta = max($target - $existing, 0);
+
+    //         if ($delta > 0) {
+    //             WalletTransaction::create([
+    //                 'membership_id' => $parentId,
+    //                 'type' => 'referral_commission',
+    //                 'amount' => $delta,
+    //                 'status' => 'confirmed',
+    //                 'meta' => [
+    //                     'level' => $i + 1,
+    //                     'child_id' => $childToken,
+    //                     'percentage' => $percent
+    //                 ]
+    //             ]);
+    //         }
+
+    //         $current = $parentId;
+    //     }
+    // }
+
+
+
+    private function insertReferralComission($memberId)
     {
         $levels = [3, 2, 1, 1, 1];
-        $earnings = WalletTransaction::where('membership_id', $memberId)
-            ->whereIn('type', ['binary_commission', 'daily_commission'])
+        $childId = $memberId;
+        $childToken = $this->getToken($childId);
+
+        $credits = WalletTransaction::where('membership_id', $childId)
+            ->whereIn('type', ['binary_commission'])
             ->where('status', 'confirmed')
             ->sum('amount');
-        if ($earnings <= 0) {
+
+        $childWallet = max($credits, 0);
+
+        if ($childWallet <= 0) {
             return;
         }
 
-        $childToken = $this->getToken($memberId);
+        $current = $childId;
 
-        $current = $memberId;
         for ($i = 0; $i < 5; $i++) {
-            $parent = ReferralTree::where('member_id', $current)->first();
-            if (!$parent || !$parent->parent_id) break;
-            $parentId = $parent->parent_id;
+
+            $parent = BinaryTree::where('member_id', $current)->first();
+
+            if (!$parent || !$parent->parent_id)
+                break;
+
+            $uplineId = $parent->parent_id;
 
             $percent = $levels[$i];
-            $target = ($earnings * $percent) / 100;
-            $existing = WalletTransaction::where('membership_id', $parentId)
-                ->where('type', 'referral_commission')
-                ->where('meta->child_id', $childToken)
-                ->where('meta->level', $i + 1)
-                ->sum('amount');
-            $delta = max($target - $existing, 0);
+            $amount = ($childWallet * $percent) / 100;
 
-            if ($delta > 0) {
-                WalletTransaction::create([
-                    'membership_id' => $parentId,
-                    'type' => 'referral_commission',
-                    'amount' => $delta,
-                    'status' => 'confirmed',
-                    'meta' => [
-                        'level' => $i + 1,
-                        'child_id' => $childToken,
-                        'percentage' => $percent
+            if ($amount > 0) {
+                WalletTransaction::updateOrCreate(
+                    [
+                        'membership_id' => $uplineId,
+                        'type' => 'referral_commission',
+                        'meta->child_id' => $childToken,
+                        'meta->level' => $i + 1
+                    ],
+                    [
+                        'amount' => $amount,
+                        'status' => 'confirmed',
+                        'meta' => [
+                            'level' => $i + 1,
+                            'child_id' => $childToken,
+                            'percentage' => $percent,
+                            'base_wallet' => $childWallet
+                        ]
                     ]
-                ]);
+                );
             }
 
-            $current = $parentId;
+            $current = $uplineId;
         }
     }
 
@@ -367,8 +429,8 @@ class MyWallet extends Component
 
     private function hasFirstPair($memberId)
     {
-        $left = \App\Models\BinaryTree::where('parent_id', $memberId)->where('position', 'left')->first();
-        $right = \App\Models\BinaryTree::where('parent_id', $memberId)->where('position', 'right')->first();
+        $left = BinaryTree::where('parent_id', $memberId)->where('position', 'left')->first();
+        $right = BinaryTree::where('parent_id', $memberId)->where('position', 'right')->first();
         if (!$left || !$right) {
             return false;
         }

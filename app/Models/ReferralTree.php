@@ -11,4 +11,8 @@ class ReferralTree extends Model
     {
         return $this->belongsTo(Membership::class, 'member_id');
     }
+    public function parent()
+    {
+        return $this->belongsTo(Membership::class, 'parent_id');
+    }
 }

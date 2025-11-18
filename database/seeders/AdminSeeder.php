@@ -10,11 +10,11 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-        if (! Admin::where('email', 'admin@admin.com')->exists()) {
+        if (!Admin::where('email', 'admin@admin.com')->exists()) {
             Admin::create([
                 'name' => 'Super Admin',
                 'email' => 'admin@admin.com',
-                'password' => Hash::make('password123')
+                'password' => Hash::make('password')
             ]);
         }
     }
