@@ -61,9 +61,6 @@ new class extends Component {
 
         $validated['password'] = Hash::make($validated['password']);
 
-        event(new Registered(($user = User::create($validated))));
-
-        Auth::login($user);
 
         $sponsor = null;
         $pin = null;
@@ -84,6 +81,9 @@ new class extends Component {
             $this->addError('upline_token', 'Invalid E-PIN or Upline Token');
             return;
         }
+
+                event(new Registered(($user = User::create($validated))));
+
         
         // dd($sponsor);
         Membership::create([
@@ -146,7 +146,7 @@ new class extends Component {
             $pin->save();
         }
 
-        // Redirect to dashboard after registration
+        Auth::login($user);
         redirect()->route('dashboard');
     }
     private function placeInBinaryTree($parentId, $newMemberId)
