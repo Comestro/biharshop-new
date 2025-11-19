@@ -59,14 +59,13 @@
                     } elseif ($mem->referal_id) {
                         $parent = \App\Models\Membership::find($mem->referal_id);
                     }
-                    if ($parent) { $parentName = $parent->name; $parentToken = $parent->token; $parentId = $parent->id; }
+                    if ($parent) { $parentName = $parent->name; $parentToken = $parent->membership_id; }
                 }
             @endphp
             <div class="px-4 py-3 bg-indigo-50 border-b border-indigo-100">
                 <div class="text-indigo-900 font-semibold text-sm">Sponsor</div>
                 <div class="mt-1 text-sm text-indigo-800">{{ $parentName }}</div>
                 <div class="mt-0.5 text-xs text-indigo-700">Token: {{ $parentToken }}</div>
-                <div class="mt-0.5 text-xs text-indigo-700">ID: {{ $parentId }}</div>
             </div>
 
             <!-- Navigation -->
@@ -191,79 +190,6 @@
                                 d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-
-                    <!-- Member ID Card -->
-                    {{-- <div class="flex items-center gap-3 px-4 py-2 bg-indigo-50 rounded-lg border border-indigo-200">
-                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-                        </svg>
-                        <div>
-                            <p class="text-xs text-gray-600 font-medium">Member ID</p>
-                            <p class="text-sm font-bold text-gray-900">
-                                {{ auth()->user()->membership->isVerified ? auth()->user()->membership->token : 'N/A' }}
-                            </p>
-                        </div>
-                    </div> --}}
-
-                    <!-- Wallet Balance Card -->
-                    @php
-                        $mid = auth()->user()->membership->id ?? null;
-                        $headerBalance = 0;
-                        if ($mid) {
-                            $credits = \App\Models\WalletTransaction::where('membership_id', $mid)
-                                ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission'])
-                                ->where('status', 'confirmed')
-                                ->sum('amount');
-                            $debits = \App\Models\Withdrawal::where('membership_id', $mid)
-                                ->whereIn('status', ['pending', 'approved'])
-                                ->sum('amount');
-                            $walletBalance = $credits - $debits;
-                            $leftChild = \App\Models\BinaryTree::where('parent_id', $mid)->where('position', 'left')->first();
-                            $rightChild = \App\Models\BinaryTree::where('parent_id', $mid)->where('position', 'right')->first();
-                            $leftDepth = 0;
-                            $rightDepth = 0;
-                            if ($leftChild) {
-                                $leftDepth = 1;
-                                $c = $leftChild->member_id;
-                                while (true) {
-                                    $n = \App\Models\BinaryTree::where('parent_id', $c)->where('position', 'left')->first();
-                                    if (!$n) break;
-                                    $leftDepth++;
-                                    $c = $n->member_id;
-                                }
-                            }
-                            if ($rightChild) {
-                                $rightDepth = 1;
-                                $c = $rightChild->member_id;
-                                while (true) {
-                                    $n = \App\Models\BinaryTree::where('parent_id', $c)->where('position', 'right')->first();
-                                    if (!$n) break;
-                                    $rightDepth++;
-                                    $c = $n->member_id;
-                                }
-                            }
-                            $maxDepth = max($leftDepth, $rightDepth);
-                            $minDepth = min($leftDepth, $rightDepth);
-                            $hasFirstPair = $leftChild && $rightChild && ($maxDepth >= 2 && $minDepth >= 1);
-                            $lockedDaily = $hasFirstPair ? 0 : \App\Models\WalletTransaction::where('membership_id', $mid)
-                                ->where('type', 'daily_commission')
-                                ->where('status', 'confirmed')
-                                ->sum('amount');
-                            $headerBalance = max($walletBalance - $lockedDaily, 0);
-                        }
-                    @endphp
-                    <div class="flex items-center gap-3">
-                        <div class="text-right hidden sm:block">
-                            <p class="text-xs text-gray-600 font-medium">Available Balance</p>
-                            <p class="text-lg font-bold text-indigo-600">
-                                ₹{{ number_format($headerBalance, 2) }}
-                            </p>
-                        </div>
-                        <a href="{{ route('member.wallet') }}" 
-                           class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                            Wallet
-                        </a>
-                    </div>
                 </div>
             </header>
 

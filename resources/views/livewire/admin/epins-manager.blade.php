@@ -31,6 +31,7 @@
                     <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Status</th>
                     <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Used By</th>
                     <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Used At</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Join</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -42,10 +43,15 @@
                     <td class="px-3 py-2 text-sm">{{ $pin->status }}</td>
                     <td class="px-3 py-2 text-sm">{{ $pin->usedBy?->token ?: '-' }}</td>
                     <td class="px-3 py-2 text-sm">{{ $pin->used_at ? \Carbon\Carbon::parse($pin->used_at)->format('d M Y, h:i A') : '-' }}</td>
+                    <td class="px-3 py-2 text-sm">
+                        <a href="{{ route('register') }}?epin={{ $pin->code }}&token={{ \App\Models\Membership::where('user_id', $pin->owner_user_id)->first()?->token }}"
+                           class="inline-block px-3 py-1 rounded bg-teal-600 text-white hover:bg-teal-700 {{ $pin->status !== 'available' ? 'opacity-50 pointer-events-none' : '' }}">
+                            Join
+                        </a>
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 </div>
-

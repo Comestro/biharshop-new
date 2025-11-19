@@ -2,7 +2,7 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         @php
             $mem = auth()->user()->membership ?? null;
-            $myToken = $mem?->token ?? null;
+            $myToken = $mem?->membership_id ?? null;
             $parent = null;
             if ($mem) {
                 $pos = \App\Models\BinaryTree::where('member_id', $mem->id)->first();
@@ -21,7 +21,7 @@
             </div>
             <div class="bg-gray-50 border rounded-lg p-4 md:col-span-2">
                 <p class="text-xs text-gray-700">Parent</p>
-                <p class="text-sm text-gray-800">{{ $parent?->name ?? '-' }} | Token: {{ $parent?->token ?? '-' }} | ID: {{ $parent?->id ?? '-' }}</p>
+                <p class="text-sm text-gray-800">{{ $parent?->name ?? '-' }} | User Id: {{ $parent?->membership_id ?? '-' }}</p>
             </div>
         </div>
         @endif
@@ -56,6 +56,7 @@
                         <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Plan</th>
                         <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Status</th>
                         <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Used At</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Join</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -65,6 +66,12 @@
                         <td class="px-3 py-2 text-sm">{{ $pin->plan_name }} (₹{{ number_format($pin->plan_amount,2) }})</td>
                         <td class="px-3 py-2 text-sm">{{ $pin->status }}</td>
                         <td class="px-3 py-2 text-sm">{{ $pin->used_at ? \Carbon\Carbon::parse($pin->used_at)->format('d M Y, h:i A') : '-' }}</td>
+                        <td class="px-3 py-2 text-sm">
+                            <a href="{{ route('register') }}?epin={{ $pin->code }}&token={{ $myToken }}"
+                               class="inline-block px-3 py-1 rounded bg-teal-600 text-white hover:bg-teal-700 {{ ($pin->status !== 'available' || !$myToken) ? 'opacity-50 pointer-events-none' : '' }}">
+                                Join
+                            </a>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>

@@ -21,7 +21,7 @@ class MyWallet extends Component
     public $availableBalance = 0.00;
     public $commissionHistory = [];
     public $referralComissionHistory = [];
-    public $binaryComissionHistory = true;
+    public $binaryComissionHistory = true;      
     public $activeCommissionTab = 'binary';
     public $binaryCommissionTotal = 0.00;
     public $referralCommissionTotal = 0.00;

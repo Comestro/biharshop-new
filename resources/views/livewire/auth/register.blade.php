@@ -20,8 +20,8 @@ new class extends Component {
     public string $password_confirmation = '';
     public string $epin = '';
     public string $position = 'left';
-    public string $upline_token = '';
-    public $upline_token_name = null;
+    public string $sponsor_id = '';
+    public $sponsor_name = null;
 
 
     /**
@@ -39,9 +39,9 @@ new class extends Component {
         if (in_array($pos, ['left', 'right']))
             $this->position = $pos;
 
-        $tok = request()->query('token');
+        $tok = request()->query('sponsor_id');
         if ($tok)
-            $this->upline_token = (string) $tok;
+            $this->sponsor_id = (string) $tok;
 
 
     }
@@ -56,13 +56,13 @@ new class extends Component {
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'mobile' => ['required', 'regex:/^[6-9]\d{9}$/'],
             'epin' => ['nullable', 'regex:/^\d{6}$/'],
-            'upline_token' => ['nullable', 'string'],
+            'sponsor_id' => ['nullable', 'string'],
             'position' => ['required'],
         ]);
 
-        if (!$this->epin && !$this->upline_token) {
-            $this->addError('epin', 'Provide E-PIN or Upline Token');
-            $this->addError('upline_token', 'Provide E-PIN or Upline Token');
+        if (!$this->epin && !$this->sponsor_id) {
+            $this->addError('epin', 'Provide E-PIN or Sponsor ID');
+            $this->addError('sponsor_id', 'Provide E-PIN or Sponsor ID');
             return;
         }
 
@@ -78,14 +78,14 @@ new class extends Component {
             $this->addError('epin', 'Invalid or used E-PIN');
             return;
         }
-        $sponsor = Membership::where('token', $this->upline_token)->first();
+        $sponsor = Membership::where('membership_id', $this->sponsor_id)->first();
         if (!$sponsor) {
             if ($pin) {
                 $sponsor = Membership::where('id', $pin->issued_to_membership_id)->first();
             }
         }
         if (!$sponsor) {
-            $this->addError('upline_token', 'Invalid E-PIN or Upline Token');
+            $this->addError('sponsor_id', 'Invalid E-PIN or Sponsor ID');
             return;
         }
 
@@ -100,7 +100,6 @@ new class extends Component {
             'mobile' => $this->mobile,
             'referal_id' => $sponsor->id,
             'membership_id' => $this->generateUniqueMembershipId(),
-            'referral_code' => $this->upline_token ?: null,
             'token' => $this->epin ?: null,
             'isPaid' => true,
             'status' => true,
@@ -192,37 +191,20 @@ new class extends Component {
         }
     }
 
-    public function refreshUplineName()
+    public function refreshSponsorName()
     {
-        $member = Membership::where('token', $this->upline_token)->first();
-        $this->upline_token_name = $member ? $member->name : null;
+        $member = Membership::where('membership_id', $this->sponsor_id)->first();
+        $this->sponsor_name = $member ? $member->name : null;
     }
 
 }; ?>
 
 <div
     class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 via-emerald-700 to-cyan-800 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-5xl w-full">
-        <div class="grid grid-cols-1 md:grid-cols-2 bg-white rounded-xl overflow-hidden shadow-xl">
-            <div class="p-8 md:p-10 bg-teal-50 border-r border-teal-100">
-                <h2 class="text-2xl md:text-3xl font-extrabold text-teal-900">Grow with BiharShop Network</h2>
-                <p class="mt-2 text-sm text-teal-800">Register to start building your team and earning.</p>
-                <div class="mt-6 space-y-3 text-sm text-teal-900">
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Verified
-                        referrals and position availability</div>
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Binary
-                        and referral trees</div>
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span>
-                        Transparent withdrawal charges</div>
-                </div>
-                <div class="mt-8">
-                    <a href="{{ route('login') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-teal-700 border border-teal-200 rounded-md font-medium hover:bg-gray-50 transition">Already
-                        a member? Sign in</a>
-                </div>
-            </div>
+    <div class="max-w-3xl w-full">
+        <div class="grid grid-cols-1 bg-white rounded-xl overflow-hidden shadow-xl">
             <div class="p-8 md:p-10">
-                <h2 class="text-2xl font-extrabold text-gray-900">Create your account</h2>
+                <h2 class="text-2xl font-extrabold text-gray-900">Register </h2>
                 <p class="mt-1 text-sm text-gray-600">Join BiharShop and start your journey</p>
                 <form wire:submit="register" class="mt-6 space-y-6">
                     <!-- Name -->
@@ -276,20 +258,20 @@ new class extends Component {
                         <p class="mt-1 text-xs text-gray-500">Use your sponsor/parent's E-PIN to join</p>
                     </div>
 
-                    <!-- Or Upline Token -->
+                    <!-- Or Sponsor Id -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Upline Token</label>
-                        <input type="text" wire:model="upline_token" wire:keyup="refreshUplineName"
+                        <label class="block text-sm font-medium text-gray-700">Sponsor Id</label>
+                        <input type="text" wire:model="sponsor_id" wire:keyup="refreshSponsorName"
                             placeholder="Enter sponsor token"
                             class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500">
 
-                        @error('upline_token')
+                        @error('sponsor_id')
                             <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
                         @enderror
                         <p class="mt-1 text-xs text-gray-500 bg-teal-50 p-2">
-                            @if ($upline_token_name)
-                                {{ $upline_token_name }}
-                            @elseif($upline_token == null)
+                            @if ($sponsor_name)
+                                {{ $sponsor_name }}
+                            @elseif($sponsor_id == null)
                                 {{ 'Alternatively, enter the sponsor token' }}
                             @else
                                 {{ 'Searching... Not Found' }}

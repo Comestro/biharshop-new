@@ -46,7 +46,7 @@
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 mb-1">{{ $membership->name }}</h1>
-                    <p class="text-gray-600 mb-2">Member ID: <span class="font-semibold text-gray-900">{{ $membership->isVerified ? $membership->token : 'N/A' }}</span></p>
+                    <p class="text-gray-600 mb-2">User ID: <span class="font-semibold text-gray-900">{{ $membership->membership_id }}</span></p>
                     <div class="flex items-center gap-2">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold 
                             {{ $membership->isVerified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">

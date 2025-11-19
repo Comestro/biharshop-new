@@ -1,11 +1,8 @@
     <div class="w-full">
         <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <div class="p-6 sm:p-8 space-y-8">
-                @php
-                    $kycIncomplete = !($membership->father_name && $membership->mother_name && $membership->home_address && $membership->city && $membership->state && $membership->bank_name && $membership->account_no && $membership->ifsc && $membership->pancard && $membership->aadhar_card && $membership->image && $membership->terms_and_condition);
-                @endphp
-
-                @if($kycIncomplete)
+             
+                @if(request()->user()->kyc_complete == false)
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
                         <div class="flex items-start">
                             <div class="flex-shrink-0">
@@ -46,10 +43,10 @@
                     </div>
                     <div class="flex-1 text-center sm:text-left">
                         <h3 class="text-3xl font-bold text-gray-900">{{ $membership->name }}</h3>
-                        <p class="text-gray-600 mt-1">Member ID: <span class="font-semibold text-gray-900">{{ $membership->isVerified ? $membership->token : 'N/A' }}</span></p>
+                        <p class="text-gray-600 mt-1">Member ID: <span class="font-semibold text-gray-900">{{ $membership->membership_id }}</span></p>
                         <div class="mt-3 flex flex-wrap gap-2 justify-center sm:justify-start">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $membership->isVerified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                {{ $membership->isVerified ? '✓ Verified' : '⏳ Pending Verification' }}
+                                {{ $membership->isVerified ? '✓ Verified' : '⏳ KYC Pending' }}
                             </span>
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $membership->isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                 {{ $membership->isPaid ? '✓ Paid' : '✗ Payment Pending' }}
@@ -62,12 +59,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-6">
                         <h4 class="text-xl font-semibold text-gray-900">Personal Information</h4>
-                        <button class="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            Edit
-                        </button>
+                      
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4"><p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Name</p><p class="text-base font-medium text-gray-900">{{ $membership->name ?: 'Not provided' }}</p></div>
@@ -88,12 +80,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-6">
                         <h4 class="text-xl font-semibold text-gray-900">Bank Details</h4>
-                        <button class="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            Edit
-                        </button>
+                       
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
