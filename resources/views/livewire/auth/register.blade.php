@@ -193,14 +193,25 @@ new class extends Component {
 }; ?>
 
 <div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 via-emerald-700 to-cyan-800 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl w-full">
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 via-emerald-700 to-cyan-800 py-5 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-xl w-full">
         <div class="grid grid-cols-1 bg-white rounded-xl overflow-hidden shadow-xl">
-            <div class="p-8 md:p-10">
+            <div class="p-8 md:p-5">
                 <h2 class="text-2xl font-extrabold text-gray-900">Register </h2>
-                <p class="mt-1 text-sm text-gray-600">Join BiharShop and start your journey</p>
-                <form wire:submit="register" class="mt-6 space-y-6">
-                    <!-- Name -->
+                <p class=" text-sm text-gray-600">Join BiharShop and start your journey</p>
+                <form wire:submit="register" class="mt-6 space-y-4">
+                    <!-- Parent E-PIN -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700"> E-PIN</label>
+                        <input type="text" wire:model="epin" @if (request()->query('epin')) disabled @endif
+                            maxlength="6" placeholder="Enter 6-digit E-PIN" 
+                            class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                        @error('epin')
+                            <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+                        <p class="mt-1 text-xs text-gray-500">Use your sponsor/parent's E-PIN to join</p>
+                    </div>
+                     <!-- Name -->
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
                         <div class="mt-1">
@@ -239,23 +250,11 @@ new class extends Component {
                         @enderror
                     </div>
 
-                    <!-- Parent E-PIN -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700"> E-PIN</label>
-                        <input type="text" wire:model="epin" @if (request()->query('epin')) disabled @endif
-                            maxlength="6" placeholder="Enter 6-digit E-PIN" 
-                            class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
-                        @error('epin')
-                            <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
-                        @enderror
-                        <p class="mt-1 text-xs text-gray-500">Use your sponsor/parent's E-PIN to join</p>
-                    </div>
-
                     <!-- Or Sponsor Id -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Sponsor Id</label>
                         <input type="text" wire:model="sponsor_id" wire:keyup="refreshSponsorName"
-                            placeholder="Enter sponsor token" disabled="@if (request()->query('sponsor_id')) true @endif"
+                            placeholder="Enter sponsor token" @if (request()->query('sponsor_id')) disabled @endif
                             class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500">
 
                         @error('sponsor_id')
@@ -293,16 +292,6 @@ new class extends Component {
                             <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
                         @enderror
 
-                    </div>
-
-                    <!-- Terms & Privacy Policy -->
-                    <div class="flex items-center">
-                        <input id="terms" name="terms" type="checkbox" required
-                            class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded">
-                        <label for="terms" class="ml-2 block text-sm text-gray-900">
-                            I agree to the <a href="#" class="text-teal-600 hover:text-teal-500">Terms</a>
-                            and <a href="#" class="text-teal-600 hover:text-teal-500">Privacy Policy</a>
-                        </label>
                     </div>
 
                     <div>

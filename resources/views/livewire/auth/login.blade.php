@@ -103,21 +103,10 @@ new class extends Component {
     }
 }; ?>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 via-emerald-700 to-cyan-800 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-5xl w-full">
-        <div class="grid grid-cols-1 md:grid-cols-2 bg-white rounded-xl overflow-hidden shadow-xl">
-            <div class="p-8 md:p-10 bg-teal-50 border-r border-teal-100">
-                <h2 class="text-2xl md:text-3xl font-extrabold text-teal-900">Join the BiharShop Network</h2>
-                <p class="mt-2 text-sm text-teal-800">Build your team, earn commissions, and grow with us.</p>
-                <div class="mt-6 space-y-3 text-sm text-teal-900">
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Daily commission tracking</div>
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Binary and referral earnings</div>
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-teal-600"></span> Simple withdrawals with fee preview</div>
-                </div>
-                <div class="mt-8">
-                    <a href="{{ route('register') }}" class="inline-flex items-center px-5 py-2.5 bg-teal-600 text-white rounded-md font-medium hover:bg-teal-700 transition">Join Network</a>
-                </div>
-            </div>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 via-emerald-700 to-cyan-800 py-4 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-xl w-full">
+        <div class="grid grid-cols-1 bg-white rounded-xl overflow-hidden shadow-xl">
+          
             <div class="p-8 md:p-10">
                 <h2 class="text-2xl font-extrabold text-gray-900">Welcome back</h2>
                 <p class="mt-1 text-sm text-gray-600">Sign in to continue</p>
