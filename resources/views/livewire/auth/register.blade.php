@@ -19,7 +19,7 @@ new class extends Component {
     public string $password = '';
     public string $password_confirmation = '';
     public string $epin = '';
-    public string $position = '';
+    public string $position = 'left';
     public string $upline_token = '';
     public $upline_token_name = null;
 
@@ -55,9 +55,9 @@ new class extends Component {
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'mobile' => ['required', 'regex:/^[6-9]\d{9}$/'],
-            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
             'epin' => ['nullable', 'regex:/^\d{6}$/'],
             'upline_token' => ['nullable', 'string'],
+            'position' => ['required'],
         ]);
 
         if (!$this->epin && !$this->upline_token) {
@@ -66,7 +66,7 @@ new class extends Component {
             return;
         }
 
-        $validated['password'] = Hash::make($validated['password']);
+        $validated['password'] = Hash::make('11111111');
 
 
         $sponsor = null;
@@ -159,32 +159,29 @@ new class extends Component {
     }
     private function placeInBinaryTree($parentId, $newMemberId)
     {
-        $queue = [$parentId];
-        while (!empty($queue)) {
-            $current = array_shift($queue);
-            $children = BinaryTree::where('parent_id', $current)->get();
-            $left = $children->firstWhere('position', 'left');
-            $right = $children->firstWhere('position', 'right');
-            if ($this->position === 'left' && !$left) {
-                BinaryTree::create(['member_id' => $newMemberId, 'parent_id' => $current, 'position' => 'left']);
+        $position = $this->position; // left or right
+
+        $current = $parentId;
+
+        while (true) {
+
+            $existing = BinaryTree::where('parent_id', $current)
+                ->where('position', $position)
+                ->first();
+
+            if (!$existing) {
+                BinaryTree::create([
+                    'member_id' => $newMemberId,
+                    'parent_id' => $current,
+                    'position' => $position,
+                ]);
                 return;
             }
-            if ($this->position === 'right' && !$right) {
-                BinaryTree::create(['member_id' => $newMemberId, 'parent_id' => $current, 'position' => 'right']);
-                return;
-            }
-            if (!$left) {
-                BinaryTree::create(['member_id' => $newMemberId, 'parent_id' => $current, 'position' => 'left']);
-                return;
-            }
-            if (!$right) {
-                BinaryTree::create(['member_id' => $newMemberId, 'parent_id' => $current, 'position' => 'right']);
-                return;
-            }
-            $queue[] = $left->member_id;
-            $queue[] = $right->member_id;
+
+            $current = $existing->member_id;
         }
     }
+
     public function refreshUplineName()
     {
         $member = Membership::where('token', $this->upline_token)->first();
@@ -285,37 +282,23 @@ new class extends Component {
                             @elseif($upline_token == null)
                                 {{ 'Alternatively, enter the sponsor token' }}
                             @else
-                            {{ 'Searching... Not Found' }}
+                                {{ 'Searching... Not Found' }}
                             @endif
                         </p>
                     </div>
+                    <!-- Or Upline Token -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Choose Position</label>
+                        <select wire:model="position" placeholder="Enter sponsor token"
+                            class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500">
+                            <option value="left">Left</option>
+                            <option value="right">Right</option>
+                        </select>
 
+                        @error('position')
+                            <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
+                        @enderror
 
-                    <!-- Password -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                            <div class="mt-1">
-                                <input wire:model="password" id="password" type="password" required
-                                    class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                                    placeholder="••••••••">
-                            </div>
-                            @error('password')
-                                <span class="text-sm text-red-600">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <!-- Confirm Password -->
-                        <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm
-                                password</label>
-                            <div class="mt-1">
-                                <input wire:model="password_confirmation" id="password_confirmation" type="password"
-                                    required
-                                    class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                                    placeholder="••••••••">
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Terms & Privacy Policy -->
@@ -356,3 +339,4 @@ new class extends Component {
             </div>
         </div>
     </div>
+</div>
