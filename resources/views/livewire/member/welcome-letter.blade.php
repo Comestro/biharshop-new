@@ -69,8 +69,7 @@
                             class="font-medium">Not displayed</span></div>
                     <div class="flex justify-between mt-1"><span class="text-gray-600">Membership Id</span><span
                             class="font-medium">{{ $member?->membership_id ?? '-' }}</span></div>
-                    <div class="flex justify-between mt-1"><span class="text-gray-600">epin Password</span><span
-                            class="font-medium">{{ decrypt(Auth::user()->membership->epin_password) }}</span></div>
+                    <div class="flex justify-between mt-1"><span class="text-gray-600">epin Password</span><span class="font-medium">@if(optional(Auth::user()->membership)->epin_password){{ decrypt(Auth::user()->membership->epin_password) }}@else <a href="{{ route('member.profile') }}" class="text-indigo-600 hover:text-indigo-800">Set / Reset Epin Password</a> @endif</span></div>
                 </div>
             </div>
         </div>

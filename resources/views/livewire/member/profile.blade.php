@@ -108,7 +108,7 @@
             </button>
 
             <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Epin Password</p>
-            <p class="text-base font-medium text-gray-900">{{ decrypt($membership->epin_password) }}</p>
+                <p class="text-base font-medium text-gray-900">@if($membership->epin_password){{ decrypt($membership->epin_password) }}@else <a href="{{ route('member.profile') }}" wire:click.prevent="epinPasswordChange" class="text-indigo-600 hover:text-indigo-800">Set / Reset Epin Password</a> @endif</p>
         </div>
 
     </div>

@@ -23,27 +23,29 @@ new class extends Component {
     public string $sponsor_id = '';
     public $sponsor_name = null;
 
-
     /**
      * Handle an incoming registration request.
      */
     public function mount(): void
     {
         $q = request()->query('epin');
-        if ($q)
-            $this->epin = (string) $q;
 
-        if ($q)
+        if ($q) {
             $this->epin = (string) $q;
-        $pos = strtolower((string) (request()->query('position') ?? ''));
-        if (in_array($pos, ['left', 'right']))
-            $this->position = $pos;
+        }
+
+        if (request()->query('position')) {
+            $pos = strtolower((string) (request()->query('position') ?? ''));
+            if (in_array($pos, ['left', 'right'])) {
+                $this->position = $pos;
+            }
+        }
 
         $tok = request()->query('sponsor_id');
-        if ($tok)
+        if ($tok) {
             $this->sponsor_id = (string) $tok;
-
-
+            $this->refreshSponsorName();
+        }
     }
 
     public function register(): void
@@ -68,7 +70,6 @@ new class extends Component {
 
         $validated['password'] = Hash::make('11111111');
 
-
         $sponsor = null;
         $pin = null;
 
@@ -91,7 +92,6 @@ new class extends Component {
 
         event(new Registered(($user = User::create($validated))));
 
-
         // dd($sponsor);
         Membership::create([
             'user_id' => $user->id,
@@ -113,7 +113,6 @@ new class extends Component {
                 ReferralTree::create(['member_id' => $newMember->id, 'parent_id' => $sponsor->id]);
             }
 
-
             if ($pin) {
                 $pin->update([
                     'used_by_membership_id' => $newMember->id,
@@ -128,9 +127,7 @@ new class extends Component {
                     ->where('type', 'daily_commission')
                     ->whereDate('created_at', now()->toDateString())
                     ->exists();
-                $totalReceived = \App\Models\WalletTransaction::where('membership_id', $newMember->id)
-                    ->where('type', 'daily_commission')
-                    ->sum('amount');
+                $totalReceived = \App\Models\WalletTransaction::where('membership_id', $newMember->id)->where('type', 'daily_commission')->sum('amount');
                 if (!$existsToday && $totalReceived < 480) {
                     \App\Models\WalletTransaction::create([
                         'membership_id' => $newMember->id,
@@ -173,10 +170,7 @@ new class extends Component {
         $current = $parentId;
 
         while (true) {
-
-            $existing = BinaryTree::where('parent_id', $current)
-                ->where('position', $position)
-                ->first();
+            $existing = BinaryTree::where('parent_id', $current)->where('position', $position)->first();
 
             if (!$existing) {
                 BinaryTree::create([
@@ -196,7 +190,6 @@ new class extends Component {
         $member = Membership::where('membership_id', $this->sponsor_id)->first();
         $this->sponsor_name = $member ? $member->name : null;
     }
-
 }; ?>
 
 <div
@@ -249,8 +242,8 @@ new class extends Component {
                     <!-- Parent E-PIN -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700"> E-PIN</label>
-                        <input type="text" wire:model="epin" @if(request()->query("epin")) disabled @endif maxlength="6"
-                            placeholder="Enter 6-digit E-PIN"
+                        <input type="text" wire:model="epin" @if (request()->query('epin')) disabled @endif
+                            maxlength="6" placeholder="Enter 6-digit E-PIN" 
                             class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                         @error('epin')
                             <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
@@ -262,7 +255,7 @@ new class extends Component {
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Sponsor Id</label>
                         <input type="text" wire:model="sponsor_id" wire:keyup="refreshSponsorName"
-                            placeholder="Enter sponsor token"
+                            placeholder="Enter sponsor token" disabled="@if (request()->query('sponsor_id')) true @endif"
                             class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500">
 
                         @error('sponsor_id')
@@ -281,11 +274,20 @@ new class extends Component {
                     <!-- Or Upline Token -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Choose Position</label>
-                        <select wire:model="position" placeholder="Enter sponsor token"
-                            class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500">
-                            <option value="left">Left</option>
-                            <option value="right">Right</option>
-                        </select>
+                        {{-- use radio button --}}
+                        <div class="mt-1">
+                            <label class="inline-flex items-center mr-4">
+                                <input type="radio" wire:model="position" value="left" @if (request()->query('position') == 'left') disabled @endif
+                                    class="form-radio text-teal-600">
+                                <span class="ml-2">Left</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" wire:model="position" value="right" @if (request()->query('position') == 'right') disabled @endif
+                                    class="form-radio text-teal-600">
+                                <span class="ml-2">Right</span>
+                            </label>
+                        </div>
+                        
 
                         @error('position')
                             <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
