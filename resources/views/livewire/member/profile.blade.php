@@ -75,6 +75,98 @@
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4"><p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Mother Name</p><p class="text-base font-medium text-gray-900">{{ $membership->mother_name ?: 'Not provided' }}</p></div>
                     </div>
                 </div>
+                
+                
+                <div>
+    <div class="flex items-center justify-between mb-6">
+        <h4 class="text-xl font-semibold text-gray-900">Password Information</h4>
+        
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Name -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 relative">
+            <button wire:click="normalPasswordChange" class="absolute top-3 right-3 text-gray-500 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+            </button>
+
+            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Password</p>
+            <p class="text-base font-medium text-gray-900">********</p>
+        </div>
+
+        <!-- Email -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 relative">
+            <button wire:click="epinPasswordChange" class="absolute top-3 right-3 text-gray-500 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+            </button>
+
+            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Epin Password</p>
+            <p class="text-base font-medium text-gray-900">{{ decrypt($membership->epin_password) }}</p>
+        </div>
+
+    </div>
+</div>
+             
+@if ($openPasswordModelName)
+<!-- MODAL BOX -->
+<div 
+    class="fixed inset-0 flex items-center justify-center z-[9999] "
+>
+    <div class="bg-white w-full max-w-md rounded-xl shadow-2xl p-6 border border-gray-200">
+
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Change Password {{ $openPasswordModelName }}</h2>
+
+        <!-- New Password -->
+<div class="mb-4">
+    <label class="text-sm font-medium text-gray-700">New Password</label>
+    <input wire:model="password"
+           type="password"
+           class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+           placeholder="Enter new password">
+    @error('password')
+        <span class="text-sm text-red-600">{{ $message }}</span>
+    @enderror
+</div>
+
+<!-- Confirm Password -->
+<div class="mb-6">
+    <label class="text-sm font-medium text-gray-700">Confirm Password</label>
+    <input wire:model="confirm_password"
+           type="password"
+           class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+           placeholder="Re-enter new password">
+    @error('confirm_password')
+        <span class="text-sm text-red-600">{{ $message }}</span>
+    @enderror
+</div>
+
+
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3">
+            <button wire:click="closePasswordChangeModel"
+                class="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm font-medium" >
+                Cancel
+            </button>
+
+            <button wire:click="updatePasswordFunction"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium"
+            >
+                Update Password
+            </button>
+        </div>
+
+    </div>
+</div>
+@endif
+
+
 
                 <!-- Bank Details -->
                 <div>

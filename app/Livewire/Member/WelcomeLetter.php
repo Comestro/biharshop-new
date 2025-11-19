@@ -37,5 +37,6 @@ class WelcomeLetter extends Component
             'parent' => $this->parent,
         ]);
     }
+
 }
 
