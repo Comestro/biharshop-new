@@ -21,6 +21,7 @@ new class extends Component {
     public string $epin = '';
     public string $position = '';
     public string $upline_token = '';
+    public $upline_token_name = null;
 
 
     /**
@@ -29,14 +30,20 @@ new class extends Component {
     public function mount(): void
     {
         $q = request()->query('epin');
-        if ($q) $this->epin = (string) $q;
+        if ($q)
+            $this->epin = (string) $q;
 
-        if ($q) $this->epin = (string) $q;
+        if ($q)
+            $this->epin = (string) $q;
         $pos = strtolower((string) (request()->query('position') ?? ''));
-        if (in_array($pos, ['left','right'])) $this->position = $pos;
+        if (in_array($pos, ['left', 'right']))
+            $this->position = $pos;
 
         $tok = request()->query('token');
-        if ($tok) $this->upline_token = (string) $tok;
+        if ($tok)
+            $this->upline_token = (string) $tok;
+
+
     }
 
     public function register(): void
@@ -67,7 +74,7 @@ new class extends Component {
 
         $pin = EPin::where('code', $this->epin)->where('status', 'available')->first();
 
-        if(!$pin){
+        if (!$pin) {
             $this->addError('epin', 'Invalid or used E-PIN');
             return;
         }
@@ -82,9 +89,9 @@ new class extends Component {
             return;
         }
 
-                event(new Registered(($user = User::create($validated))));
+        event(new Registered(($user = User::create($validated))));
 
-        
+
         // dd($sponsor);
         Membership::create([
             'user_id' => $user->id,
@@ -98,14 +105,14 @@ new class extends Component {
             'status' => true,
         ]);
         $newMember = Membership::where('user_id', $user->id)->first();
-        
+
         if ($newMember) {
             $newMember->used_pin_count = ($newMember->used_pin_count ?? 0) + 1;
             $newMember->save();
             if (!ReferralTree::where('member_id', $newMember->id)->exists()) {
                 ReferralTree::create(['member_id' => $newMember->id, 'parent_id' => $sponsor->id]);
             }
-            
+
 
             if ($pin) {
                 $pin->update([
@@ -134,7 +141,8 @@ new class extends Component {
                         'updated_at' => now(),
                     ]);
                 }
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+            }
         }
 
         // dd($pin);
@@ -177,6 +185,12 @@ new class extends Component {
             $queue[] = $right->member_id;
         }
     }
+    public function refreshUplineName()
+    {
+        $member = Membership::where('token', $this->upline_token)->first();
+        $this->upline_token_name = $member ? $member->name : null;
+    }
+
 }; ?>
 
 <div
@@ -233,37 +247,48 @@ new class extends Component {
                     <!-- Mobile / Contact -->
                     <div>
                         <label for="mobile" class="block text-sm font-medium text-gray-700">Mobile</label>
-                <div class="mt-1">
-                    <input wire:model="mobile" id="mobile" type="number" required
-                        class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                        placeholder="98########">
-                </div>
-                @error('mobile')
-                    <span class="text-sm text-red-600">{{ $message }}</span>
-                @enderror
-            </div>
+                        <div class="mt-1">
+                            <input wire:model="mobile" id="mobile" type="number" required
+                                class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                                placeholder="98########">
+                        </div>
+                        @error('mobile')
+                            <span class="text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-            <!-- Parent E-PIN -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Parent E-PIN</label>
-                <input type="text" wire:model="epin" @if(request()->query("epin")) disabled @endif maxlength="6" placeholder="Enter 6-digit E-PIN"
-                    class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
-                @error('epin')
-                    <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
-                @enderror
-                <p class="mt-1 text-xs text-gray-500">Use your sponsor/parent's E-PIN to join</p>
-            </div>
+                    <!-- Parent E-PIN -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700"> E-PIN</label>
+                        <input type="text" wire:model="epin" @if(request()->query("epin")) disabled @endif maxlength="6"
+                            placeholder="Enter 6-digit E-PIN"
+                            class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                        @error('epin')
+                            <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+                        <p class="mt-1 text-xs text-gray-500">Use your sponsor/parent's E-PIN to join</p>
+                    </div>
 
-            <!-- Or Upline Token -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Upline Token</label>
-                <input type="text" wire:model="upline_token" @if(request()->query("token")) disabled @endif placeholder="Enter sponsor token"
-                    class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
-                @error('upline_token')
-                    <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
-                @enderror
-                <p class="mt-1 text-xs text-gray-500">Alternatively, enter the sponsor token</p>
-            </div>
+                    <!-- Or Upline Token -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Upline Token</label>
+                        <input type="text" wire:model="upline_token" wire:keyup="refreshUplineName"
+                            placeholder="Enter sponsor token"
+                            class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500">
+
+                        @error('upline_token')
+                            <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+                        <p class="mt-1 text-xs text-gray-500 bg-teal-50 p-2">
+                            @if ($upline_token_name)
+                                {{ $upline_token_name }}
+                            @elseif($upline_token == null)
+                                {{ 'Alternatively, enter the sponsor token' }}
+                            @else
+                            {{ 'Searching... Not Found' }}
+                            @endif
+                        </p>
+                    </div>
 
 
                     <!-- Password -->

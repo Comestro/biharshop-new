@@ -1,6 +1,7 @@
 <?php
 namespace App\Livewire\Admin;
 
+use App\Models\ReferralTree;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\Membership;
@@ -179,7 +180,7 @@ class ViewMember extends Component
 
         for ($i = 0; $i < 5; $i++) {
 
-            $parent = BinaryTree::where('member_id', $current)->first();
+            $parent = ReferralTree::where('member_id', $current)->first();
 
             if (!$parent || !$parent->parent_id)
                 break;
@@ -388,7 +389,7 @@ class ViewMember extends Component
         $current = $memberId;
         $level = 1;
         while (true) {
-            $ref = \App\Models\ReferralTree::where('member_id', $current)->first();
+            $ref = ReferralTree::where('member_id', $current)->first();
             if (!$ref || !$ref->parent_id)
                 break;
             $parent = Membership::find($ref->parent_id);
