@@ -124,7 +124,7 @@ new class extends Component {
                 <form wire:submit="login" class="mt-6 space-y-6">
                 <!-- Identifier -->
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email / Member ID / Mobile</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700">MemberShip ID</label>
                     <div class="mt-1">
                         <input wire:model="email" id="email" type="text" required 
                             class="appearance-none block w-full px-3 py-2 border-2 border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">

@@ -99,6 +99,7 @@ new class extends Component {
             'email' => $validated['email'],
             'mobile' => $this->mobile,
             'referal_id' => $sponsor->id,
+            'membership_id' => $this->generateUniqueMembershipId(),
             'referral_code' => $this->upline_token ?: null,
             'token' => $this->epin ?: null,
             'isPaid' => true,
@@ -157,6 +158,15 @@ new class extends Component {
         Auth::login($user);
         redirect()->route('dashboard');
     }
+    private function generateUniqueMembershipId()
+    {
+        do {
+            $id = rand(1000000, 9999999); // 7-digit random
+        } while (Membership::where('membership_id', $id)->exists());
+
+        return $id;
+    }
+
     private function placeInBinaryTree($parentId, $newMemberId)
     {
         $position = $this->position; // left or right
