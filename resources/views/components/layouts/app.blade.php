@@ -2,7 +2,16 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    @include('partials.head', ['title' => 'BiharShop'])
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>BiharShop.com</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     @livewireStyles
 </head>
@@ -23,12 +32,15 @@
                     <a href="#about" class="hover:text-teal-600 transition">About</a>
                     <a href="#contact" class="hover:text-teal-600 transition">Contact</a>
                     @auth
-                        @if(auth()->user()->membership)
-                            <a href="{{ route('member.dashboard') }}" class="hover:text-teal-600 transition">Member Panel</a>
+                        @if (auth()->user()->membership)
+                            <a href="{{ route('member.dashboard') }}" class="hover:text-teal-600 transition">Member
+                                Panel</a>
                         @else
-                            <a href="{{ route('register') }}" class="inline-flex items-center px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Join Network</a>
+                            <a href="{{ route('register') }}"
+                                class="inline-flex items-center px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Join
+                                Network</a>
                         @endif
-                        @if(auth()->guard('admin')->check())
+                        @if (auth()->guard('admin')->check())
                             <a href="{{ route('admin.dashboard') }}" class="hover:text-teal-600 transition">Admin Panel</a>
                         @endif
                     @endauth
@@ -47,11 +59,15 @@
                     </a>
 
                     @guest
-                        <a href="{{ route('register') }}" class="hidden md:inline-flex items-center px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Join Network</a>
+                        <a href="{{ route('register') }}"
+                            class="hidden md:inline-flex items-center px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Join
+                            Network</a>
                     @endguest
                     @auth
-                        @if(!auth()->user()->membership)
-                            <a href="{{ route('register') }}" class="hidden md:inline-flex items-center px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Join Network</a>
+                        @if (!auth()->user()->membership)
+                            <a href="{{ route('register') }}"
+                                class="hidden md:inline-flex items-center px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">Join
+                                Network</a>
                         @endif
                     @endauth
 
@@ -69,14 +85,14 @@
                             <!-- Dropdown -->
                             <div id="userMenu"
                                 class="hidden absolute right-0 mt-2 w-52 bg-white/95 backdrop-blur border border-gray-100 rounded-xl shadow-lg overflow-hidden">
-                                @if(auth()->user()->membership)
+                                @if (auth()->user()->membership)
                                     <a href="{{ route('member.dashboard') }}"
                                         class="block px-4 py-2 text-sm hover:bg-gray-50">Member Panel</a>
                                 @else
-                                    <a href="{{ route('register') }}"
-                                        class="block px-4 py-2 text-sm hover:bg-gray-50">Join Network</a>
+                                    <a href="{{ route('register') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Join
+                                        Network</a>
                                 @endif
-                                @if(auth()->guard('admin')->check())
+                                @if (auth()->guard('admin')->check())
                                     <a href="{{ route('admin.dashboard') }}"
                                         class="block px-4 py-2 text-sm hover:bg-gray-50">Admin Panel</a>
                                 @endif
@@ -88,7 +104,8 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 font-medium transition">Login</a>
+                        <a href="{{ route('login') }}"
+                            class="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 font-medium transition">Login</a>
                     @endauth
 
                     <!-- Mobile Menu Button -->
@@ -108,19 +125,22 @@
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0 top-16 z-[9999]">
+        <div id="mobileMenu"
+            class="hidden md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0 top-16 z-[9999]">
             <div class="px-4 py-4 space-y-3 font-medium text-gray-700">
                 <a href="{{ route('home') }}" class="block hover:text-teal-600">Home</a>
                 <a href="{{ route('shop') }}" class="block hover:text-teal-600">Products</a>
                 <a href="#about" class="block hover:text-teal-600">About</a>
                 <a href="#contact" class="block hover:text-teal-600">Contact</a>
                 @auth
-                    @if(auth()->user()->membership)
+                    @if (auth()->user()->membership)
                         <a href="{{ route('member.dashboard') }}" class="block hover:text-teal-600">Member Panel</a>
                     @else
-                        <a href="{{ route('register') }}" class="block bg-teal-600 text-white text-center rounded-md py-2 hover:bg-teal-700">Join Network</a>
+                        <a href="{{ route('register') }}"
+                            class="block bg-teal-600 text-white text-center rounded-md py-2 hover:bg-teal-700">Join
+                            Network</a>
                     @endif
-                    @if(auth()->guard('admin')->check())
+                    @if (auth()->guard('admin')->check())
                         <a href="{{ route('admin.dashboard') }}" class="block hover:text-teal-600">Admin Panel</a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">
@@ -128,7 +148,8 @@
                         <button type="submit" class="w-full text-left hover:text-teal-600">Logout</button>
                     </form>
                 @else
-                    <a href="{{ route('register') }}" class="block bg-teal-600 text-white text-center rounded-md py-2 hover:bg-teal-700">Join Network</a>
+                    <a href="{{ route('register') }}"
+                        class="block bg-teal-600 text-white text-center rounded-md py-2 hover:bg-teal-700">Join Network</a>
                     <a href="{{ route('login') }}"
                         class="block bg-teal-600 text-white text-center rounded-md py-2 hover:bg-teal-700">Login</a>
                 @endauth
@@ -183,7 +204,8 @@
                         <a href="#" class="text-gray-500 hover:text-teal-600">Privacy</a>
                     </div>
                     <div class="flex items-center space-x-4">
-                        <p class="text-sm text-gray-500">&copy; {{ date('Y') }} BiharShop. All rights reserved.</p>
+                        <p class="text-sm text-gray-500">&copy; {{ date('Y') }} BiharShop. All rights reserved.
+                        </p>
                         <a href="{{ route('admin.login') }}" class="text-sm text-gray-500 hover:text-teal-600">Admin
                             Login</a>
                     </div>
