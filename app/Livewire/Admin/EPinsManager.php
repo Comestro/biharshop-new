@@ -21,6 +21,16 @@ class EPinsManager extends Component
 
     public $bulkTransferQty = 0;
     public $bulkTransferMemberId = '';
+    public $transferMemberName = null;
+    public function updatedBulkTransferMemberId($value)
+    {
+        if (!$value) {
+            $this->transferMemberName = null;
+            return;
+        }
+        $member = Membership::where('membership_id', $value)->first();
+        $this->transferMemberName = $member ? $member->name : 'Not Found';
+    }
 
     public function updatedMembershipId($value)
     {

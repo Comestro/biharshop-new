@@ -24,8 +24,9 @@
             <p class="text-sm font-medium text-gray-800 mb-2">Transfer Pin</p>
 
             <div class="space-y-3">
-                <input type="number" wire:model="bulkTransferQty" class="w-full border rounded px-3 py-2" placeholder="Qty">
-                <input type="text" wire:model="bulkTransferMemberId" class="w-full border rounded px-3 py-2" placeholder="Member ID">
+                <input type="number" wire:model.live="bulkTransferQty" class="w-full border rounded px-3 py-2" placeholder="Qty">
+                <input type="text" wire:model.live="bulkTransferMemberId" class="w-full border rounded px-3 py-2" placeholder="Member ID">
+                <p class="text-sm text-gray-700">{{ $transferMemberName ?? '' }}</p>
                 <button wire:click="bulkTransfer" class="px-4 py-2 bg-indigo-600 text-white rounded">Transfer Available</button>
             </div>
             
