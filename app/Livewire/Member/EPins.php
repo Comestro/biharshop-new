@@ -29,7 +29,7 @@ class EPins extends Component
         }
     }
 
-    public function redeem()
+    public function redeem() 
     {
         $pin = EPin::where('code', $this->redeemCode)->where('status','!=','used')->first();
         if ($pin && $pin->owner_user_id) {

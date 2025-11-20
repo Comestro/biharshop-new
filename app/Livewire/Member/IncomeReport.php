@@ -25,9 +25,9 @@ class IncomeReport extends Component
     {
         $rows = [];
         $tx = WalletTransaction::where('membership_id', $memberId)
-            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission'])
+            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission', 'retopup'])
             ->orderBy('created_at', 'asc')
-            ->get(['type','amount','created_at']);
+            ->get(['type', 'amount', 'created_at']);
 
         $groups = [];
         foreach ($tx as $t) {
@@ -40,11 +40,17 @@ class IncomeReport extends Component
                     'daily' => 0,
                     'everest' => 0,
                     'diamond' => 0,
+                    'retopup' => 0,
                 ];
             }
-            if ($t->type === 'referral_commission') $groups[$key]['direct_sponsor'] += $t->amount;
-            if ($t->type === 'binary_commission') $groups[$key]['matching'] += $t->amount;
-            if ($t->type === 'daily_commission') $groups[$key]['daily'] += $t->amount;
+            if ($t->type === 'referral_commission')
+                $groups[$key]['direct_sponsor'] += $t->amount;
+            if ($t->type === 'binary_commission')
+                $groups[$key]['matching'] += $t->amount;
+            if ($t->type === 'daily_commission')
+                $groups[$key]['daily'] += $t->amount;
+            if ($t->type === 'retopup')
+                $groups[$key]['retopup'] += $t->amount;
         }
 
         $prevIncome = 0;
@@ -53,7 +59,7 @@ class IncomeReport extends Component
             $gross = round($vals['direct_sponsor'] + $vals['matching'] + $vals['daily'] + $vals['everest'] + $vals['diamond'], 2);
             $tds = round($gross * 0.02, 2);
             $admin = round($gross * 0.05, 2);
-            $retopup = 0.00;
+            $retopup = round($vals['retopup'], 2);
             $totalDeduction = round($tds + $admin + $retopup, 2);
             $net = max(round($gross - $totalDeduction, 2), 0);
             $rows[] = [
@@ -67,7 +73,7 @@ class IncomeReport extends Component
                 'gross' => $gross,
                 'tds' => $tds,
                 'admin' => $admin,
-                'retopup' => $retopup,
+                'retopup' => $vals['retopup'],
                 'total_deduction' => $totalDeduction,
                 'previous_income' => $prevIncome,
                 'net_income' => $net,
@@ -82,10 +88,10 @@ class IncomeReport extends Component
     {
         $rows = [];
         $tx = WalletTransaction::where('membership_id', $memberId)
-            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission'])
+            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission', 'retopup'])
             ->whereDate('created_at', '>=', Carbon::now()->subDays(60)->toDateString())
             ->orderBy('created_at', 'asc')
-            ->get(['type','amount','created_at']);
+            ->get(['type', 'amount', 'created_at']);
 
         $groups = [];
         foreach ($tx as $t) {
@@ -96,13 +102,19 @@ class IncomeReport extends Component
                     'direct_sponsor' => 0,
                     'matching' => 0,
                     'daily' => 0,
+                    'retopup' => 0,
                     'everest' => 0,
                     'diamond' => 0,
                 ];
             }
-            if ($t->type === 'referral_commission') $groups[$key]['direct_sponsor'] += $t->amount;
-            if ($t->type === 'binary_commission') $groups[$key]['matching'] += $t->amount;
-            if ($t->type === 'daily_commission') $groups[$key]['daily'] += $t->amount;
+            if ($t->type === 'referral_commission')
+                $groups[$key]['direct_sponsor'] += $t->amount;
+            if ($t->type === 'binary_commission')
+                $groups[$key]['matching'] += $t->amount;
+            if ($t->type === 'daily_commission')
+                $groups[$key]['daily'] += $t->amount;
+            if ($t->type === 'retopup')
+                $groups[$key]['retopup'] += $t->amount;
         }
 
         $sno = 1;
@@ -124,7 +136,7 @@ class IncomeReport extends Component
                 'gross' => $gross,
                 'tds' => $tds,
                 'admin' => $admin,
-                'retopup' => $retopup,
+                'retopup' => $vals['retopup'],
                 'total_deduction' => $totalDeduction,
                 'net_income' => $net,
             ];
