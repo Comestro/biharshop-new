@@ -7,4 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Plan extends Model
 {
     protected $guarded = [];
+
+    public function membershipLinks()
+    {
+        return $this->hasMany(\App\Models\MembershipPlan::class);
+    }
 }

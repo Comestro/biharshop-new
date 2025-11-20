@@ -138,6 +138,7 @@ function binaryTreeModal() {
 
 
     function initBinaryTree(data) {
+        console.log('Initializing binary tree with data:', data);
         if (!data || data.length === 0) return;
         d3.select("#binary-tree-container").html("");
 

@@ -12,7 +12,7 @@ class EPin extends Model
     protected $table = 'epins';
 
     protected $fillable = [
-        'code','plan_amount','plan_name','owner_user_id','generated_by_admin_id','used_by_membership_id','status','used_at'
+        'code','plan_amount','plan_name','plan_id','owner_user_id','generated_by_admin_id','used_by_membership_id','status','used_at'
     ];
 
     protected $casts = [
@@ -28,5 +28,10 @@ class EPin extends Model
     public function usedBy()
     {
         return $this->belongsTo(Membership::class, 'used_by_membership_id');
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
     }
 }

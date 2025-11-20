@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\WalletTransaction;
 use App\Models\Withdrawal;
 use App\Models\BinaryTree as BinaryTreeModel;
+use Illuminate\Support\Facades\Artisan;
 #[Layout('components.layouts.admin')]
 class Dashboard extends Component
 {
@@ -76,12 +77,15 @@ class Dashboard extends Component
         $totalCategories = Category::count();
 
         $walletCreditsSum = WalletTransaction::where('status', 'confirmed')->sum('amount');
+        $totalEarnings = WalletTransaction::where('status', 'confirmed')->sum('amount');
+        $totalWalletGenerated = $walletCreditsSum;
         $walletCreditsToday = WalletTransaction::where('status', 'confirmed')->whereDate('created_at', now()->toDateString())->sum('amount');
         $walletCreditsTodayCount = WalletTransaction::where('status', 'confirmed')->whereDate('created_at', now()->toDateString())->count();
 
         $withdrawPendingCount = Withdrawal::where('status', 'pending')->count();
         $withdrawPendingSum = Withdrawal::where('status', 'pending')->sum('amount');
         $withdrawApprovedSum = Withdrawal::where('status', 'approved')->sum('amount');
+        $withdrawTotalSum = Withdrawal::sum('amount');
 
         $binaryLinks = BinaryTreeModel::count();
 
@@ -105,11 +109,14 @@ class Dashboard extends Component
             'total_products' => $totalProducts,
             'total_categories' => $totalCategories,
             'wallet_credits_sum' => $walletCreditsSum,
+            'total_earnings' => $totalEarnings,
+            'total_wallet_generated' => $totalWalletGenerated,
             'wallet_credits_today' => $walletCreditsToday,
             'wallet_credits_today_count' => $walletCreditsTodayCount,
             'withdraw_pending_count' => $withdrawPendingCount,
             'withdraw_pending_sum' => $withdrawPendingSum,
             'withdraw_approved_sum' => $withdrawApprovedSum,
+            'withdraw_total_sum' => $withdrawTotalSum,
             'binary_links' => $binaryLinks,
         ];
 
@@ -120,5 +127,12 @@ class Dashboard extends Component
             'recentWithdrawals' => $recentWithdrawals,
             'recentTransactions' => $recentTransactions,
         ]);
+    }
+
+    public function refreshCommissions()
+    {
+        Artisan::call('wallet:daily-commission');
+        Artisan::call('wallet:recompute-binary-referral');
+        $this->dispatch('$refresh');
     }
 }

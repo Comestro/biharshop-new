@@ -4,20 +4,43 @@
         <div class="border rounded-lg p-4">
             <p class="text-sm font-medium text-gray-800 mb-2">Generate Pins</p>
             <div class="space-y-3">
+                <select wire:model="selectedPlanId" class="w-full border rounded px-3 py-2">
+                    <option value="">Select Plan</option>
+                    @foreach($plans ?? [] as $plan)
+                        <option value="{{ $plan->id }}">{{ $plan->name }} (₹{{ number_format($plan->price,2) }})</option>
+                    @endforeach
+                </select>
                 <input type="number" wire:model="generateCount" class="w-full border rounded px-3 py-2" placeholder="Count">
-                <input type="number" wire:model="planAmount" class="w-full border rounded px-3 py-2" placeholder="Plan Amount">
-                <input type="text" wire:model="planName" class="w-full border rounded px-3 py-2" placeholder="Plan Name">
-                <input type="email" wire:model="assignEmail" class="w-full border rounded px-3 py-2" placeholder="Assign to email (optional)">
                 <button wire:click="generate" class="px-4 py-2 bg-indigo-600 text-white rounded">Generate</button>
             </div>
         </div>
         <div class="border rounded-lg p-4">
             <p class="text-sm font-medium text-gray-800 mb-2">Transfer Pin</p>
             <div class="space-y-3">
-                <input type="text" wire:model="transferCode" class="w-full border rounded px-3 py-2" placeholder="Pin Code">
-                <input type="email" wire:model="transferToEmail" class="w-full border rounded px-3 py-2" placeholder="Recipient Email">
-                <button wire:click="transfer" class="px-4 py-2 bg-indigo-600 text-white rounded">Transfer</button>
+                <input type="number" wire:model="bulkTransferQty" class="w-full border rounded px-3 py-2" placeholder="Qty">
+                <input type="text" wire:model="bulkTransferMemberId" class="w-full border rounded px-3 py-2" placeholder="Member ID">
+                <button wire:click="bulkTransfer" class="px-4 py-2 bg-indigo-600 text-white rounded">Transfer Available</button>
             </div>
+            
+        </div>
+    </div>
+
+    <div class="border rounded-lg p-4 mb-4">
+        <p class="text-sm font-medium text-gray-800 mb-2">Filter Pins</p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <select wire:model="filterStatus" class="border rounded px-3 py-2">
+                <option value="all">All Status</option>
+                <option value="available">Available</option>
+                <option value="transferred">Transferred</option>
+                <option value="used">Used</option>
+            </select>
+            <select wire:model="filterPlanId" class="border rounded px-3 py-2">
+                <option value="">All Plans</option>
+                @foreach($plans ?? [] as $plan)
+                    <option value="{{ $plan->id }}">{{ $plan->name }} (₹{{ number_format($plan->price,2) }})</option>
+                @endforeach
+            </select>
+            <input type="text" wire:model="filterOwnerEmail" class="border rounded px-3 py-2" placeholder="Filter by owner email">
         </div>
     </div>
 

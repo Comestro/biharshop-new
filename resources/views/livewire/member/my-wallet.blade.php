@@ -159,7 +159,7 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Level</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Child Token</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Child Membership ID</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Commission %</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Commission</th>
                             </tr>
@@ -168,7 +168,7 @@
                             @forelse ($referralComissionHistory as $row)
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-4 py-3 text-sm text-gray-900">{{ $row['level'] }}</td>
-                                    <td class="px-4 py-3 text-sm font-medium text-indigo-600">{{ $row['child_id'] }}</td>
+                                    <td class="px-4 py-3 text-sm font-mono font-medium text-indigo-600">{{ $row['child_id'] }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-700">{{ $row['percentage'] }}%</td>
                                     <td class="px-4 py-3 text-sm font-semibold text-green-700">
                                         ₹{{ number_format($row['commission'], 2) }}

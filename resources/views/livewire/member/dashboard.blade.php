@@ -85,7 +85,7 @@
             $dailyAchieved = 0;
             if ($mid) {
                 $dailyAchieved = \App\Models\WalletTransaction::where('membership_id', $mid)
-                    ->where('type', 'daily_commission')
+                    ->where('type', 'daily_cashback')
                     ->where('status', 'confirmed')
                     ->sum('amount');
             }

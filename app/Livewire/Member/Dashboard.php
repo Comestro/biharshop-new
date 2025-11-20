@@ -34,7 +34,7 @@ class Dashboard extends Component
         $this->leftTeamSize = 0;
         $this->rightTeamSize = 0;
         $credits = WalletTransaction::where('membership_id', $this->membership->id)
-            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission'])
+            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_cashback'])
             ->where('status', 'confirmed')
             ->sum('amount');
         $debits = Withdrawal::where('membership_id', $this->membership->id)

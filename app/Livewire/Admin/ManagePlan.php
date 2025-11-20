@@ -24,8 +24,8 @@ class ManagePlan extends Component
         'price' => 'required|numeric|min:0',
         'description' => 'required|string',
         'features' => 'required|string',
-        'image' => 'required|image',
-        'type' => 'required',
+        'image' => 'nullable|image',
+        'type' => 'required|in:main,add_on',
     ];
 
     public function mount()

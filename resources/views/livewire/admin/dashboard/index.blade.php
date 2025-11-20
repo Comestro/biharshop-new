@@ -1,7 +1,15 @@
 <div class="w-full">
-    <div class="mb-10">
-        <h2 class="text-3xl font-bold text-gray-900">Welcome back, Admin</h2>
-        <p class="text-gray-600 mt-2">Here's what's happening in your MLM network today.</p>
+    <div class="mb-10 flex items-center justify-between">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-900">Welcome back, Admin</h2>
+            <p class="text-gray-600 mt-2">Here's what's happening in your MLM network today.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button wire:click="refreshCommissions" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 flex items-center gap-2">
+                <i class="fas fa-sync-alt"></i>
+                Refresh Commissions
+            </button>
+        </div>
     </div>
 
     <!-- Stats Grid -->
@@ -59,43 +67,21 @@
             </div>
         </div>
 
-        <!-- Payment Status (Paid / Unpaid) -->
-        <div class="bg-white border border-gray-200 rounded-xl p-6 hover:border-indigo-300 transition-colors lg:col-span-2">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Payment Status</p>
-                    <div class="flex items-center gap-8 mt-3">
-                        <div>
-                            <p class="text-2xl font-bold text-green-600">{{ $stats['paid_members'] }}</p>
-                            <p class="text-xs text-gray-500">Paid</p>
-                        </div>
-                        <div>
-                            <p class="text-2xl font-bold text-red-600">{{ $stats['unpaid_members'] }}</p>
-                            <p class="text-xs text-gray-500">Unpaid</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 bg-indigo-50 rounded-xl">
-                    <i class="fas fa-credit-card text-2xl text-indigo-600"></i>
-                </div>
-            </div>
-        </div>
 
-        <!-- Wallet Activity -->
-        <div class="bg-white border border-gray-200 rounded-xl p-6 hover:border-sky-300 transition-colors lg:col-span-2">
-            <div class="flex items-center justify-between">
+        <!-- Financial Totals -->
+        <div class="bg-white border border-gray-200 col-span-4 rounded-xl p-6 hover:border-emerald-300 transition-colors ">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Wallet Credits</p>
-                    <div class="mt-3">
-                        <p class="text-xl font-bold text-teal-700">₹{{ number_format($stats['wallet_credits_sum'], 0) }}</p>
-                        <p class="text-xs text-gray-500 mt-1">
-                            Today: ₹{{ number_format($stats['wallet_credits_today'], 0) }} 
-                            ({{ $stats['wallet_credits_today_count'] }} txns)
-                        </p>
-                    </div>
+                    <p class="text-sm font-medium text-gray-600">Total Earnings</p>
+                    <p class="text-2xl font-bold text-emerald-700 mt-2">₹{{ number_format($stats['total_earnings'], 0) }}</p>
                 </div>
-                <div class="p-4 bg-sky-50 rounded-xl">
-                    <i class="fas fa-wallet text-2xl text-sky-600"></i>
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Wallet Generated</p>
+                    <p class="text-2xl font-bold text-emerald-700 mt-2">₹{{ number_format($stats['total_wallet_generated'], 0) }}</p>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Withdrawals</p>
+                    <p class="text-2xl font-bold text-emerald-700 mt-2">₹{{ number_format($stats['withdraw_total_sum'], 0) }}</p>
                 </div>
             </div>
         </div>
@@ -191,7 +177,6 @@
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Name</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Token</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Status</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Joined</th>
                             </tr>
                         </thead>
@@ -200,15 +185,7 @@
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-3 text-sm text-gray-900">{{ $m->name }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-600">{{ $m->token }}</td>
-                                    <td class="px-4 py-3 text-sm">
-                                        @if($m->isPaid && $m->isVerified)
-                                            <span class="text-green-600 font-medium">Active</span>
-                                        @elseif($m->isPaid)
-                                            <span class="text-yellow-600">Pending Verify</span>
-                                        @else
-                                            <span class="text-red-600">Unpaid</span>
-                                        @endif
-                                    </td>
+                                    
                                     <td class="px-4 py-3 text-xs text-gray-500">{{ $m->created_at->format('d M, h:i A') }}</td>
                                 </tr>
                             @empty
