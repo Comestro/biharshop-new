@@ -48,6 +48,22 @@ new class extends Component {
         }
     }
 
+    public $showWelcomeLetter = false;
+    public $registeredMember = null;
+    public $registeredParent = null;
+    public $registeredPassword = null;
+
+    private function generateRandomPassword($length = 7)
+    {
+        // Generates a random 7-character alphanumeric password
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $password = '';
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+        return $password;
+    }
+
     public function register(): void
     {
         $referer = null;
@@ -68,7 +84,8 @@ new class extends Component {
             return;
         }
 
-        $validated['password'] = Hash::make('11111111');
+        $plainPassword = $this->generateRandomPassword(7);
+        $validated['password'] = Hash::make($plainPassword);
 
         $sponsor = null;
         $pin = null;
@@ -92,14 +109,14 @@ new class extends Component {
 
         event(new Registered(($user = User::create($validated))));
 
-        // dd($sponsor);
+        $membershipId = $this->generateUniqueMembershipId();
         Membership::create([
             'user_id' => $user->id,
             'name' => $validated['name'],
             'email' => $validated['email'],
             'mobile' => $this->mobile,
             'referal_id' => $sponsor->id,
-            'membership_id' => $this->generateUniqueMembershipId(),
+            'membership_id' => $membershipId,
             'token' => $this->epin ?: null,
             'isPaid' => true,
             'status' => true,
@@ -142,7 +159,6 @@ new class extends Component {
             }
         }
 
-        // dd($pin);
         // update epin table
         if ($pin) {
             $pin->used_by_membership_id = $newMember->id;
@@ -151,8 +167,11 @@ new class extends Component {
             $pin->save();
         }
 
-        Auth::login($user);
-        redirect()->route('dashboard');
+        // Instead of login and redirect, show welcome letter
+        $this->showWelcomeLetter = true;
+        $this->registeredMember = $newMember;
+        $this->registeredParent = $sponsor;
+        $this->registeredPassword = $plainPassword;
     }
     private function generateUniqueMembershipId()
     {
@@ -199,6 +218,13 @@ new class extends Component {
             <div class="p-8 md:p-5">
                 <h2 class="text-2xl font-extrabold text-gray-900">Register </h2>
                 <p class=" text-sm text-gray-600">Join BiharShop and start your journey</p>
+                @if($showWelcomeLetter && $registeredMember)
+                    @include('livewire.member.welcome-letter', [
+                        'member' => $registeredMember,
+                        'parent' => $registeredParent,
+                        'password' => $registeredPassword,
+                    ])
+                @else
                 <form wire:submit="register" class="mt-6 space-y-4">
                     <!-- Parent E-PIN -->
                     <div>
@@ -316,6 +342,7 @@ new class extends Component {
                         </button>
                     </div>
                 </form>
+@endif
 
                 <div class="mt-6">
                     <div class="relative">
