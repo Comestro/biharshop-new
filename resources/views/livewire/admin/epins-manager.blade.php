@@ -1,8 +1,12 @@
 <div class="p-6">
     <h2 class="text-xl font-semibold text-gray-900 mb-4">E-PIN Manager</h2>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+        {{-- Generate PINs --}}
         <div class="border rounded-lg p-4">
             <p class="text-sm font-medium text-gray-800 mb-2">Generate Pins</p>
+
             <div class="space-y-3">
                 <select wire:model="selectedPlanId" class="w-full border rounded px-3 py-2">
                     <option value="">Select Plan</option>
@@ -14,8 +18,11 @@
                 <button wire:click="generate" class="px-4 py-2 bg-indigo-600 text-white rounded">Generate</button>
             </div>
         </div>
+
+        {{-- Transfer --}}
         <div class="border rounded-lg p-4">
             <p class="text-sm font-medium text-gray-800 mb-2">Transfer Pin</p>
+
             <div class="space-y-3">
                 <input type="number" wire:model="bulkTransferQty" class="w-full border rounded px-3 py-2" placeholder="Qty">
                 <input type="text" wire:model="bulkTransferMemberId" class="w-full border rounded px-3 py-2" placeholder="Member ID">
@@ -44,6 +51,7 @@
         </div>
     </div>
 
+    {{-- Table --}}
     <div class="border rounded-lg overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -57,22 +65,38 @@
                     <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Join</th>
                 </tr>
             </thead>
+
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach($pins as $pin)
-                <tr>
-                    <td class="px-3 py-2 text-sm">{{ $pin->code }}</td>
-                    <td class="px-3 py-2 text-sm">{{ $pin->plan_name }} (₹{{ number_format($pin->plan_amount,2) }})</td>
-                    <td class="px-3 py-2 text-sm">{{ $pin->owner?->email ?: '-' }}</td>
-                    <td class="px-3 py-2 text-sm">{{ $pin->status }}</td>
-                    <td class="px-3 py-2 text-sm">{{ $pin->usedBy?->token ?: '-' }}</td>
-                    <td class="px-3 py-2 text-sm">{{ $pin->used_at ? \Carbon\Carbon::parse($pin->used_at)->format('d M Y, h:i A') : '-' }}</td>
-                    <td class="px-3 py-2 text-sm">
-                        <a href="{{ route('register') }}?epin={{ $pin->code }}&token={{ \App\Models\Membership::where('user_id', $pin->owner_user_id)->first()?->token }}"
-                           class="inline-block px-3 py-1 rounded bg-teal-600 text-white hover:bg-teal-700 {{ $pin->status !== 'available' ? 'opacity-50 pointer-events-none' : '' }}">
-                            Join
-                        </a>
-                    </td>
-                </tr>
+                    <tr>
+                        <td class="px-3 py-2 text-sm">{{ $pin->code }}</td>
+
+                        <td class="px-3 py-2 text-sm">
+                            {{ $pin->plan_name }} (₹{{ number_format($pin->plan_amount, 2) }})
+                        </td>
+
+                        <td class="px-3 py-2 text-sm">
+                            {{ $pin->owner?->email ?: '-' }}
+                        </td>
+
+                        <td class="px-3 py-2 text-sm">{{ $pin->status }}</td>
+
+                        <td class="px-3 py-2 text-sm">
+                            {{ $pin->usedBy?->token ?: '-' }}
+                        </td>
+
+                        <td class="px-3 py-2 text-sm">
+                            {{ $pin->used_at ? \Carbon\Carbon::parse($pin->used_at)->format('d M Y, h:i A') : '-' }}
+                        </td>
+
+                        <td class="px-3 py-2 text-sm">
+                            <a href="{{ route('register') }}?epin={{ $pin->code }}&token={{ \App\Models\Membership::where('user_id', $pin->owner_user_id)->first()?->token }}"
+                                class="inline-block px-3 py-1 rounded bg-teal-600 text-white hover:bg-teal-700 
+                                                                    {{ $pin->status !== 'available' ? 'opacity-50 pointer-events-none' : '' }}">
+                                Join
+                            </a>
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>

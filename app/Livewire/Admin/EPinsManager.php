@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\EPin;
+use App\Models\Membership;
 use App\Models\User;
 use App\Models\Plan;
 use Livewire\Attributes\Layout;
@@ -21,6 +22,19 @@ class EPinsManager extends Component
     public $bulkTransferQty = 0;
     public $bulkTransferMemberId = '';
 
+    public function updatedMembershipId($value)
+    {
+        if (!$value) {
+            $this->transferMemberName = null;
+            return;
+        }
+
+        $member = Membership::where('membership_id', $value)->first();
+
+        $this->transferMemberName = $member ? $member->name : 'Not Found';
+    }
+
+
     public function generate()
     {
         $admin = auth('admin')->user();
@@ -28,7 +42,13 @@ class EPinsManager extends Component
         if (! $plan) { return; }
         for ($i = 0; $i < max((int)$this->generateCount, 0); $i++) {
             $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            if (EPin::where('code', $code)->exists()) { $i--; continue; }
+
+            // If exists, regenerate
+            if (EPin::where('code', $code)->exists()) {
+                $i--;
+                continue;
+            }
+
             EPin::create([
                 'code' => $code,
                 'plan_amount' => $plan->price,
@@ -39,18 +59,25 @@ class EPinsManager extends Component
                 'status' => 'available',
             ]);
         }
+        $this->reset();
         $this->dispatch('pins-generated');
     }
 
+
     public function transfer()
     {
-        $pin = EPin::where('code', $this->transferCode)->where('status','!=','used')->first();
+        $pin = EPin::where('code', $this->transferCode)
+            ->where('status', '!=', 'used')
+            ->first();
+
         $to = User::where('email', $this->transferToEmail)->first();
+
         if ($pin && $to) {
             $pin->update([
                 'owner_user_id' => $to->id,
-                'status' => 'transferred',
+                'status' => 'transferred'
             ]);
+
             $this->dispatch('pin-transferred');
         }
     }
