@@ -76,6 +76,56 @@
         </div>
     </div>
 
+    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 mb-6">
+        @php
+            $planPerDay = 16;
+            $planDays = 30;
+            $planTotal = $planPerDay * $planDays;
+            $mid = $membership->id ?? null;
+            $dailyAchieved = 0;
+            if ($mid) {
+                $dailyAchieved = \App\Models\WalletTransaction::where('membership_id', $mid)
+                    ->where('type', 'daily_commission')
+                    ->where('status', 'confirmed')
+                    ->sum('amount');
+            }
+            $dailyRemaining = max(0, $planTotal - $dailyAchieved);
+            $daysAchieved = min($planDays, (int) floor($dailyAchieved / $planPerDay));
+            $progressPct = min(100, $planTotal > 0 ? round(($dailyAchieved / $planTotal) * 100) : 0);
+        @endphp
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div
+                    class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
+                    Daily Cashback Ads</div>
+                <h3 class="mt-2 text-lg font-semibold text-emerald-900">₹{{ number_format($planPerDay, 2) }} per day for
+                    {{ $planDays }} days (₹{{ number_format($planTotal, 2) }} total)
+                </h3>
+                <div class="mt-3 h-3 bg-emerald-100 rounded-full overflow-hidden">
+                    <div class="h-3 bg-emerald-500" style="width: {{ $progressPct }}%"></div>
+                </div>
+                <p class="mt-1 text-xs text-emerald-800">Progress: {{ $progressPct }}%</p>
+            </div>
+            <div class="grid grid-cols-3 gap-4 w-full lg:w-auto">
+                <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
+                    <p class="text-xs font-medium text-emerald-700">Achieved</p>
+                    <p class="mt-1 text-xl font-bold text-emerald-900">₹{{ number_format($dailyAchieved, 2) }}</p>
+                </div>
+                <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
+                    <p class="text-xs font-medium text-emerald-700">Remaining</p>
+                    <p class="mt-1 text-xl font-bold text-emerald-900">₹{{ number_format($dailyRemaining, 2) }}</p>
+                </div>
+                <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
+                    <p class="text-xs font-medium text-emerald-700">Days</p>
+                    <p class="mt-1 text-xl font-bold text-emerald-900">{{ $daysAchieved }} / {{ $planDays }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+   
+
     <!-- reffee links div -->
     <!-- Referral Link Section -->
     <div class="bg-white p-6 rounded-xl border border-gray-200 space-y-6 mb-6">
@@ -89,7 +139,8 @@
             <div onclick="if(document.getElementById('leftLink').value){ window.location.href=document.getElementById('leftLink').value }"
                 class="mt-1 flex items-center gap-2 bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 cursor-pointer">
 
-                <input id="leftLink" type="text" readonly value="{{ route('register') }}?sponsor_id={{ Auth::user()->membership->membership_id }}&position=left"
+                <input id="leftLink" type="text" readonly
+                    value="{{ route('register') }}?sponsor_id={{ Auth::user()->membership->membership_id }}&position=left"
                     class="w-full bg-transparent focus:outline-none text-sm cursor-pointer">
 
                 <!-- Copy Button -->
@@ -134,20 +185,15 @@
 
         </div>
     </div>
-
-
     <!-- SUCCESS TOAST -->
     <div id="copyToast"
         class="fixed top-5 right-5 bg-black text-white text-sm px-4 py-2 rounded-lg shadow-lg opacity-0 scale-90 transition-all duration-300 pointer-events-none z-[9999]">
         Copied to clipboard!
     </div>
-
     <div id="shareToast"
         class="fixed top-16 right-5 bg-green-600 text-white text-sm px-4 py-2 rounded-lg shadow-lg opacity-0 scale-90 transition-all duration-300 pointer-events-none z-[9999]">
         Sharing link…
     </div>
-
-
     <script>
         function copyLink(id) {
             let input = document.getElementById(id);
@@ -193,7 +239,6 @@
             }
         }
     </script>
-
 
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
