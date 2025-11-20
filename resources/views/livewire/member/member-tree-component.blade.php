@@ -344,7 +344,7 @@
             .attr("stroke", d => {
                 if (d.data.status === 'empty') return '#e2e8f0';
                 if (d.data.status === 'current') return '#059669';
-                return d.data.status === 'verified' ? '#22c55e' : '#ef4444';
+                return d.data.status === 'verified' ? '#22c55e' : '#e2e8f0'; // Use gray for non-verified
             })
             .attr("stroke-width", d => d.data.status === 'current' ? 3 : 2)
             .attr("stroke-dasharray", d => d.data.status === 'empty' ? "5,5" : "none")
@@ -477,6 +477,7 @@
                 const name = d?.data?.name || '—';
                 const status = d?.data?.status || '—';
                 const id = d?.data?.id ?? '—';
+                const memberid = d?.data?.membership_id ?? '—';
                 const binary_income = d?.data?.binary_income ?? '—';
                 const total_income = d?.data?.total_income ?? '—';
                 tooltipEl.innerHTML = `
@@ -484,6 +485,7 @@
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span style="display:inline-block;padding:2px 8px;background:#2563eb;color:#fff;border-radius:999px;font-weight:600;font-size:11px;">${name}</span>
                             <span style="font-size:11px;color:#6b7280;">ID: ${id}</span>
+                            <span style="font-size:11px;color:#059669;">MemberID: ${memberid}</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;gap:12px;">
                             <div><span style="color:#6b7280;">Token:</span> <span style="color:#111827;">${token}</span></div>
