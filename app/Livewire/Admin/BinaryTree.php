@@ -71,10 +71,11 @@ class BinaryTree extends Component
             'parentId' => $parentId,
             'name' => $member->name,
             'token' => $member->token,
+            'membership_id' => $member->membership_id,
             // mark the current root so the frontend can highlight it
             'status' => $member->id == $this->root_id ? 'current' : ($member->isVerified ? 'verified' : 'pending'),
             // helpful fields for the frontend (avatar or initials)
-            'avatar' => $member->user?->avatar ?? null,
+            'avatar' => $member->image ?? null,
             'initials' => $member->user?->initials() ?? strtoupper(substr($member->name, 0, 1)),
         ];
 

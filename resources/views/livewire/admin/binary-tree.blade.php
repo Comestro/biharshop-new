@@ -253,7 +253,7 @@ function binaryTreeModal() {
             .attr("stroke", d => {
                 if (d.data.status === 'empty') return '#e2e8f0';
                 if (d.data.status === 'current') return '#059669';
-                return d.data.status === 'verified' ? '#22c55e' : '#ef4444';
+                return d.data.status === 'verified' ? '#22c55e' : '#e2e8f0'; // Use gray for non-verified
             })
             .attr("stroke-width", d => d.data.status === 'current' ? 3 : 2)
             .attr("stroke-dasharray", d => d.data.status === 'empty' ? "5,5" : "none")
@@ -269,6 +269,8 @@ function binaryTreeModal() {
                 d3.select(this).transition().duration(200).attr("stroke-width", datum.data.status === 'current' ?
                     3 : 2).attr("transform", "scale(1)");
             });
+
+            console.log(data)
 
         // Avatar image (if provided)
         nodes.append('image')
@@ -302,9 +304,9 @@ function binaryTreeModal() {
         const badges = nodes.append('g').attr('class', 'name-badge');
         const nonEmptyBadges = badges.filter(d => d.data.status !== 'empty');
         nonEmptyBadges.append('rect')
-            .attr('x', -32)
+            .attr('x', -52)
             .attr('y', 40)
-            .attr('width', 70)
+            .attr('width',100)
             .attr('height', 18)
             .attr('rx', 9)
             .attr('ry', 9)
@@ -316,7 +318,7 @@ function binaryTreeModal() {
             .attr('text-anchor', 'middle')
             .attr('class', 'text-[11px] font-semibold')
             .attr('fill', '#ffffff')
-            .text(d => (d.data.token || '').length > 18 ? (d.data.token || '').slice(0, 17) + '…' : (d.data.token || ''));
+            .text(d => (d.data.name || '').length > 18 ? (d.data.name || '').slice(0, 17) + '…' : (d.data.name || ''));
 
         // Hint badge for empty nodes
         const emptyBadges = badges.filter(d => d.data.status === 'empty');
@@ -382,7 +384,7 @@ function binaryTreeModal() {
         nodes
             .on('mouseover', function(event, d) {
                 if (d?.data?.status === 'empty') return;
-                const token = d?.data?.token || '—';
+                const memberid = d?.data?.membership_id ?? '—';
                 const name = d?.data?.name || '—';
                 const status = d?.data?.status || '—';
                 const id = d?.data?.id ?? '—';
@@ -390,10 +392,9 @@ function binaryTreeModal() {
                     <div style="display:flex;flex-direction:column;gap:4px;min-width:200px;max-width:280px;">
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span style="display:inline-block;padding:2px 8px;background:#2563eb;color:#fff;border-radius:999px;font-weight:600;font-size:11px;">${name}</span>
-                            <span style="font-size:11px;color:#6b7280;">ID: ${id}</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;gap:12px;">
-                            <div><span style="color:#6b7280;">Token:</span> <span style="color:#111827;">${token}</span></div>
+                            <div><span style="color:#6b7280;">MemberID:</span> <span style="color:#111827;">${memberid}</span></div>
                             <div><span style="color:#6b7280;">Status:</span> <span style="color:#111827;">${status}</span></div>
                         </div>
                     </div>`;

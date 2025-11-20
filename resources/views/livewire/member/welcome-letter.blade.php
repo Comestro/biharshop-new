@@ -13,6 +13,7 @@
         </div>
 
         <div class="mt-6 space-y-4 text-sm text-gray-800 leading-relaxed">
+            
             <p>Dear Clients / Participants & Families,</p>
            <div class="mt-8">
             <h2 class="text-lg font-semibold text-gray-900">Enrollment Details</h2>
