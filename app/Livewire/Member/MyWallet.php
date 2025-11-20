@@ -21,11 +21,12 @@ class MyWallet extends Component
     public $availableBalance = 0.00;
     public $commissionHistory = [];
     public $referralComissionHistory = [];
-    public $binaryComissionHistory = true;      
+    public $binaryComissionHistory = true;
     public $activeCommissionTab = 'binary';
     public $binaryCommissionTotal = 0.00;
     public $referralCommissionTotal = 0.00;
     public $dailyCommissionTotal = 0.00;
+    public $adminCommissionTotal = 0.00;
     public $dailyCommissionTx = [];
     public $binaryTx = [];
     public $kycComplete = false;
@@ -39,7 +40,7 @@ class MyWallet extends Component
     {
         $this->memberId = auth()->user()->membership->id;
         $this->kycComplete = auth()->user()->membership->isKycComplete();
-        
+
         $this->generateDailyCommission($this->memberId);
         $this->calculateCommission($this->memberId);
         $this->loadWallet();
@@ -47,7 +48,8 @@ class MyWallet extends Component
         $this->loadCommissionData();
         // $this->generateReferralCommissions($this->memberId);
         $this->insertReferralComission($this->memberId);
-        
+        $this->adminComissionCreate($this->memberId);
+
 
     }
 
@@ -377,7 +379,8 @@ class MyWallet extends Component
     private function generateDailyCommission($memberId)
     {
         $m = Membership::find($memberId);
-        if (!$m || !$m->created_at) return;
+        if (!$m || !$m->created_at)
+            return;
         $start = $m->created_at->copy()->startOfDay();
         $end = now()->copy()->startOfDay();
         $eligibleDays = min(30, $start->diffInDays($end) + 1);
@@ -385,13 +388,15 @@ class MyWallet extends Component
             ->where('type', 'daily_commission')
             ->sum('amount');
         for ($i = 0; $i < $eligibleDays; $i++) {
-            if ($totalReceived >= 480) break;
+            if ($totalReceived >= 480)
+                break;
             $date = $start->copy()->addDays($i);
             $existsForDate = WalletTransaction::where('membership_id', $memberId)
                 ->where('type', 'daily_commission')
                 ->whereDate('created_at', $date->toDateString())
                 ->exists();
-            if ($existsForDate) continue;
+            if ($existsForDate)
+                continue;
             WalletTransaction::create([
                 'membership_id' => $memberId,
                 'type' => 'daily_commission',
@@ -487,6 +492,11 @@ class MyWallet extends Component
             ->where('type', 'daily_commission')
             ->where('status', 'confirmed')
             ->sum('amount');
+            
+        $this->adminCommissionTotal = WalletTransaction::where('membership_id', $this->memberId)
+            ->where('type', 'admin_commission')
+            ->where('status', 'confirmed')
+            ->sum('amount');
 
         $this->binaryTx = WalletTransaction::where('membership_id', $this->memberId)
             ->where('type', 'binary_commission')
@@ -522,6 +532,29 @@ class MyWallet extends Component
             'tds' => $tds,
             'net_amount' => $net,
         ];
+    }
+    private function adminComissionCreate($memberId)
+    {
+        $totalEarnings = $this->totalEarnings;
+
+        $slabs = floor($totalEarnings / 20000);
+
+        $shouldHaveCut = $slabs * 3000;
+
+        $alreadyCut = WalletTransaction::where('membership_id', $memberId)
+            ->where('type', 'admin_commission')
+            ->sum('amount');
+
+        $pendingCut = $shouldHaveCut - $alreadyCut;
+
+        if ($pendingCut > 0) {
+            WalletTransaction::create([
+                'membership_id' => $memberId,
+                'type' => 'admin_comission',
+                'amount' => $pendingCut,
+                'status' => 'confirmed',
+            ]);
+        }
     }
 
 

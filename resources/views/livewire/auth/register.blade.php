@@ -204,14 +204,14 @@ new class extends Component {
                     <div>
                         <label class="block text-sm font-medium text-gray-700"> E-PIN</label>
                         <input type="text" wire:model="epin" @if (request()->query('epin')) disabled @endif
-                            maxlength="6" placeholder="Enter 6-digit E-PIN" 
+                            maxlength="6" placeholder="Enter 6-digit E-PIN"
                             class="mt-1 block w-full rounded-lg border-2 border-gray-200 px-3 py-2 shadow-sm focus:border-teal-500 focus:ring-teal-500">
                         @error('epin')
                             <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
                         @enderror
                         <p class="mt-1 text-xs text-gray-500">Use your sponsor/parent's E-PIN to join</p>
                     </div>
-                     <!-- Name -->
+                    <!-- Name -->
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
                         <div class="mt-1">
@@ -275,18 +275,33 @@ new class extends Component {
                         <label class="block text-sm font-medium text-gray-700">Choose Position</label>
                         {{-- use radio button --}}
                         <div class="mt-1">
-                            <label class="inline-flex items-center mr-4">
-                                <input type="radio" wire:model="position" value="left" @if (request()->query('position') == 'left') disabled @endif
-                                    class="form-radio text-teal-600">
-                                <span class="ml-2">Left</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" wire:model="position" value="right" @if (request()->query('position') == 'right') disabled @endif
-                                    class="form-radio text-teal-600">
-                                <span class="ml-2">Right</span>
-                            </label>
+                            @if (request()->query('position') == 'left')
+                                <label class="inline-flex items-center mr-4">
+                                    <input type="radio" wire:model="position" value="left" disabled
+                                        class="form-radio text-teal-600">
+                                    <span class="ml-2">Left</span>
+                                </label>
+                            @elseif(request()->query('position') == 'right')
+                                <label class="inline-flex items-center">
+                                    <input type="radio" wire:model="position" value="right" @if (request()->query('position') == 'right') disabled @endif
+                                        class="form-radio text-teal-600">
+                                    <span class="ml-2">Right</span>
+                                </label>
+                            @else
+                                <label class="inline-flex items-center mr-4">
+                                    <input type="radio" wire:model="position" value="left" 
+                                        class="form-radio text-teal-600">
+                                    <span class="ml-2">Left</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" wire:model="position" value="right" 
+                                        class="form-radio text-teal-600">
+                                    <span class="ml-2">Right</span>
+                                </label>
+                            @endif
+
                         </div>
-                        
+
 
                         @error('position')
                             <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
