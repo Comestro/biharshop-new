@@ -492,7 +492,7 @@ class MyWallet extends Component
             ->where('type', 'daily_commission')
             ->where('status', 'confirmed')
             ->sum('amount');
-            
+
         $this->adminCommissionTotal = WalletTransaction::where('membership_id', $this->memberId)
             ->where('type', 'admin_commission')
             ->where('status', 'confirmed')
@@ -533,29 +533,44 @@ class MyWallet extends Component
             'net_amount' => $net,
         ];
     }
-    private function adminComissionCreate($memberId)
+    public function adminComissionCreate($memberId)
     {
-        $totalEarnings = $this->totalEarnings;
+        $totalEarnings = $this->totalEarnings ?? 0;
 
-        $slabs = floor($totalEarnings / 20000);
+        // 20k per slab
+        $requiredSlabs = floor($totalEarnings / 20000);
 
-        $shouldHaveCut = $slabs * 3000;
-
-        $alreadyCut = WalletTransaction::where('membership_id', $memberId)
+        // DB me kitne admin commissions diye ja chuke hain
+        $existingSlabs = WalletTransaction::where('membership_id', $memberId)
             ->where('type', 'admin_commission')
-            ->sum('amount');
+            ->count();
 
-        $pendingCut = $shouldHaveCut - $alreadyCut;
+        // Agar DB ka count aur required slab same hai → kuchh mat karo
+        if ($existingSlabs == $requiredSlabs) {
+            return;
+        }
 
-        if ($pendingCut > 0) {
+        // Kitne slabs abhi dene baaki hain?
+        $pendingSlabs = $requiredSlabs - $existingSlabs;
+
+        // Agar pending kuchh nahi → bas chhodo
+        if ($pendingSlabs <= 0) {
+            return;
+        }
+
+        // Jitne slabs pending hai utne 3000 ke entry add karo
+        for ($i = 1; $i <= $pendingSlabs; $i++) {
             WalletTransaction::create([
                 'membership_id' => $memberId,
-                'type' => 'admin_comission',
-                'amount' => $pendingCut,
+                'type' => 'admin_commission',
+                'amount' => 3000,
                 'status' => 'confirmed',
+                'meta' => 'auto_added_slab', // optional
             ]);
         }
     }
+
+
 
 
     public function render()
