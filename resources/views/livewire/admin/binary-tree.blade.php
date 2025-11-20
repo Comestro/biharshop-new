@@ -194,20 +194,17 @@ function binaryTreeModal() {
 
         // Nodes
         const nodes = g.selectAll(".node")
-            .data(root.descendants())
+            .data(root.descendants().filter(d => d.data.status !== 'empty'))
             .join("g")
             .attr("class", "node group")
             .attr("transform", d => `translate(${d.x},${d.y})`)
-            .style("cursor", d => d.data.status !== 'empty' ? "pointer" : "default")
+            .style("cursor", "pointer")
             .on("click", function(event, d) {
                 const t = document.getElementById('binary-tree-tooltip');
                 if (t) t.style.display = 'none';
                 const rawId = d && d.data ? d.data.id : null;
                 const idStr = rawId !== null && rawId !== undefined ? String(rawId) : '';
                 if (!idStr) return;
-
-                // Add-node disabled: clicking on empty nodes does nothing
-                // if (idStr.startsWith('empty-')) { return; }
                 navigationStack.push(currentRootId);
                 Livewire.dispatch('binaryTreeChangeRootRequest', { id: rawId });
                 console.log('Dispatched binaryTreeChangeRootRequest with id:', rawId);
@@ -285,25 +282,15 @@ function binaryTreeModal() {
 
         // Labels
         const labels = nodes.append("g").attr("class", "label text-center");
-        // Initial inside circle for non-empty
-        labels.filter(d => d.data.status !== 'empty').append("text")
+        labels.append("text")
             .attr("dy", "0.35em")
             .attr("text-anchor", "middle")
             .attr("class", "text-[16px] font-bold text-gray-700 fill-current")
             .text(d => (d.data.initials || (d.data.name ? d.data.name.charAt(0) : '')).toUpperCase());
 
-        // Plus icon centered for empty nodes
-        labels.filter(d => d.data.status === 'empty').append('text')
-            .attr('dy', '0.35em')
-            .attr('text-anchor', 'middle')
-            .attr('class', 'text-[18px] font-bold')
-            .attr('fill', '#2563eb')
-            .text('+');
-
-        // Name badge on node (non-empty): pill below the square
+        // Name badge on node: pill below the square
         const badges = nodes.append('g').attr('class', 'name-badge');
-        const nonEmptyBadges = badges.filter(d => d.data.status !== 'empty');
-        nonEmptyBadges.append('rect')
+        badges.append('rect')
             .attr('x', -52)
             .attr('y', 40)
             .attr('width',100)
@@ -312,33 +299,13 @@ function binaryTreeModal() {
             .attr('ry', 9)
             .attr('fill', '#2563eb')
             .attr('opacity', 0.9);
-        nonEmptyBadges.append('text')
+        badges.append('text')
             .attr('x', 0)
             .attr('y', 53)
             .attr('text-anchor', 'middle')
             .attr('class', 'text-[11px] font-semibold')
             .attr('fill', '#ffffff')
             .text(d => (d.data.name || '').length > 18 ? (d.data.name || '').slice(0, 17) + '…' : (d.data.name || ''));
-
-        // Hint badge for empty nodes
-        const emptyBadges = badges.filter(d => d.data.status === 'empty');
-        emptyBadges.append('rect')
-            .attr('x', -28)
-            .attr('y', 40)
-            .attr('width', 56)
-            .attr('height', 18)
-            .attr('rx', 9)
-            .attr('ry', 9)
-            .attr('fill', '#e5f2ff')
-            .attr('stroke', '#3b82f6')
-            .attr('opacity', 0.9);
-        emptyBadges.append('text')
-            .attr('x', 0)
-            .attr('y', 53)
-            .attr('text-anchor', 'middle')
-            .attr('class', 'text-[11px] font-semibold')
-            .attr('fill', '#1d4ed8')
-            .text('Add');
 
         // Zoom behavior
         const zoom = d3.zoom()
