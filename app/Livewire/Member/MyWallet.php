@@ -59,8 +59,8 @@ class MyWallet extends Component
         $this->commissionHistory = [];
         $memberId = $this->memberId;
         $baseAmount = \App\Models\MembershipPlan::where('membership_id', $memberId)
-            ->where('status','active')
-            ->join('plans','membership_plans.plan_id','=','plans.id')
+            ->where('status', 'active')
+            ->join('plans', 'membership_plans.plan_id', '=', 'plans.id')
             ->sum('plans.price');
         if ($baseAmount <= 0) {
             $baseAmount = \App\Models\EPin::where('used_by_membership_id', $memberId)->value('plan_amount') ?? 3000;
@@ -162,7 +162,7 @@ class MyWallet extends Component
             $consRight = $side === 'left' ? 1 : 2;
             $availLeft = max($leftCount - $consLeft, 0);
             $availRight = max($rightCount - $consRight, 0);
-            $targetMatches = min($availLeft, $availRight);
+            $targetMatches = min($leftDepth, $rightDepth) - 1;
             if ($targetMatches > $paidMatches) {
                 for ($i = $paidMatches + 1; $i <= $targetMatches; $i++) {
                     $commission = ($baseAmount * 12) / 100;
@@ -389,13 +389,14 @@ class MyWallet extends Component
         if (!$m || !$m->created_at)
             return;
         $hasPlan3000 = \App\Models\MembershipPlan::where('membership_id', $memberId)
-            ->where('status','active')
-            ->join('plans','membership_plans.plan_id','=','plans.id')
+            ->where('status', 'active')
+            ->join('plans', 'membership_plans.plan_id', '=', 'plans.id')
             ->where('plans.price', 3000)
             ->exists();
         $pinAmount = \App\Models\EPin::where('used_by_membership_id', $memberId)->value('plan_amount');
         $qualifies = $hasPlan3000 || ($pinAmount == 3000);
-        if (! $qualifies) return;
+        if (!$qualifies)
+            return;
         $perDay = 16.00;
         $capTotal = 480.00;
         $start = $m->created_at->copy()->startOfDay();
