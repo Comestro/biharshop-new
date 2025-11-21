@@ -157,6 +157,16 @@
                     </div>
                     <span class="ml-3 font-medium">E-PINs</span>
                 </a>
+
+                <a href="{{ route('member.kyc-documents') }}"
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.kyc-documents') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.kyc-documents') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">KYC Documents</span>
+                </a>
             </nav>
 
             <!-- Logout Button -->

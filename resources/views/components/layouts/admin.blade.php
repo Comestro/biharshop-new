@@ -69,6 +69,12 @@
                         @endif
                     </a>
 
+                    <a href="{{ route('admin.kyc') }}"
+                        class="sidebar-link flex items-center gap-4 px-5 py-3.5 rounded-xl mx-3 transition-all {{ request()->routeIs('admin.kyc') ? 'active-link' : 'text-gray-700' }}">
+                        <i class="fas fa-id-card w-5 text-lg"></i>
+                        <span class="font-medium">KYC Verification</span>
+                    </a>
+
                     <a href="{{ route('admin.binary-tree') }}"
                         class="sidebar-link flex items-center gap-4 px-5 py-3.5 rounded-xl mx-3 transition-all {{ request()->routeIs('admin.binary-tree') ? 'active-link' : 'text-gray-700' }}">
                         <i class="fas fa-project-diagram w-5 text-lg"></i>
