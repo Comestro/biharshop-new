@@ -63,13 +63,13 @@
                 }
             @endphp
             <div class="px-4 py-3 bg-indigo-50 border-b border-indigo-100">
-                <div class="text-indigo-900 font-semibold text-sm">Sponsor</div>
+                <div class="text-indigo-900 font-semibold text-sm">Sponsor (UPLINE)</div>
                 <div class="mt-1 text-sm text-indigo-800">{{ $parentName }}</div>
-                <div class="mt-0.5 text-xs text-indigo-700">Token: {{ $parentToken }}</div>
+                <div class="mt-0.5 text-xs text-indigo-700">Membership ID: {{ $parentToken }}</div>
             </div>
 
             <!-- Navigation -->
-            <nav class="mt-8 px-4 space-y-2">
+            <nav class="mt-8 px-4">
                 <a href="{{ route('member.dashboard') }}"
                     class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.dashboard') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
                     <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.dashboard') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">

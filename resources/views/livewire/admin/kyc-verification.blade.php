@@ -27,16 +27,22 @@
                     </div>
                     <div class="text-sm text-gray-600 mb-2">Status: {{ $m->kyc_status ?? 'pending' }}</div>
                     <div class="grid grid-cols-2 gap-3">
-                        @if($m->pancard_image)
-                            <img src="{{ Storage::url($m->pancard_image) }}" class="rounded border" />
-                        @else
-                            <div class="text-xs text-gray-400">No PAN image</div>
-                        @endif
-                        @if($m->aadhar_card_image)
-                            <img src="{{ Storage::url($m->aadhar_card_image) }}" class="rounded border" />
-                        @else
-                            <div class="text-xs text-gray-400">No Aadhar image</div>
-                        @endif
+                        <div>
+                            @if($m->pancard_image)
+                                <img src="{{ Storage::url($m->pancard_image) }}" class="rounded border mb-2" />
+                            @else
+                                <div class="text-xs text-gray-400">No PAN image</div>
+                            @endif
+                            <div class="text-xs text-gray-700 mt-1">PAN Number: <span class="font-semibold">{{ $m->pancard ?? '-' }}</span></div>
+                        </div>
+                        <div>
+                            @if($m->aadhar_card_image)
+                                <img src="{{ Storage::url($m->aadhar_card_image) }}" class="rounded border mb-2" />
+                            @else
+                                <div class="text-xs text-gray-400">No Aadhar image</div>
+                            @endif
+                            <div class="text-xs text-gray-700 mt-1">Aadhar Number: <span class="font-semibold">{{ $m->aadhar_card ?? '-' }}</span></div>
+                        </div>
                     </div>
                     @if($m->kyc_rejection_reason)
                         <div class="mt-2 text-xs text-red-600">Reason: {{ $m->kyc_rejection_reason }}</div>

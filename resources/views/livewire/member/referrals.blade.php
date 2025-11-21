@@ -19,7 +19,7 @@
             <thead class="bg-gray-100">
                 <tr class="text-gray-700">
                     <th class="px-4 py-3 text-left">Name</th>
-                    <th class="px-4 py-3 text-left">Token</th>
+                    <th class="px-4 py-3 text-left">Membership ID</th>
                     <th class="px-4 py-3 text-left">Email</th>
                     <th class="px-4 py-3 text-left">Joined</th>
                 </tr>
@@ -29,7 +29,7 @@
                 @forelse($referrals as $row)
                     <tr class="border-t">
                         <td class="px-4 py-2">{{ $row->name }}</td>
-                        <td class="px-4 py-2">{{ $row->token }}</td>
+                        <td class="px-4 py-2">{{ $row->membership_id }}</td>
                         <td class="px-4 py-2">{{ $row->email }}</td>
                         <td class="px-4 py-2">{{ $row->created_at->format('d M Y') }}</td>
                     </tr>
