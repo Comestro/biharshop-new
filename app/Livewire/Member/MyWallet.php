@@ -162,7 +162,13 @@ class MyWallet extends Component
             $consRight = $side === 'left' ? 1 : 2;
             $availLeft = max($leftCount - $consLeft, 0);
             $availRight = max($rightCount - $consRight, 0);
-            $targetMatches = min($leftDepth, $rightDepth) - 1;
+            if ($leftDepth === $rightDepth) {
+                $targetMatches = min($leftDepth, $rightDepth) - 2;
+
+            } else {
+
+                $targetMatches = min($leftDepth, $rightDepth) - 1;
+            }
             if ($targetMatches > $paidMatches) {
                 for ($i = $paidMatches + 1; $i <= $targetMatches; $i++) {
                     $commission = ($baseAmount * 12) / 100;
