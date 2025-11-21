@@ -11,8 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('memberships', function (Blueprint $table) {
-            $table->string('referral_code')->nullable()->after('token');
-            $table->foreignId('plan_id')->nullable()->constrained('plans');
+            // $table->string('referral_code')->nullable()->after('token');
+            // $table->foreignId('plan_id')->nullable()->constrained('plans'); 
         });
     }
 
