@@ -162,7 +162,13 @@ class MyWallet extends Component
             $consRight = $side === 'left' ? 1 : 2;
             $availLeft = max($leftCount - $consLeft, 0);
             $availRight = max($rightCount - $consRight, 0);
-            $targetMatches = min($leftDepth, $rightDepth) - 1;
+            if ($leftDepth === $rightDepth) {
+                $targetMatches = min($leftDepth, $rightDepth) - 2;
+
+            } else {
+
+                $targetMatches = min($leftDepth, $rightDepth) - 1;
+            }
             if ($targetMatches > $paidMatches) {
                 for ($i = $paidMatches + 1; $i <= $targetMatches; $i++) {
                     $commission = ($baseAmount * 12) / 100;
@@ -246,55 +252,6 @@ class MyWallet extends Component
         }
         return $count;
     }
-
-
-    // private function generateReferralCommissions($memberId)
-    // {
-    //     $levels = [3, 2, 1, 1, 1];
-    //     $earnings = WalletTransaction::where('membership_id', $memberId)
-    //         ->whereIn('type', ['binary_commission', 'daily_cashback'])
-    //         ->where('status', 'confirmed')
-    //         ->sum('amount');
-    //     if ($earnings <= 0) {
-    //         return;
-    //     }
-
-    //     $childToken = $this->getToken($memberId);
-
-    //     $current = $memberId;
-    //     for ($i = 0; $i < 5; $i++) {
-    //         $parent = ReferralTree::where('member_id', $current)->first();
-    //         if (!$parent || !$parent->parent_id)
-    //             break;
-    //         $parentId = $parent->parent_id;
-
-    //         $percent = $levels[$i];
-    //         $target = ($earnings * $percent) / 100;
-    //         $existing = WalletTransaction::where('membership_id', $parentId)
-    //             ->where('type', 'referral_commission')
-    //             ->where('meta->child_id', $childToken)
-    //             ->where('meta->level', $i + 1)
-    //             ->sum('amount');
-    //         $delta = max($target - $existing, 0);
-
-    //         if ($delta > 0) {
-    //             WalletTransaction::create([
-    //                 'membership_id' => $parentId,
-    //                 'type' => 'referral_commission',
-    //                 'amount' => $delta,
-    //                 'status' => 'confirmed',
-    //                 'meta' => [
-    //                     'level' => $i + 1,
-    //                     'child_id' => $childToken,
-    //                     'percentage' => $percent
-    //                 ]
-    //             ]);
-    //         }
-
-    //         $current = $parentId;
-    //     }
-    // }
-
 
 
     private function insertReferralComission($memberId)
