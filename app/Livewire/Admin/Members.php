@@ -31,7 +31,13 @@ class Members extends Component
 
     private function recordBinaryCommissions($memberId)
     {
-        $baseAmount = $this->selectedMembership->plan?->price ?? 3000;
+        $baseAmount = \App\Models\MembershipPlan::where('membership_id', $memberId)
+            ->where('status','active')
+            ->join('plans','membership_plans.plan_id','=','plans.id')
+            ->sum('plans.price');
+        if ($baseAmount <= 0) {
+            $baseAmount = \App\Models\EPin::where('used_by_membership_id', $memberId)->value('plan_amount') ?? 3000;
+        }
 
         $left = BinaryTree::where('parent_id', $memberId)->where('position', 'left')->first();
         $right = BinaryTree::where('parent_id', $memberId)->where('position', 'right')->first();
@@ -131,7 +137,7 @@ class Members extends Component
     {
         $levels = [3, 2, 1, 1, 1];
         $earnings = WalletTransaction::where('membership_id', $member->id)
-            ->whereIn('type', ['binary_commission', 'daily_commission'])
+            ->where('type', 'binary_commission')
             ->where('status', 'confirmed')
             ->sum('amount');
         if ($earnings <= 0) {

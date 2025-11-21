@@ -34,10 +34,11 @@ class BinaryTree extends Component
 
     public function mount($root_id = null)
     {
-        $this->initial_root_id = $root_id ?? Membership::where('isVerified', true)->first()?->id;
+        $this->initial_root_id = $root_id ?? Membership::first()?->id;
         $this->root_id = $this->initial_root_id;
         $this->createParentId = $this->root_id;
         $this->loadTree();
+
     }
 
     public function updatedRootId()
@@ -54,6 +55,7 @@ class BinaryTree extends Component
 
         $flatData = [];
         $this->processNode($this->root_id, null, $flatData, 0);
+        
         $this->treeData = $flatData;
     }
 

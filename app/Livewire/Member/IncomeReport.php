@@ -25,7 +25,7 @@ class IncomeReport extends Component
     {
         $rows = [];
         $tx = WalletTransaction::where('membership_id', $memberId)
-            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission', 'retopup'])
+            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_cashback', 'retopup'])
             ->orderBy('created_at', 'asc')
             ->get(['type', 'amount', 'created_at']);
 
@@ -47,7 +47,7 @@ class IncomeReport extends Component
                 $groups[$key]['direct_sponsor'] += $t->amount;
             if ($t->type === 'binary_commission')
                 $groups[$key]['matching'] += $t->amount;
-            if ($t->type === 'daily_commission')
+            if ($t->type === 'daily_cashback')
                 $groups[$key]['daily'] += $t->amount;
             if ($t->type === 'retopup')
                 $groups[$key]['retopup'] += $t->amount;
@@ -88,7 +88,7 @@ class IncomeReport extends Component
     {
         $rows = [];
         $tx = WalletTransaction::where('membership_id', $memberId)
-            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission', 'retopup'])
+            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_cashback', 'retopup'])
             ->whereDate('created_at', '>=', Carbon::now()->subDays(60)->toDateString())
             ->orderBy('created_at', 'asc')
             ->get(['type', 'amount', 'created_at']);
@@ -111,7 +111,7 @@ class IncomeReport extends Component
                 $groups[$key]['direct_sponsor'] += $t->amount;
             if ($t->type === 'binary_commission')
                 $groups[$key]['matching'] += $t->amount;
-            if ($t->type === 'daily_commission')
+            if ($t->type === 'daily_cashback')
                 $groups[$key]['daily'] += $t->amount;
             if ($t->type === 'retopup')
                 $groups[$key]['retopup'] += $t->amount;

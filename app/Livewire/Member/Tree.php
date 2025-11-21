@@ -39,7 +39,7 @@ class Tree extends Component
             'id' => $member->id,
             'parentId' => $parentId,
             'name' => $member->name,
-            'token' => $member->token,
+            'token' => $member->membership_id,
             'status' => $member->id === auth()->user()->membership->id ? 'current' :
                 ($member->isVerified ? 'verified' : 'pending')
         ];

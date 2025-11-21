@@ -46,7 +46,7 @@ class ViewMember extends Component
     public $binaryUplines = [];
     public $referralUplines = [];
 
-    protected $validTabs = ['personal', 'financial', 'network', 'wallet', 'tree', 'binary_commission', 'referral_commission', 'daily_commission'];
+    protected $validTabs = ['personal', 'financial', 'network', 'wallet', 'tree', 'binary_commission', 'referral_commission', 'daily_cashback'];
     protected $listeners = ['treeNodeSelected' => 'navigateToMember'];
 
     public function mount($id)
@@ -111,7 +111,7 @@ class ViewMember extends Component
     protected function loadWalletData()
     {
         $credits = WalletTransaction::where('membership_id', $this->member->id)
-            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission'])
+            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_cashback'])
             ->where('status', 'confirmed')
             ->sum('amount');
 
@@ -123,7 +123,7 @@ class ViewMember extends Component
         $this->isWalletLocked = !$this->hasFirstPair($this->member->id);
         $this->lockedDaily = $this->isWalletLocked
             ? WalletTransaction::where('membership_id', $this->member->id)
-                ->where('type', 'daily_commission')
+                ->where('type', 'daily_cashback')
                 ->where('status', 'confirmed')
                 ->sum('amount')
             : 0.00;
@@ -218,7 +218,13 @@ class ViewMember extends Component
     protected function generateBinaryCommissions()
     {
         $memberId = $this->member->id;
-        $baseAmount = $this->member->plan?->price ?? 3000;
+        $baseAmount = \App\Models\MembershipPlan::where('membership_id', $memberId)
+            ->where('status','active')
+            ->join('plans','membership_plans.plan_id','=','plans.id')
+            ->sum('plans.price');
+        if ($baseAmount <= 0) {
+            $baseAmount = \App\Models\EPin::where('used_by_membership_id', $memberId)->value('plan_amount') ?? 3000;
+        }
 
         $left = BinaryTree::where('parent_id', $memberId)->where('position', 'left')->first();
         $right = BinaryTree::where('parent_id', $memberId)->where('position', 'right')->first();
@@ -333,7 +339,7 @@ class ViewMember extends Component
             ->where('status', 'confirmed')
             ->sum('amount');
         $this->dailyCommissionTotal = WalletTransaction::where('membership_id', $this->member->id)
-            ->where('type', 'daily_commission')
+            ->where('type', 'daily_cashback')
             ->where('status', 'confirmed')
             ->sum('amount');
 
@@ -350,7 +356,7 @@ class ViewMember extends Component
             ->get()
             ->toArray();
         $this->dailyCommissionTx = WalletTransaction::where('membership_id', $this->member->id)
-            ->where('type', 'daily_commission')
+            ->where('type', 'daily_cashback')
             ->orderBy('created_at', 'desc')
             ->limit(200)
             ->get()
@@ -372,7 +378,7 @@ class ViewMember extends Component
             $list[] = [
                 'level' => $level,
                 'name' => $parent->name,
-                'token' => $parent->token,
+                'token' => $parent->membership_id,
                 'position' => $pos->position
             ];
             $current = $parent->id;
@@ -501,6 +507,14 @@ class ViewMember extends Component
         if (!($this->member->payment_status === 'success' || $this->member->isPaid)) {
             return;
         }
+        $hasPlan3000 = \App\Models\MembershipPlan::where('membership_id', $this->member->id)
+            ->where('status','active')
+            ->join('plans','membership_plans.plan_id','=','plans.id')
+            ->where('plans.price', 3000)
+            ->exists();
+        $pinAmount = \App\Models\EPin::where('used_by_membership_id', $this->member->id)->value('plan_amount');
+        $qualifies = $hasPlan3000 || ($pinAmount == 3000);
+        if (! $qualifies) return;
         $start = $this->member->created_at->copy()->startOfDay();
         $end = now()->copy()->startOfDay();
         $eligibleDays = min(30, $start->diffInDays($end) + 1);
@@ -508,21 +522,21 @@ class ViewMember extends Component
         for ($i = 0; $i < $eligibleDays; $i++) {
             $date = $start->copy()->addDays($i);
             $existsForDate = WalletTransaction::where('membership_id', $this->member->id)
-                ->where('type', 'daily_commission')
+                ->where('type', 'daily_cashback')
                 ->whereDate('created_at', $date->toDateString())
                 ->exists();
             if ($existsForDate) {
                 continue;
             }
             $totalReceived = WalletTransaction::where('membership_id', $this->member->id)
-                ->where('type', 'daily_commission')
+                ->where('type', 'daily_cashback')
                 ->sum('amount');
             if ($totalReceived >= 480) {
                 break;
             }
             WalletTransaction::create([
                 'membership_id' => $this->member->id,
-                'type' => 'daily_commission',
+                'type' => 'daily_cashback',
                 'amount' => 16,
                 'status' => 'confirmed',
                 'created_at' => $date,

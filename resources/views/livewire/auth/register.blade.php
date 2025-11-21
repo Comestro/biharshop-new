@@ -11,6 +11,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use App\Models\EPin;
 use App\Models\BinaryTree;
+use App\Models\Plan;
 
 new class extends Component {
     public string $name = '';
@@ -110,6 +111,10 @@ new class extends Component {
         event(new Registered(($user = User::create($validated))));
 
         $membershipId = $this->generateUniqueMembershipId();
+        $planModel = null;
+        if ($pin) {
+            $planModel = $pin->plan ? $pin->plan : Plan::where('name', $pin->plan_name)->where('price', $pin->plan_amount)->first();
+        }
         Membership::create([
             'user_id' => $user->id,
             'name' => $validated['name'],
@@ -136,24 +141,41 @@ new class extends Component {
                     'status' => 'used',
                     'used_at' => now(),
                 ]);
+                if ($planModel) {
+                    \App\Models\MembershipPlan::create([
+                        'membership_id' => $newMember->id,
+                        'plan_id' => $planModel->id,
+                        'epin_id' => $pin->id,
+                        'status' => 'active',
+                        'activated_at' => now(),
+                    ]);
+                }
             }
             $this->placeInBinaryTree($sponsor->id, $newMember->id);
 
             try {
-                $existsToday = \App\Models\WalletTransaction::where('membership_id', $newMember->id)
-                    ->where('type', 'daily_commission')
-                    ->whereDate('created_at', now()->toDateString())
-                    ->exists();
-                $totalReceived = \App\Models\WalletTransaction::where('membership_id', $newMember->id)->where('type', 'daily_commission')->sum('amount');
-                if (!$existsToday && $totalReceived < 480) {
-                    \App\Models\WalletTransaction::create([
-                        'membership_id' => $newMember->id,
-                        'type' => 'daily_commission',
-                        'amount' => 16,
-                        'status' => 'confirmed',
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                $hasPlan3000 = $planModel?->price === 3000;
+                $qualifies = $hasPlan3000 || (($pin?->plan_amount ?? null) === 3000);
+                if ($qualifies) {
+                    $perDay = 16.00;
+                    $capTotal = 480.00;
+                    $existsToday = \App\Models\WalletTransaction::where('membership_id', $newMember->id)
+                        ->where('type', 'daily_cashback')
+                        ->whereDate('created_at', now()->toDateString())
+                        ->exists();
+                    $totalReceived = \App\Models\WalletTransaction::where('membership_id', $newMember->id)
+                        ->where('type', 'daily_cashback')
+                        ->sum('amount');
+                    if (!$existsToday && $totalReceived < $capTotal) {
+                        \App\Models\WalletTransaction::create([
+                            'membership_id' => $newMember->id,
+                            'type' => 'daily_cashback',
+                            'amount' => $perDay,
+                            'status' => 'confirmed',
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
                 }
             } catch (\Throwable $e) {
             }

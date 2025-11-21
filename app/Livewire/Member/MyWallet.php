@@ -57,7 +57,14 @@ class MyWallet extends Component
     private function calculateCommission($memberId)
     {
         $this->commissionHistory = [];
-        $baseAmount = Auth::user()->membership->plan?->price ?? 3000;
+        $memberId = $this->memberId;
+        $baseAmount = \App\Models\MembershipPlan::where('membership_id', $memberId)
+            ->where('status','active')
+            ->join('plans','membership_plans.plan_id','=','plans.id')
+            ->sum('plans.price');
+        if ($baseAmount <= 0) {
+            $baseAmount = \App\Models\EPin::where('used_by_membership_id', $memberId)->value('plan_amount') ?? 3000;
+        }
         $wallet = 0.0;
 
         $left = BinaryTree::where('parent_id', $memberId)->where('position', 'left')->first();
@@ -245,7 +252,7 @@ class MyWallet extends Component
     // {
     //     $levels = [3, 2, 1, 1, 1];
     //     $earnings = WalletTransaction::where('membership_id', $memberId)
-    //         ->whereIn('type', ['binary_commission', 'daily_commission'])
+    //         ->whereIn('type', ['binary_commission', 'daily_cashback'])
     //         ->where('status', 'confirmed')
     //         ->sum('amount');
     //     if ($earnings <= 0) {
@@ -349,7 +356,7 @@ class MyWallet extends Component
     private function loadWallet()
     {
         $credits = WalletTransaction::where('membership_id', $this->memberId)
-            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_commission'])
+            ->whereIn('type', ['binary_commission', 'referral_commission', 'daily_cashback'])
             ->where('status', 'confirmed')
             ->sum('amount');
         $debits = Withdrawal::where('membership_id', $this->memberId)
@@ -359,7 +366,7 @@ class MyWallet extends Component
         $this->isWalletLocked = !$this->hasFirstPair($this->memberId);
         $this->lockedDaily = $this->isWalletLocked
             ? WalletTransaction::where('membership_id', $this->memberId)
-                ->where('type', 'daily_commission')
+                ->where('type', 'daily_cashback')
                 ->where('status', 'confirmed')
                 ->sum('amount')
             : 0.00;
@@ -381,31 +388,41 @@ class MyWallet extends Component
         $m = Membership::find($memberId);
         if (!$m || !$m->created_at)
             return;
+        $hasPlan3000 = \App\Models\MembershipPlan::where('membership_id', $memberId)
+            ->where('status','active')
+            ->join('plans','membership_plans.plan_id','=','plans.id')
+            ->where('plans.price', 3000)
+            ->exists();
+        $pinAmount = \App\Models\EPin::where('used_by_membership_id', $memberId)->value('plan_amount');
+        $qualifies = $hasPlan3000 || ($pinAmount == 3000);
+        if (! $qualifies) return;
+        $perDay = 16.00;
+        $capTotal = 480.00;
         $start = $m->created_at->copy()->startOfDay();
         $end = now()->copy()->startOfDay();
         $eligibleDays = min(30, $start->diffInDays($end) + 1);
         $totalReceived = WalletTransaction::where('membership_id', $memberId)
-            ->where('type', 'daily_commission')
+            ->where('type', 'daily_cashback')
             ->sum('amount');
         for ($i = 0; $i < $eligibleDays; $i++) {
-            if ($totalReceived >= 480)
+            if ($totalReceived >= $capTotal)
                 break;
             $date = $start->copy()->addDays($i);
             $existsForDate = WalletTransaction::where('membership_id', $memberId)
-                ->where('type', 'daily_commission')
+                ->where('type', 'daily_cashback')
                 ->whereDate('created_at', $date->toDateString())
                 ->exists();
             if ($existsForDate)
                 continue;
             WalletTransaction::create([
                 'membership_id' => $memberId,
-                'type' => 'daily_commission',
-                'amount' => 16,
+                'type' => 'daily_cashback',
+                'amount' => $perDay,
                 'status' => 'confirmed',
                 'created_at' => $date,
                 'updated_at' => $date,
             ]);
-            $totalReceived += 16;
+            $totalReceived += $perDay;
         }
     }
 
@@ -417,9 +434,10 @@ class MyWallet extends Component
             ->get()
             ->map(function ($tx) {
                 $meta = $tx->meta ?? [];
+                $childMembership = Membership::where('token', $meta['child_id'] ?? null)->first();
                 return [
                     'level' => $meta['level'] ?? '-',
-                    'child_id' => $meta['child_id'] ?? '-',
+                    'child_id' => $childMembership ? $childMembership->membership_id : ($meta['child_id'] ?? '-'),
                     'percentage' => $meta['percentage'] ?? '-',
                     'commission' => $tx->amount,
                 ];
@@ -489,7 +507,7 @@ class MyWallet extends Component
             ->sum('amount');
 
         $this->dailyCommissionTotal = WalletTransaction::where('membership_id', $this->memberId)
-            ->where('type', 'daily_commission')
+            ->where('type', 'daily_cashback')
             ->where('status', 'confirmed')
             ->sum('amount');
 
@@ -506,7 +524,7 @@ class MyWallet extends Component
             ->toArray();
 
         $this->dailyCommissionTx = WalletTransaction::where('membership_id', $this->memberId)
-            ->where('type', 'daily_commission')
+            ->where('type', 'daily_cashback')
             ->orderBy('created_at', 'desc')
             ->limit(200)
             ->get()

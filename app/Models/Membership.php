@@ -8,9 +8,9 @@ class Membership extends Model
 {
     protected $guarded = [];
 
-    public function plan()
+    public function plans()
     {
-        return $this->belongsTo(Plan::class);
+        return $this->hasMany(MembershipPlan::class);
     }
 
     public function user()

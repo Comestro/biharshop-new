@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\EPin;
 use App\Models\Membership;
 use App\Models\User;
+use App\Models\Plan;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -12,13 +13,24 @@ use Livewire\Component;
 class EPinsManager extends Component
 {
     public $generateCount = 10;
-    public $planAmount = 3000;
-    public $planName = 'Standard';
-    public $membershipId = null;
-    public $transferMemberName = null;
+    public $selectedPlanId = null;
 
-    public $transferCode = '';
-    public $transferToEmail = '';
+    public $filterStatus = 'all';
+    public $filterOwnerEmail = '';
+    public $filterPlanId = null;
+
+    public $bulkTransferQty = 0;
+    public $bulkTransferMemberId = '';
+    public $transferMemberName = null;
+    public function updatedBulkTransferMemberId($value)
+    {
+        if (!$value) {
+            $this->transferMemberName = null;
+            return;
+        }
+        $member = Membership::where('membership_id', $value)->first();
+        $this->transferMemberName = $member ? $member->name : 'Not Found';
+    }
 
     public function updatedMembershipId($value)
     {
@@ -36,11 +48,9 @@ class EPinsManager extends Component
     public function generate()
     {
         $admin = auth('admin')->user();
-        $owner = Membership::where('membership_id', $this->membershipId)->first(); // may be null
-
-        for ($i = 0; $i < max((int) $this->generateCount, 0); $i++) {
-
-            // Unique random 6-digit code
+        $plan = $this->selectedPlanId ? Plan::find($this->selectedPlanId) : null;
+        if (! $plan) { return; }
+        for ($i = 0; $i < max((int)$this->generateCount, 0); $i++) {
             $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
             // If exists, regenerate
@@ -51,9 +61,10 @@ class EPinsManager extends Component
 
             EPin::create([
                 'code' => $code,
-                'plan_amount' => $this->planAmount,
-                'plan_name' => $this->planName,
-                'owner_user_id' => $owner?->id,
+                'plan_amount' => $plan->price,
+                'plan_name' => $plan->name,
+                'plan_id' => $plan->id,
+                'owner_user_id' => null,
                 'generated_by_admin_id' => $admin?->id,
                 'status' => 'available',
             ]);
@@ -81,12 +92,43 @@ class EPinsManager extends Component
         }
     }
 
+    public function bulkTransfer()
+    {
+        $member = \App\Models\Membership::where('membership_id', $this->bulkTransferMemberId)->first();
+        if (! $member || ! $member->user_id) { return; }
+        $limit = max((int)$this->bulkTransferQty, 0);
+        if ($limit <= 0) { return; }
+        $pins = EPin::where('status','available')->limit($limit)->get();
+        foreach ($pins as $pin) {
+            $pin->update([
+                'owner_user_id' => $member->user_id,
+                'status' => 'transferred',
+            ]);
+        }
+        $this->dispatch('pin-transferred');
+        $this->bulkTransferQty = 0;
+        $this->bulkTransferMemberId = '';
+    }
+
     public function render()
     {
-        $pins = EPin::orderBy('created_at', 'desc')->limit(200)->get();
-
+        $query = EPin::query()->orderBy('created_at','desc');
+        if ($this->filterStatus !== 'all') {
+            $query->where('status', $this->filterStatus);
+        }
+        if ($this->filterPlanId) {
+            $query->where('plan_id', $this->filterPlanId);
+        }
+        if ($this->filterOwnerEmail) {
+            $query->whereHas('owner', function($q) {
+                $q->where('email','like','%'.$this->filterOwnerEmail.'%');
+            });
+        }
+        $pins = $query->limit(200)->get();
+        $plans = Plan::orderBy('name')->get();
         return view('livewire.admin.epins-manager', [
-            'pins' => $pins
+            'pins' => $pins,
+            'plans' => $plans,
         ]);
     }
 }
