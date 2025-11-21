@@ -15,7 +15,7 @@ class RecomputeBinaryReferral extends Command
 
     public function handle()
     {
-        $members = Membership::whereNotNull('token')->get(['id','token']);
+        $members = Membership::whereNotNull('token')->get(['id', 'token']);
         $processed = 0;
         foreach ($members as $member) {
             $this->calculateBinaryForMember($member->id);
@@ -28,8 +28,8 @@ class RecomputeBinaryReferral extends Command
     private function calculateBinaryForMember($memberId)
     {
         $baseAmount = \App\Models\MembershipPlan::where('membership_id', $memberId)
-            ->where('status','active')
-            ->join('plans','membership_plans.plan_id','=','plans.id')
+            ->where('status', 'active')
+            ->join('plans', 'membership_plans.plan_id', '=', 'plans.id')
             ->sum('plans.price');
         if ($baseAmount <= 0) {
             $baseAmount = EPin::where('used_by_membership_id', $memberId)->value('plan_amount') ?? 3000;
@@ -41,6 +41,11 @@ class RecomputeBinaryReferral extends Command
         if (!$left || !$right) {
             return;
         }
+
+        [$leftDepth, $leftMembers] = $this->getDirectionalDepth($left->member_id, 'left');
+        [$rightDepth, $rightMembers] = $this->getDirectionalDepth($right->member_id, 'right');
+
+
 
         $leftCount = 1 + $this->countSubtree($left->member_id);
         $rightCount = 1 + $this->countSubtree($right->member_id);
@@ -92,11 +97,19 @@ class RecomputeBinaryReferral extends Command
             $consRight = $side === 'left' ? 1 : 2;
             $availLeft = max($leftCount - $consLeft, 0);
             $availRight = max($rightCount - $consRight, 0);
-            $targetMatches = min($availLeft, $availRight);
+            if ($leftDepth === $rightDepth) {
+                $targetMatches = min($leftDepth, $rightDepth) - 2;
+
+            } else {
+
+                $targetMatches = min($leftDepth, $rightDepth) - 1;
+            }
 
             if ($targetMatches > $paidMatches) {
                 for ($i = $paidMatches + 1; $i <= $targetMatches; $i++) {
-                    if ($capRemaining <= 0) { break; }
+                    if ($capRemaining <= 0) {
+                        break;
+                    }
                     $commission = ($baseAmount * 12) / 100;
                     WalletTransaction::create([
                         'membership_id' => $memberId,
@@ -120,17 +133,21 @@ class RecomputeBinaryReferral extends Command
     {
         $levels = [3, 2, 1, 1, 1];
         $childToken = Membership::find($memberId)?->token ?? null;
-        if (!$childToken) return;
+        if (!$childToken)
+            return;
         $childWallet = WalletTransaction::where('membership_id', $memberId)
             ->whereIn('type', ['binary_commission'])
             ->where('status', 'confirmed')
             ->sum('amount');
-        if ($childWallet <= 0) { return; }
+        if ($childWallet <= 0) {
+            return;
+        }
 
         $current = $memberId;
         for ($i = 0; $i < 5; $i++) {
             $parent = BinaryTree::where('member_id', $current)->first();
-            if (!$parent || !$parent->parent_id) break;
+            if (!$parent || !$parent->parent_id)
+                break;
             $uplineId = $parent->parent_id;
             $percent = $levels[$i];
             $amount = ($childWallet * $percent) / 100;
@@ -156,6 +173,27 @@ class RecomputeBinaryReferral extends Command
 
             $current = $uplineId;
         }
+    }
+    private function getDirectionalDepth($memberId, $direction)
+    {
+        $depth = 1;
+        $current = $memberId;
+        $chain = [$current];
+
+        while (true) {
+            $next = BinaryTree::where('parent_id', $current)
+                ->where('position', $direction)
+                ->first();
+
+            if (!$next)
+                break;
+
+            $depth++;
+            $current = $next->member_id;
+            $chain[] = $current;
+        }
+
+        return [$depth, $chain];
     }
 
     private function countSubtree($memberId)
