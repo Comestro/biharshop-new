@@ -100,8 +100,8 @@
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Level</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Left Member</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Right Member</th>
+                                <!-- <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Left Member</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Right Member</th> -->
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Percentage</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Commission</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date & Time</th>
@@ -124,8 +124,8 @@
                                             <span class="text-gray-500">{{ $tx['status'] ?? '-' }}</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3 text-sm font-medium text-blue-600">{{ data_get($tx['meta'],'left_member','N/A') }}</td>
-                                    <td class="px-4 py-3 text-sm font-medium text-purple-600">{{ data_get($tx['meta'],'right_member','N/A') }}</td>
+                                    <!-- <td class="px-4 py-3 text-sm font-medium text-blue-600">{{ data_get($tx['meta'],'left_member','N/A') }}</td>
+                                    <td class="px-4 py-3 text-sm font-medium text-purple-600">{{ data_get($tx['meta'],'right_member','N/A') }}</td> -->
                                     <td class="px-4 py-3 text-sm text-gray-700">{{ data_get($tx['meta'],'percentage','-') }}%</td>
                                     <td class="px-4 py-3 text-sm font-semibold text-green-700">
                                         ₹{{ number_format(($tx['amount'] ?? 0), 2) }}

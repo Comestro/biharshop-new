@@ -8,5 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('wallet:daily-commission')->everyMinute();
-Schedule::command('wallet:recompute-binary-referral')->everyMinute();
+Schedule::command('wallet:daily-commission')->daily();
+Schedule::command('wallet:recompute-binary-referral')->daily();

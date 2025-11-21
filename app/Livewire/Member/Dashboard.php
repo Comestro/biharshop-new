@@ -23,7 +23,7 @@ class Dashboard extends Component
         if (!$this->membership) {
             return redirect()->route('membership.register');
         }
-
+ 
         $this->loadStats();
     }
 

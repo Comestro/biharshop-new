@@ -325,16 +325,26 @@ new class extends Component {
                         <div class="mt-1">
                             @if (request()->query('position') == 'left')
                                 <label class="inline-flex items-center mr-4">
-                                    <input type="radio" wire:model="position" value="left" disabled
+                                    <input type="radio" wire:model="position" value="left" 
                                         class="form-radio text-teal-600">
                                     <span class="ml-2">Left</span>
                                 </label>
-                            @elseif(request()->query('position') == 'right')
                                 <label class="inline-flex items-center">
-                                    <input type="radio" wire:model="position" value="right" @if (request()->query('position') == 'right') disabled @endif
+                                    <input type="radio" wire:model="position" value="right" disabled
                                         class="form-radio text-teal-600">
                                     <span class="ml-2">Right</span>
                                 </label>
+                            @elseif(request()->query('position') == 'right')
+                            <label class="inline-flex items-center mr-4">
+                                <input type="radio" wire:model="position" value="left" disabled
+                                class="form-radio text-teal-600">
+                                <span class="ml-2">Left</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" wire:model="position" value="right" @if (request()->query('position') == 'right')  @endif
+                                    class="form-radio text-teal-600">
+                                <span class="ml-2">Right</span>
+                            </label>
                             @else
                                 <label class="inline-flex items-center mr-4">
                                     <input type="radio" wire:model="position" value="left" 
