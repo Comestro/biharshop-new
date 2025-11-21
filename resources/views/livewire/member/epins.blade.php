@@ -53,6 +53,9 @@
 
                     <input type="text" wire:model.live="transferCode" class="w-full border rounded px-3 py-2"
                         placeholder="PIN Code">
+                    @error($transferCode)
+                        {{ $message }}
+                    @enderror
 
                     <input type="text" wire:model.live="transferToMemberId" class="w-full border rounded px-3 py-2"
                         placeholder="Recipient Membership ID">
