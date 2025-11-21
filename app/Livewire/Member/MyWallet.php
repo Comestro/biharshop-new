@@ -42,7 +42,6 @@ class MyWallet extends Component
         $this->kycComplete = auth()->user()->membership->isKycComplete();
 
         $this->generateDailyCommission($this->memberId);
-        $this->calculateCommission($this->memberId);
         $this->loadWallet();
         $this->loadReferralHistory();
         $this->loadCommissionData();
@@ -54,7 +53,7 @@ class MyWallet extends Component
     }
 
     // binary wala
-    private function calculateCommission($memberId)
+    private function calculateCommission($memberId) 
     {
         $this->commissionHistory = [];
         $memberId = $this->memberId;
