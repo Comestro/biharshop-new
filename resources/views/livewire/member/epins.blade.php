@@ -117,7 +117,7 @@
                             </td>
 
                             <td class="px-3 py-2 text-sm">
-                                {{ $pin->status }}
+                                {{ $pin->status == 'used' ? 'Used' : 'Available' }}
 
                                 @if($pin->usedBy)
                                     — Used by:
