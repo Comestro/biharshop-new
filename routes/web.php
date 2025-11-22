@@ -66,6 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/member/epins', \App\Livewire\Member\EPins::class)->name('member.epins');
     Route::get('/member/select-position/{membership}', \App\Livewire\Member\BinaryPosition::class)->name('member.select-position');
     Route::get('/member/welcome-letter', \App\Livewire\Member\WelcomeLetter::class)->name('member.welcome-letter');
+    Route::get('/member/id-card', \App\Livewire\Member\IdCard::class)->name('member.id-card');
     Route::get('/member/kyc-documents', \App\Livewire\Member\KycDocuments::class)->name('member.kyc-documents');
 });
 

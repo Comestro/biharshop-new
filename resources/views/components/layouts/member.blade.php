@@ -158,6 +158,16 @@
                     <span class="ml-3 font-medium">E-PINs</span>
                 </a>
 
+                <a href="{{ route('member.id-card') }}"
+                    class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.id-card') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.id-card') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 11-4 0 2 2 0 014 0zM12 14l-3 3m0 0l-3-3m3 3V4m6 13l3-3m0 0l3 3m-3-3V4" />
+                        </svg>
+                    </div>
+                    <span class="ml-3 font-medium">ID Card</span>
+                </a>
+
                 <a href="{{ route('member.kyc-documents') }}"
                     class="group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200 {{ request()->routeIs('member.kyc-documents') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
                     <div class="flex items-center justify-center w-10 h-10 rounded-lg {{ request()->routeIs('member.kyc-documents') ? 'bg-indigo-800' : 'bg-indigo-500' }} group-hover:bg-indigo-700 transition-colors">
