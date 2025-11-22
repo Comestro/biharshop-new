@@ -15,7 +15,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
             <input type="password" wire:model.defer="current_password"
-                class="w-full border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
             @error('current_password')
                 <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
             @enderror
@@ -25,7 +25,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
             <input type="password" wire:model.defer="new_password"
-                class="w-full border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
             @error('new_password')
                 <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
             @enderror
@@ -35,7 +35,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
             <input type="password" wire:model.defer="new_password_confirmation"
-                class="w-full border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
         </div>
 
         {{-- Submit --}}

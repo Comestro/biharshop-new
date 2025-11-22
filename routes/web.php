@@ -69,6 +69,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/member/id-card', \App\Livewire\Member\IdCard::class)->name('member.id-card');
     Route::get('/member/kyc-documents', \App\Livewire\Member\KycDocuments::class)->name('member.kyc-documents');
     Route::get('/member/changePassword', \App\Livewire\Member\ResetPasswordComponent::class)->name('member.changePassword');
+    Route::get('/member/changeEpinPassword', \App\Livewire\Member\ResetEpinPassword::class)->name('member.changeEpinPassword');
 });
 
 Route::middleware(['auth'])->group(function () {

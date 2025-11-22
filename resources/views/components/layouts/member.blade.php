@@ -103,13 +103,11 @@
                 <div x-data="{ open: {{ request()->routeIs('member.profile') ? 'true' : 'false' }} }">
 
                     <!-- MAIN PROFILE BUTTON -->
-                    <button @click="open = !open"
-                        class="w-full group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200
+                    <button @click="open = !open" class="w-full group flex items-center px-4 py-3 text-white rounded-lg transition-all duration-200
         {{ request()->routeIs('member.profile') ? 'bg-indigo-700' : 'hover:bg-indigo-500' }}">
 
                         <!-- Icon -->
-                        <div
-                            class="flex items-center justify-center w-10 h-10 rounded-lg
+                        <div class="flex items-center justify-center w-10 h-10 rounded-lg
             {{ request()->routeIs('member.profile') ? 'bg-indigo-800' : 'bg-indigo-500' }}
             group-hover:bg-indigo-700 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,25 +134,26 @@
                         x-transition:leave-end="opacity-0 translate-y-1" class="ml-14 mt-2 space-y-1">
 
                         <!-- View Profile -->
-                        <a href="{{ route('member.profile', ['tab' => 'view']) }}"
+                        <a href="{{ route('member.profile') }}"
                             class="block px-3 py-2 text-sm rounded-lg transition
-            {{ request()->fullUrlIs('*tab=view*') ? 'bg-indigo-100 text-indigo-800' : 'text-indigo-50 hover:bg-indigo-500/40' }}">
+            {{ request()->routeIs('member.profile') ? 'bg-indigo-100 text-indigo-800' : 'text-indigo-50 hover:bg-indigo-500/40' }}">
                             View Profile
                         </a>
 
                         <!-- Edit Profile -->
-                        <a href="{{ route('member.profile', ['tab' => 'edit']) }}"
+                        <a href="{{ route('member.changePassword') }}"
                             class="block px-3 py-2 text-sm rounded-lg transition
-            {{ request()->fullUrlIs('*tab=edit*') ? 'bg-indigo-100 text-indigo-800' : 'text-indigo-50 hover:bg-indigo-500/40' }}">
-                            Edit Profile
-                        </a>
-
-                        <!-- Change Password -->
-                        <a href="{{ route('member.profile', ['tab' => 'password']) }}"
-                            class="block px-3 py-2 text-sm rounded-lg transition
-            {{ request()->fullUrlIs('*tab=password*') ? 'bg-indigo-100 text-indigo-800' : 'text-indigo-50 hover:bg-indigo-500/40' }}">
+            {{ request()->routeIs('member.changePassword') ? 'bg-indigo-100 text-indigo-800' : 'text-indigo-50 hover:bg-indigo-500/40' }}">
                             Change Password
                         </a>
+                        <!-- Edit Profile -->
+                        <a href="{{ route('member.changeEpinPassword') }}"
+                            class="block px-3 py-2 text-sm rounded-lg transition
+            {{ request()->routeIs('member.changeEpinPassword') ? 'bg-indigo-100 text-indigo-800' : 'text-indigo-50 hover:bg-indigo-500/40' }}">
+                            Change E-Pin Password
+                        </a>
+
+
                     </div>
                 </div>
 
