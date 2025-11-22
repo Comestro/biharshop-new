@@ -209,14 +209,11 @@
             .attr('rx', 50)
             .attr('ry', 50)
             .attr("fill", d => {
-                if (d.data.status === 'empty') return '#f9fafb';
-                if (d.data.status === 'current') return '#ecfdf5';
-                return d.data.status === 'verified' ? '#f0fdf4' : '#fef2f2';
+                if (d.data.status !== 'empty') return '#f0fdf4';
             })
             .attr("stroke", d => {
-                if (d.data.status === 'empty') return '#e2e8f0';
-                if (d.data.status === 'current') return '#059669';
-                return d.data.status === 'verified' ? '#22c55e' : '#e2e8f0'; // Use gray for non-verified
+                if (d.data.status !== 'empty') return '#22c55e';
+               
             })
             .attr("stroke-width", d => d.data.status === 'current' ? 3 : 2)
             .attr("stroke-dasharray", d => d.data.status === 'empty' ? "5,5" : "none")
@@ -320,6 +317,8 @@
                 const memberid = d?.data?.membership_id ?? '—';
                 const name = d?.data?.name || '—';
                 const status = d?.data?.status || '—';
+                const binary_income = d?.data?.binary_income || '0';
+                const total_income = d?.data?.total_income || '0';
                 const id = d?.data?.id ?? '—';
                 tooltipEl.innerHTML = `
                     <div style="display:flex;flex-direction:column;gap:4px;min-width:200px;max-width:280px;">
@@ -329,6 +328,10 @@
                         <div style="display:flex;justify-content:space-between;gap:12px;">
                             <div><span style="color:#6b7280;">MemberID:</span> <span style="color:#111827;">${memberid}</span></div>
                             <div><span style="color:#6b7280;">Status:</span> <span style="color:#111827;">${status}</span></div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;gap:12px;">
+                            <div><span style="color:#6b7280;">Binary Income:</span> <span style="color:#111827;">${binary_income}</span></div>
+                            <div><span style="color:#6b7280;">Total Income:</span> <span style="color:#111827;">${total_income}</span></div>
                         </div>
                     </div>`;
                 tooltipEl.style.display = 'block';
