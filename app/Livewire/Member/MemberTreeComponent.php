@@ -29,9 +29,10 @@ class MemberTreeComponent extends Component
     ];
 
 
-    public function mount($root_id = null)
+    public function mount()
     {
-        $this->initial_root_id = $root_id ?? Membership::where('isVerified', true)->first()?->id;
+        $selfId = auth()->user()?->membership?->id;
+        $this->initial_root_id = $root_id ?? $selfId ?? Membership::where('isVerified', true)->first()?->id;
         $this->root_id = $this->initial_root_id;
         $this->createParentId = $this->root_id;
         $this->loadTree();
@@ -131,7 +132,6 @@ class MemberTreeComponent extends Component
             $this->root_id = $id;
         }
         $this->loadTree();
-        // Dispatch an event with updated tree data (different name to avoid recursion)
         $this->dispatch('binaryTreeDataUpdated', treeData: $this->treeData);
     }
 
