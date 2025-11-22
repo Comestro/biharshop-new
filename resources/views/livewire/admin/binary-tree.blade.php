@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 flex flex-col" x-data="binaryTreeModal()"  x-init="init()">
+<div class="min-h-screen bg-gray-50 flex flex-col" x-data="binaryTreeModal()" x-init="init()">
     <!-- Header -->
     <header
         class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-t-2xl">
@@ -17,7 +17,8 @@
                 <button id="clear-search"
                     class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition flex-shrink-0">Clear</button>
                 <button id="global-search"
-                    class="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition flex-shrink-0">Search All</button>
+                    class="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition flex-shrink-0">Search
+                    All</button>
             </div>
 
             <div class="flex items-center gap-2 mt-2 sm:mt-0">
@@ -66,8 +67,8 @@
         </div>
     </main>
 
-<!-- Add-node modal removed -->
-<!--
+    <!-- Add-node modal removed -->
+    <!--
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" x-show="open" x-cloak>
     ...
 </div>
@@ -77,35 +78,35 @@
 <!-- D3 Script -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
-(function(){
-    try {
-        const s = document.currentScript;
-        if (!s) return;
-        if (window.Livewire && !window.AdminBinaryTreeWire) {
-            const root = s.closest('[wire\\:id]');
-            if (!root) return;
-            const id = root.getAttribute('wire:id');
-            const comp = Livewire.find(id);
-            if (comp && !window.AdminBinaryTreeWire) window.AdminBinaryTreeWire = comp;
-        }
-    } catch(e) {}
-})();
+    (function() {
+        try {
+            const s = document.currentScript;
+            if (!s) return;
+            if (window.Livewire && !window.AdminBinaryTreeWire) {
+                const root = s.closest('[wire\\:id]');
+                if (!root) return;
+                const id = root.getAttribute('wire:id');
+                const comp = Livewire.find(id);
+                if (comp && !window.AdminBinaryTreeWire) window.AdminBinaryTreeWire = comp;
+            }
+        } catch (e) {}
+    })();
 </script>
 <script>
-// Add-node modal logic removed
-function binaryTreeModal() {
-    return {
-        open: false,
-        parentId: null,
-        position: null,
-        init() {
-            // disabled
-        },
-        close() {
-            this.open = false;
+    // Add-node modal logic removed
+    function binaryTreeModal() {
+        return {
+            open: false,
+            parentId: null,
+            position: null,
+            init() {
+                // disabled
+            },
+            close() {
+                this.open = false;
+            }
         }
     }
-}
 </script>
 <script>
     let currentZoom;
@@ -161,7 +162,7 @@ function binaryTreeModal() {
             .attr("width", width)
             .attr("height", height)
             .attr("viewBox", [-70, 100, width, height]);
-            
+
 
         const g = svg.append("g");
         const defs = svg.append("defs");
@@ -207,7 +208,9 @@ function binaryTreeModal() {
                 const idStr = rawId !== null && rawId !== undefined ? String(rawId) : '';
                 if (!idStr) return;
                 navigationStack.push(currentRootId);
-                Livewire.dispatch('binaryTreeChangeRootRequest', { id: rawId });
+                Livewire.dispatch('binaryTreeChangeRootRequest', {
+                    id: rawId
+                });
                 console.log('Dispatched binaryTreeChangeRootRequest with id:', rawId);
                 updateBreadcrumbUI();
             });
@@ -268,8 +271,6 @@ function binaryTreeModal() {
                     3 : 2).attr("transform", "scale(1)");
             });
 
-            console.log(data)
-
         // Avatar image (if provided)
         nodes.append('image')
             .attr('x', d => d.data.status === 'empty' ? -20 : -30)
@@ -282,19 +283,19 @@ function binaryTreeModal() {
             .style('display', d => d.data.avatar ? null : 'none');
 
         // Labels
-        const labels = nodes.append("g").attr("class", "label text-center");
-        labels.append("text")
-            .attr("dy", "0.35em")
-            .attr("text-anchor", "middle")
-            .attr("class", "text-[16px] font-bold text-gray-700 fill-current")
-            .text(d => (d.data.initials || (d.data.name ? d.data.name.charAt(0) : '')).toUpperCase());
+        // const labels = nodes.append("g").attr("class", "label text-center");
+        // labels.append("text")
+        //     .attr("dy", "0.35em")
+        //     .attr("text-anchor", "middle")
+        //     .attr("class", "text-[16px] font-bold text-gray-700 fill-current")
+        //     .text(d => (d.data.initials || (d.data.name ? d.data.name.charAt(0) : '')).toUpperCase());
 
         // Name badge on node: pill below the square
         const badges = nodes.append('g').attr('class', 'name-badge');
         badges.append('rect')
             .attr('x', -52)
             .attr('y', 40)
-            .attr('width',100)
+            .attr('width', 100)
             .attr('height', 18)
             .attr('rx', 9)
             .attr('ry', 9)
@@ -438,7 +439,9 @@ function binaryTreeModal() {
             b.className = 'px-2 py-1 rounded hover:bg-gray-100';
             b.textContent = idx === 0 ? 'Root' : `#${id}`;
             b.onclick = () => {
-                Livewire.dispatch('binaryTreeChangeRootRequest', { id });
+                Livewire.dispatch('binaryTreeChangeRootRequest', {
+                    id
+                });
             };
             el.appendChild(b);
             if (idx < items.length - 1) {
@@ -476,7 +479,9 @@ function binaryTreeModal() {
             const q = e.target.value.trim();
             if (q) {
                 pendingGlobalSearchQuery = q;
-                Livewire.dispatch('binaryTreeSearch', { query: q });
+                Livewire.dispatch('binaryTreeSearch', {
+                    query: q
+                });
             }
         }
     });
@@ -485,12 +490,16 @@ function binaryTreeModal() {
         const q = document.getElementById('search-node').value.trim();
         if (q) {
             pendingGlobalSearchQuery = q;
-            Livewire.dispatch('binaryTreeSearch', { query: q });
+            Livewire.dispatch('binaryTreeSearch', {
+                query: q
+            });
         }
     });
 
     document.addEventListener('livewire:init', function() {
-        try { window.AdminBinaryTreeWire = @this; } catch (e) {}
+        try {
+            window.AdminBinaryTreeWire = @this;
+        } catch (e) {}
         const treeData = @json($treeData);
         if (treeData && treeData.length > 0) initBinaryTree(treeData);
         // Listen for Livewire dispatched browser events or Livewire JS events
@@ -518,33 +527,37 @@ function binaryTreeModal() {
         // window.addEventListener('admin-binary-tree:open-empty-slot', function(e) { /* disabled */ });
     });
 
-        window.addEventListener('resize', () => {
-            clearTimeout(window.resizeTimer);
-            window.resizeTimer = setTimeout(() => {
-                const treeData = @json($treeData);
-                if (treeData && treeData.length > 0) initBinaryTree(treeData);
-            }, 250);
-        });
+    window.addEventListener('resize', () => {
+        clearTimeout(window.resizeTimer);
+        window.resizeTimer = setTimeout(() => {
+            const treeData = @json($treeData);
+            if (treeData && treeData.length > 0) initBinaryTree(treeData);
+        }, 250);
+    });
 
-        document.addEventListener('click', function() {
-            const t = document.getElementById('binary-tree-tooltip');
-            if (t) t.style.display = 'none';
-        });
+    document.addEventListener('click', function() {
+        const t = document.getElementById('binary-tree-tooltip');
+        if (t) t.style.display = 'none';
+    });
 
-        document.getElementById('go-back-root').addEventListener('click', function() {
-            if (navigationStack.length > 0) {
-                const prev = navigationStack.pop();
-                if (prev) Livewire.dispatch('binaryTreeChangeRootRequest', { id: prev });
-            }
-            updateBreadcrumbUI();
-        });
+    document.getElementById('go-back-root').addEventListener('click', function() {
+        if (navigationStack.length > 0) {
+            const prev = navigationStack.pop();
+            if (prev) Livewire.dispatch('binaryTreeChangeRootRequest', {
+                id: prev
+            });
+        }
+        updateBreadcrumbUI();
+    });
 
-        document.getElementById('reset-tree-root').addEventListener('click', function() {
-            if (initialRootId) {
-                navigationStack = [];
-                Livewire.dispatch('binaryTreeChangeRootRequest', { id: initialRootId });
-                pendingGlobalSearchQuery = '';
-            }
-            updateBreadcrumbUI();
-        });
-    </script>
+    document.getElementById('reset-tree-root').addEventListener('click', function() {
+        if (initialRootId) {
+            navigationStack = [];
+            Livewire.dispatch('binaryTreeChangeRootRequest', {
+                id: initialRootId
+            });
+            pendingGlobalSearchQuery = '';
+        }
+        updateBreadcrumbUI();
+    });
+</script>

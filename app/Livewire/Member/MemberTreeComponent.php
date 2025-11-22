@@ -15,7 +15,7 @@ class MemberTreeComponent extends Component
     public $treeData = [];
     public $initial_root_id;
     public $root_history = [];
-    public $searchQuery = '';
+    public $searchQuery = ''; 
     public $maxDepth = 50; // default to 6 levels when not searching
     public $showCreateModal = false;
     public $createParentId = null;
@@ -70,7 +70,7 @@ class MemberTreeComponent extends Component
             'id' => $member->id,
             'parentId' => $parentId,
             'name' => $member->name,
-            'token' => $member->token,
+            'token' => $member->membership_id,
             // mark the current root so the frontend can highlight it
             'status' => $member->id == $this->root_id ? 'current' : ($member->isVerified ? 'verified' : 'pending'),
             // helpful fields for the frontend (avatar or initials)

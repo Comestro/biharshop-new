@@ -11,7 +11,7 @@ use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-    #[Layout('components.layouts.admin')]
+#[Layout('components.layouts.admin')]
 class BinaryTree extends Component
 {
     public $root_id;
@@ -30,7 +30,7 @@ class BinaryTree extends Component
         'password' => '',
         'password_confirmation' => '',
     ];
-    
+
 
     public function mount($root_id = null)
     {
@@ -38,7 +38,6 @@ class BinaryTree extends Component
         $this->root_id = $this->initial_root_id;
         $this->createParentId = $this->root_id;
         $this->loadTree();
-
     }
 
     public function updatedRootId()
@@ -55,7 +54,7 @@ class BinaryTree extends Component
 
         $flatData = [];
         $this->processNode($this->root_id, null, $flatData, 0);
-        
+
         $this->treeData = $flatData;
     }
 
@@ -77,7 +76,7 @@ class BinaryTree extends Component
             // mark the current root so the frontend can highlight it
             'status' => $member->id == $this->root_id ? 'current' : ($member->isVerified ? 'verified' : 'pending'),
             // helpful fields for the frontend (avatar or initials)
-            'avatar' => asset("storage/" . $member->image) ?? null,
+            'avatar' => $member->image ? asset("storage/" . $member->image) : asset("storage/member-photos/default-avatar.jpg"),
             'initials' => $member->user?->initials() ?? strtoupper(substr($member->name, 0, 1)),
         ];
 
@@ -145,7 +144,7 @@ class BinaryTree extends Component
     #[On('binaryTreeOpenCreateAtEmpty')]
     public function openCreateAtEmpty($parentId = null, $position = null)
     {
-        
+
         if (is_array($parentId)) {
             $this->createParentId = $parentId['parentId'] ?? null;
             $this->createPosition = $parentId['position'] ?? null;
