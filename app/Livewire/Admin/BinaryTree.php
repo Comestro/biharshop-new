@@ -77,7 +77,7 @@ class BinaryTree extends Component
             // mark the current root so the frontend can highlight it
             'status' => $member->id == $this->root_id ? 'current' : ($member->isVerified ? 'verified' : 'pending'),
             // helpful fields for the frontend (avatar or initials)
-            'avatar' => $member->image ?? null,
+            'avatar' => asset("storage/" . $member->image) ?? null,
             'initials' => $member->user?->initials() ?? strtoupper(substr($member->name, 0, 1)),
         ];
 

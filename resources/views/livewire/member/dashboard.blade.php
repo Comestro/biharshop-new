@@ -1,10 +1,8 @@
 <div>
-    @php
-        $kycIncomplete = !($membership->father_name && $membership->mother_name && $membership->home_address && $membership->city && $membership->state && $membership->bank_name && $membership->account_no && $membership->ifsc && $membership->pancard && $membership->aadhar_card && $membership->image && $membership->terms_and_condition);
-    @endphp
 
 
-    @if($kycIncomplete)
+
+    @if (auth()->user()->membership->isKycCompleted == 0)
         <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
@@ -18,7 +16,8 @@
                 </div>
                 <div class="ml-4 flex-1">
                     <h3 class="text-base font-semibold text-blue-900">Complete Your KYC</h3>
-                    <p class="mt-2 text-sm text-blue-700">Your profile is incomplete. Please provide your address, nominee,
+                    <p class="mt-2 text-sm text-blue-700">Your profile is incomplete. Please provide your address,
+                        nominee,
                         bank and document details to activate your membership.</p>
                     <div class="mt-4">
                         <a href="{{ route('membership.register') }}"
@@ -75,56 +74,69 @@
             </div>
         </div>
     </div>
+   
+    @php
+        $startDate = $membership->created_at ?? null;
+        $today = date('Y-m-d');
 
-    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 mb-6">
-        @php
-            $planPerDay = 16;
-            $planDays = 30;
-            $planTotal = $planPerDay * $planDays;
-            $mid = $membership->id ?? null;
-            $dailyAchieved = 0;
-            if ($mid) {
-                $dailyAchieved = \App\Models\WalletTransaction::where('membership_id', $mid)
-                    ->where('type', 'daily_cashback')
-                    ->where('status', 'confirmed')
-                    ->sum('amount');
-            }
-            $dailyRemaining = max(0, $planTotal - $dailyAchieved);
-            $daysAchieved = min($planDays, (int) floor($dailyAchieved / $planPerDay));
-            $progressPct = min(100, $planTotal > 0 ? round(($dailyAchieved / $planTotal) * 100) : 0);
-        @endphp
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <div
-                    class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
-                    Daily Cashback Ads</div>
-                <h3 class="mt-2 text-lg font-semibold text-emerald-900">₹{{ number_format($planPerDay, 2) }} per day for
-                    {{ $planDays }} days (₹{{ number_format($planTotal, 2) }} total)
-                </h3>
-                <div class="mt-3 h-3 bg-emerald-100 rounded-full overflow-hidden">
-                    <div class="h-3 bg-emerald-500" style="width: {{ $progressPct }}%"></div>
+        $after30 = $startDate ? date('Y-m-d', strtotime($startDate . ' +31 days')) : null;
+    @endphp
+
+    @if ($after30 && strtotime($today) > strtotime($after30))
+    @else
+        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 mb-6">
+            @php
+                $planPerDay = 16;
+                $planDays = 30;
+                $planTotal = $planPerDay * $planDays;
+                $mid = $membership->id ?? null;
+                $dailyAchieved = 0;
+                if ($mid) {
+                    $dailyAchieved = \App\Models\WalletTransaction::where('membership_id', $mid)
+                        ->where('type', 'daily_cashback')
+                        ->where('status', 'confirmed')
+                        ->sum('amount');
+                }
+                $dailyRemaining = max(0, $planTotal - $dailyAchieved);
+                $daysAchieved = min($planDays, (int) floor($dailyAchieved / $planPerDay));
+                $progressPct = min(100, $planTotal > 0 ? round(($dailyAchieved / $planTotal) * 100) : 0);
+            @endphp
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <div
+                        class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
+                        Daily Cashback Ads</div>
+                    <h3 class="mt-2 text-lg font-semibold text-emerald-900">₹{{ number_format($planPerDay, 2) }} per
+                        day
+                        for
+                        {{ $planDays }} days (₹{{ number_format($planTotal, 2) }} total)
+                    </h3>
+                    <div class="mt-3 h-3 bg-emerald-100 rounded-full overflow-hidden">
+                        <div class="h-3 bg-emerald-500" style="width: {{ $progressPct }}%"></div>
+                    </div>
+                    <p class="mt-1 text-xs text-emerald-800">Progress: {{ $progressPct }}%</p>
                 </div>
-                <p class="mt-1 text-xs text-emerald-800">Progress: {{ $progressPct }}%</p>
-            </div>
-            <div class="grid grid-cols-3 gap-4 w-full lg:w-auto">
-                <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
-                    <p class="text-xs font-medium text-emerald-700">Achieved</p>
-                    <p class="mt-1 text-xl font-bold text-emerald-900">₹{{ number_format($dailyAchieved, 2) }}</p>
-                </div>
-                <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
-                    <p class="text-xs font-medium text-emerald-700">Remaining</p>
-                    <p class="mt-1 text-xl font-bold text-emerald-900">₹{{ number_format($dailyRemaining, 2) }}</p>
-                </div>
-                <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
-                    <p class="text-xs font-medium text-emerald-700">Days</p>
-                    <p class="mt-1 text-xl font-bold text-emerald-900">{{ $daysAchieved }} / {{ $planDays }}</p>
+                <div class="grid grid-cols-3 gap-4 w-full lg:w-auto">
+                    <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
+                        <p class="text-xs font-medium text-emerald-700">Achieved</p>
+                        <p class="mt-1 text-xl font-bold text-emerald-900">₹{{ number_format($dailyAchieved, 2) }}</p>
+                    </div>
+                    <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
+                        <p class="text-xs font-medium text-emerald-700">Remaining</p>
+                        <p class="mt-1 text-xl font-bold text-emerald-900">₹{{ number_format($dailyRemaining, 2) }}</p>
+                    </div>
+                    <div class="bg-white rounded-lg border border-emerald-200 p-4 text-center">
+                        <p class="text-xs font-medium text-emerald-700">Days</p>
+                        <p class="mt-1 text-xl font-bold text-emerald-900">{{ $daysAchieved }} / {{ $planDays }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
 
-   
+
 
     <!-- reffee links div -->
     <!-- Referral Link Section -->
@@ -290,7 +302,8 @@
             <div class="flex items-start justify-between">
                 <div class="flex-1">
                     <p class="text-sm font-medium text-gray-600 mb-1">Membership Status</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $membership->isVerified ? 'Active' : 'Pending' }}</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ $membership->isVerified ? 'Active' : 'Pending' }}
+                    </p>
                 </div>
                 <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

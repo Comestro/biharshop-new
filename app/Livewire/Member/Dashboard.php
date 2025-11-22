@@ -19,11 +19,11 @@ class Dashboard extends Component
     public function mount()
     {
         $this->membership = auth()->user()->membership;
-        
+
         if (!$this->membership) {
             return redirect()->route('membership.register');
         }
- 
+
         $this->loadStats();
     }
 
@@ -41,48 +41,46 @@ class Dashboard extends Component
             ->whereIn('status', ['pending', 'approved'])
             ->sum('amount');
         $this->walletBalance = $credits - $debits;
-        
-        if ($this->membership->binaryPosition) {
-            // Get left and right legs first
-            $leftChild = \App\Models\BinaryTree::where('parent_id', $this->membership->id)
-                ->where('position', 'left')
-                ->first();
-                
-            $rightChild = \App\Models\BinaryTree::where('parent_id', $this->membership->id)
-                ->where('position', 'right')
-                ->first();
-            
-            // Count members in left leg
-            if ($leftChild) {
-                $this->leftTeamSize = 1 + $this->countTreeMembers($leftChild->member_id);
-            }
-            
-            // Count members in right leg
-            if ($rightChild) {
-                $this->rightTeamSize = 1 + $this->countTreeMembers($rightChild->member_id);
-            }
-            
-            // Total tree members is the sum of both legs
-            $this->treeMembers = $this->leftTeamSize + $this->rightTeamSize;
+
+        // Get left and right legs first
+        $leftChild = \App\Models\BinaryTree::where('parent_id', $this->membership->id)
+            ->where('position', 'left')
+            ->first();
+
+        $rightChild = \App\Models\BinaryTree::where('parent_id', $this->membership->id)
+            ->where('position', 'right')
+            ->first();
+
+        // Count members in left leg
+        if ($leftChild) {
+            $this->leftTeamSize = 1 + $this->countTreeMembers($leftChild->member_id);
         }
+
+        // Count members in right leg
+        if ($rightChild) {
+            $this->rightTeamSize = 1 + $this->countTreeMembers($rightChild->member_id);
+        }
+
+        // Total tree members is the sum of both legs
+        $this->treeMembers = $this->leftTeamSize + $this->rightTeamSize;
     }
 
     protected function countTreeMembers($memberId)
     {
         $count = 0;
         $children = \App\Models\BinaryTree::where('parent_id', $memberId)->get();
-        
+
         foreach ($children as $child) {
             $count++; // Count this child
             $count += $this->countTreeMembers($child->member_id); // Add all descendants
         }
-        
+
         return $count;
     }
 
     public function render()
     {
         return view('livewire.member.dashboard')
-               ->layout('components.layouts.member');
+            ->layout('components.layouts.member');
     }
 }
