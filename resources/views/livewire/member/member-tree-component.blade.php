@@ -202,6 +202,7 @@
 
 
     function initBinaryTree(data) {
+        console.log('Initializing binary tree with data:', data);
         if (!data || data.length === 0) return;
         d3.select("#binary-tree-container").html("");
 
@@ -224,7 +225,7 @@
             .attr("width", width)
             .attr("height", height)
             .attr("viewBox", [-70, 100, width, height]);
-
+            
 
         const g = svg.append("g");
         const defs = svg.append("defs");
@@ -258,47 +259,17 @@
 
         // Nodes
         const nodes = g.selectAll(".node")
-            .data(root.descendants())
+            .data(root.descendants().filter(d => d.data.status !== 'empty'))
             .join("g")
             .attr("class", "node group")
             .attr("transform", d => `translate(${d.x},${d.y})`)
-            .style("cursor", d => d.data.status !== 'empty' ? "pointer" : "default")
-            .on("click", function (event, d) {
+            .style("cursor", "pointer")
+            .on("click", function(event, d) {
                 const t = document.getElementById('binary-tree-tooltip');
                 if (t) t.style.display = 'none';
                 const rawId = d && d.data ? d.data.id : null;
                 const idStr = rawId !== null && rawId !== undefined ? String(rawId) : '';
                 if (!idStr) return;
-
-                // Handle empty nodes: create under parent at position
-                if (idStr.startsWith('empty-')) {
-                    const m = idStr.match(/^empty-(left|right)-(\d+)$/);
-                    if (m) {
-                        const position = m[1];
-                        const parentId = parseInt(m[2], 10);
-                        if (window.AdminBinaryTreeWire) {
-                            try {
-                                if (typeof window.AdminBinaryTreeWire.set === 'function') {
-                                    window.AdminBinaryTreeWire.set('createParentId', parentId);
-
-                                    window.AdminBinaryTreeWire.set('createPosition', position);
-                                    window.AdminBinaryTreeWire.set('showCreateModal', true);
-                                }
-                                if (typeof window.AdminBinaryTreeWire.openCreateAtEmpty === 'function') {
-                                    window.AdminBinaryTreeWire.openCreateAtEmpty(parentId, position);
-                                    console.log()
-                                } else if (typeof window.AdminBinaryTreeWire.call === 'function') {
-                                    window.AdminBinaryTreeWire.call('openCreateAtEmpty', parentId, position);
-
-                                }
-                            } catch (_) { }
-                        }
-                        window.dispatchEvent(new CustomEvent('admin-binary-tree:open-empty-slot', { detail: { parentId, position } }));
-                        Livewire.dispatch('binaryTreeOpenCreateAtEmpty', { parentId, position });
-                        console.log('Dispatched binaryTreeOpenCreateAtEmpty with parentId:', parentId, 'position:', position);
-                    }
-                    return;
-                }
                 navigationStack.push(currentRootId);
                 Livewire.dispatch('binaryTreeChangeRootRequest', { id: rawId });
                 console.log('Dispatched binaryTreeChangeRootRequest with id:', rawId);
@@ -310,7 +281,7 @@
         }
 
         // Create per-node clipPaths for avatars (rounded rect)
-        nodes.each(function (d) {
+        nodes.each(function(d) {
             const id = safeId(d.data.id);
             const w = d.data.status === 'empty' ? 40 : 60;
             const h = w;
@@ -349,17 +320,19 @@
             .attr("stroke-width", d => d.data.status === 'current' ? 3 : 2)
             .attr("stroke-dasharray", d => d.data.status === 'empty' ? "5,5" : "none")
             .attr("filter", "drop-shadow(0px 2px 2px rgba(0,0,0,0.05))")
-            .on("mouseover", function () {
+            .on("mouseover", function() {
                 if (d3.select(this).datum().data.status !== 'empty') {
                     d3.select(this).transition().duration(200).attr("stroke-width", 3).attr("transform",
                         "scale(1.03)");
                 }
             })
-            .on("mouseout", function (d) {
+            .on("mouseout", function(d) {
                 const datum = d3.select(this).datum();
                 d3.select(this).transition().duration(200).attr("stroke-width", datum.data.status === 'current' ?
                     3 : 2).attr("transform", "scale(1)");
             });
+
+            console.log(data)
 
         // Avatar image (if provided)
         nodes.append('image')
@@ -374,60 +347,30 @@
 
         // Labels
         const labels = nodes.append("g").attr("class", "label text-center");
-        // Initial inside circle for non-empty
-        labels.filter(d => d.data.status !== 'empty').append("text")
+        labels.append("text")
             .attr("dy", "0.35em")
             .attr("text-anchor", "middle")
             .attr("class", "text-[16px] font-bold text-gray-700 fill-current")
             .text(d => (d.data.initials || (d.data.name ? d.data.name.charAt(0) : '')).toUpperCase());
 
-        // Plus icon centered for empty nodes
-        labels.filter(d => d.data.status === 'empty').append('text')
-            .attr('dy', '0.35em')
-            .attr('text-anchor', 'middle')
-            .attr('class', 'text-[18px] font-bold')
-            .attr('fill', '#2563eb')
-            .text('+');
-
-        // Name badge on node (non-empty): pill below the square
+        // Name badge on node: pill below the square
         const badges = nodes.append('g').attr('class', 'name-badge');
-        const nonEmptyBadges = badges.filter(d => d.data.status !== 'empty');
-        nonEmptyBadges.append('rect')
-            .attr('x', -32)
+        badges.append('rect')
+            .attr('x', -52)
             .attr('y', 40)
-            .attr('width', 70)
+            .attr('width',100)
             .attr('height', 18)
             .attr('rx', 9)
             .attr('ry', 9)
             .attr('fill', '#2563eb')
             .attr('opacity', 0.9);
-        nonEmptyBadges.append('text')
+        badges.append('text')
             .attr('x', 0)
             .attr('y', 53)
             .attr('text-anchor', 'middle')
             .attr('class', 'text-[11px] font-semibold')
             .attr('fill', '#ffffff')
-            .text(d => (d.data.token || '').length > 18 ? (d.data.token || '').slice(0, 17) + '…' : (d.data.token || ''));
-
-        // Hint badge for empty nodes
-        const emptyBadges = badges.filter(d => d.data.status === 'empty');
-        emptyBadges.append('rect')
-            .attr('x', -28)
-            .attr('y', 40)
-            .attr('width', 56)
-            .attr('height', 18)
-            .attr('rx', 9)
-            .attr('ry', 9)
-            .attr('fill', '#e5f2ff')
-            .attr('stroke', '#3b82f6')
-            .attr('opacity', 0.9);
-        emptyBadges.append('text')
-            .attr('x', 0)
-            .attr('y', 53)
-            .attr('text-anchor', 'middle')
-            .attr('class', 'text-[11px] font-semibold')
-            .attr('fill', '#1d4ed8')
-            .text('Add');
+            .text(d => (d.data.name || '').length > 18 ? (d.data.name || '').slice(0, 17) + '…' : (d.data.name || ''));
 
         // Zoom behavior
         const zoom = d3.zoom()
@@ -471,39 +414,30 @@
 
         // Tooltip handlers on node groups
         nodes
-            .on('mouseover', function (event, d) {
+            .on('mouseover', function(event, d) {
                 if (d?.data?.status === 'empty') return;
-                const token = d?.data?.token || '—';
+                const memberid = d?.data?.membership_id ?? '—';
                 const name = d?.data?.name || '—';
                 const status = d?.data?.status || '—';
                 const id = d?.data?.id ?? '—';
-                const memberid = d?.data?.membership_id ?? '—';
-                const binary_income = d?.data?.binary_income ?? '—';
-                const total_income = d?.data?.total_income ?? '—';
                 tooltipEl.innerHTML = `
                     <div style="display:flex;flex-direction:column;gap:4px;min-width:200px;max-width:280px;">
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span style="display:inline-block;padding:2px 8px;background:#2563eb;color:#fff;border-radius:999px;font-weight:600;font-size:11px;">${name}</span>
-                            <span style="font-size:11px;color:#6b7280;">ID: ${id}</span>
-                            <span style="font-size:11px;color:#059669;">MemberID: ${memberid}</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;gap:12px;">
-                            <div><span style="color:#6b7280;">Token:</span> <span style="color:#111827;">${token}</span></div>
+                            <div><span style="color:#6b7280;">MemberID:</span> <span style="color:#111827;">${memberid}</span></div>
                             <div><span style="color:#6b7280;">Status:</span> <span style="color:#111827;">${status}</span></div>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;gap:12px;">
-                            <div><span style="color:#6b7280;">B Income:</span> <span style="color:#111827;">${binary_income}</span></div>
-                            <div><span style="color:#6b7280;">T. Income:</span> <span style="color:#111827;">${total_income}</span></div>
                         </div>
                     </div>`;
                 tooltipEl.style.display = 'block';
             })
-            .on('mousemove', function (event) {
+            .on('mousemove', function(event) {
                 const offset = 12;
                 tooltipEl.style.left = (event.pageX + offset) + 'px';
                 tooltipEl.style.top = (event.pageY + offset) + 'px';
             })
-            .on('mouseout', function () {
+            .on('mouseout', function() {
                 tooltipEl.style.display = 'none';
             });
 
