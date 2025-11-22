@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 flex flex-col" x-data="binaryTreeModal()" x-init="init()">
+<div class="min-h-screen bg-gray-50 flex flex-col">
     <!-- Header -->
     <header
         class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-t-2xl">
@@ -67,110 +67,11 @@
         </div>
     </main>
 
-    <!-- Create Member Modal (Alpine controlled; Livewire entangled) -->
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" x-show="open" x-cloak>
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6" @click.stop>
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold">Sign Up Member</h2>
-                <button class="text-gray-500 hover:text-gray-700" @click="close">✕</button>
-            </div>
-            <form wire:submit.prevent="confirmCreateAtEmpty" class="space-y-4">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Parent ID</label>
-                        <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100"
-                            value="{{ $createParentId }}" readonly />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Position</label>
-                        <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2 bg-gray-100"
-                            value="{{ $createPosition }}" readonly />
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Name</label>
-                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2"
-                        wire:model.defer="createForm.name" placeholder="Member name" />
-                    @error('createForm.name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" class="mt-1 w-full border rounded-lg px-3 py-2"
-                        wire:model.defer="createForm.email" placeholder="email@example.com" />
-                    @error('createForm.email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Mobile</label>
-                    <input type="text" class="mt-1 w-full border rounded-lg px-3 py-2"
-                        wire:model.defer="createForm.mobile" placeholder="98########" />
-                    @error('createForm.mobile') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" class="mt-1 w-full border rounded-lg px-3 py-2"
-                        wire:model.defer="createForm.password" placeholder="Choose a strong password" />
-                    @error('createForm.password') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                    <input type="password" class="mt-1 w-full border rounded-lg px-3 py-2"
-                        wire:model.defer="createForm.password_confirmation" placeholder="Re-enter password" />
-                    @error('createForm.password_confirmation') <span class="text-red-600 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" class="px-4 py-2 rounded-lg border" @click="close">Cancel</button>
-                    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white">Create</button>
-                </div>
-            </form>
-        </div>
-    </div>
+   
 </div>
 
 <!-- D3 Script -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script>
-    (function () {
-        try {
-            const s = document.currentScript;
-            if (!s) return;
-            if (window.Livewire && !window.AdminBinaryTreeWire) {
-                const root = s.closest('[wire\\:id]');
-                if (!root) return;
-                const id = root.getAttribute('wire:id');
-                const comp = Livewire.find(id);
-                if (comp && !window.AdminBinaryTreeWire) window.AdminBinaryTreeWire = comp;
-            }
-        } catch (e) { }
-    })();
-</script>
-<script>
-    function binaryTreeModal() {
-        return {
-            open: false,
-            parentId: null,
-            position: null,
-            init() {
-                window.addEventListener('admin-binary-tree:open-empty-slot', (e) => {
-                    const d = e && e.detail ? e.detail : {};
-                    if (!d.parentId || !d.position) return;
-                    this.parentId = d.parentId;
-                    this.position = d.position;
-                    try {
-                        $wire.set('createParentId', d.parentId);
-                        $wire.set('createPosition', d.position);
-                        $wire.set('showCreateModal', true);
-                    } catch (_) { }
-                    this.open = true;
-                });
-            },
-            close() {
-                this.open = false;
-                try { $wire.call('cancelCreateAtEmpty'); } catch (_) { $wire.set('showCreateModal', false); }
-            }
-        }
-    }
-</script>
 <script>
     let currentZoom;
     let navigationStack = [];
@@ -270,10 +171,10 @@
                 const rawId = d && d.data ? d.data.id : null;
                 const idStr = rawId !== null && rawId !== undefined ? String(rawId) : '';
                 if (!idStr) return;
-                navigationStack.push(currentRootId);
                 Livewire.dispatch('binaryTreeChangeRootRequest', { id: rawId });
-                console.log('Dispatched binaryTreeChangeRootRequest with id:', rawId);
-                updateBreadcrumbUI();
+                navigationStack.push(rawId);
+                console.log('first', rawId);
+                // updateBreadcrumbUI();
             });
         // For avatar clipping helper
         function safeId(id) {
@@ -409,7 +310,6 @@
             document.body.appendChild(tooltipEl);
         }
 
-        console.log("testing", data)
         // Tooltip handlers on node groups
         nodes
             .on('mouseover', function(event, d) {
@@ -505,7 +405,9 @@
             const b = document.createElement('button');
             b.className = 'px-2 py-1 rounded hover:bg-gray-100';
             b.textContent = idx === 0 ? 'Root' : `#${id}`;
+                console.log("testing", id);
             b.onclick = () => {
+                console.log("second", id);
                 Livewire.dispatch('binaryTreeChangeRootRequest', { id });
             };
             el.appendChild(b);
@@ -560,6 +462,7 @@
     document.addEventListener('livewire:init', function () {
         try { window.AdminBinaryTreeWire = @this; } catch (e) { }
         const treeData = @json($treeData);
+        console.log(treeData)
         if (treeData && treeData.length > 0) initBinaryTree(treeData);
         // Listen for Livewire dispatched browser events or Livewire JS events
         try {
@@ -617,6 +520,7 @@
     document.getElementById('go-back-root').addEventListener('click', function () {
         if (navigationStack.length > 0) {
             const prev = navigationStack.pop();
+            console.log("third", prev);
             if (prev) Livewire.dispatch('binaryTreeChangeRootRequest', { id: prev });
         }
         updateBreadcrumbUI();
@@ -625,6 +529,7 @@
     document.getElementById('reset-tree-root').addEventListener('click', function () {
         if (initialRootId) {
             navigationStack = [];
+            console.log("fourth", initialRootId);
             Livewire.dispatch('binaryTreeChangeRootRequest', { id: initialRootId });
             pendingGlobalSearchQuery = '';
         }

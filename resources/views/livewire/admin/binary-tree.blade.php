@@ -509,6 +509,7 @@
                 Livewire.on('binaryTreeDataUpdated', function(treeData) {
                     initBinaryTree(treeData);
                 });
+                initBinaryTree(treeData);
             }
         } catch (err) {
             // ignore
