@@ -308,14 +308,11 @@
             .attr('rx', 50)
             .attr('ry', 50)
             .attr("fill", d => {
-                if (d.data.status === 'empty') return '#f9fafb';
-                if (d.data.status === 'current') return '#ecfdf5';
-                return d.data.status === 'verified' ? '#f0fdf4' : '#fef2f2';
+                if (d.data.status !== 'empty') return '#f0fdf4';
             })
             .attr("stroke", d => {
-                if (d.data.status === 'empty') return '#e2e8f0';
-                if (d.data.status === 'current') return '#059669';
-                return d.data.status === 'verified' ? '#22c55e' : '#e2e8f0'; // Use gray for non-verified
+                if (d.data.status !== 'empty') return '#22c55e';
+               
             })
             .attr("stroke-width", d => d.data.status === 'current' ? 3 : 2)
             .attr("stroke-dasharray", d => d.data.status === 'empty' ? "5,5" : "none")
