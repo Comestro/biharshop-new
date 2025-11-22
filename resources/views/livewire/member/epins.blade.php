@@ -74,23 +74,60 @@
             </div>
 
 
-            {{-- REDEEM (Optional)
             <div class="border rounded-lg p-4">
-                <p class="text-sm font-medium text-gray-800 mb-2">Redeem Pin</p>
+                <p class="text-sm font-medium text-gray-800 mb-2">Transfer Bulk Pin</p>
 
                 <div class="space-y-3">
-                    <input type="text" wire:model="redeemCode" class="w-full border rounded px-3 py-2"
-                        placeholder="PIN Code">
 
-                    <button wire:click="redeem"
+                    {{-- PIN COUNT --}}
+                    <div>
+                        <input type="number" wire:model.live="countSendingToken" class="w-full border rounded px-3 py-2"
+                            placeholder="Count of PINs">
+
+                        @error('countSendingToken')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- MEMBER ID --}}
+                    <div>
+                        <input type="text" wire:model.live="bulkTransferToMemberId"
+                            class="w-full border rounded px-3 py-2" placeholder="Recipient Membership ID">
+
+                        @error('bulkTransferToMemberId')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- LIVE MEMBER NAME --}}
+                    <p class="text-sm text-gray-700">
+                        {{ $bulkTransferMemberName ?? '' }}
+                    </p>
+
+                    {{-- BUTTON --}}
+                    <button wire:click="sendBulkPin"
                         class="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 transition">
-                        Redeem
+                        Transfer
                     </button>
+
                 </div>
             </div>
-            --}}
+
+
         </div>
 
+        <div class="flex items-center justify-between mb-4">
+
+            <input type="text" wire:model.live="search" class="border rounded px-3 py-2 w-60"
+                placeholder="Search PIN Code...">
+
+            <select wire:model.live="statusFilter" class="border rounded px-3 py-2">
+                <option value="">All</option>
+                <option value="transferred">Available</option>
+                <option value="used">Used</option>
+            </select>
+
+        </div>
 
         {{-- PIN LIST --}}
         <div class="border rounded-lg overflow-x-auto">
@@ -140,7 +177,40 @@
                 </tbody>
 
             </table>
+            <div class="mt-4">
+                {{ $pins->links() }}
+            </div>
+
         </div>
 
     </div>
 </div>
+<script>
+    document.addEventListener('livewire:init', () => {
+
+        Livewire.on('error', (data) => {
+            showToast(data.message, 'error');
+        });
+
+        Livewire.on('success', (data) => {
+            showToast(data.message, 'success');
+        });
+
+    });
+
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+
+        toast.className = `
+            fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white z-50
+            ${type === 'error' ? 'bg-red-600' : 'bg-green-600'}
+        `;
+        toast.innerText = message;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 2500);
+    }
+</script>
