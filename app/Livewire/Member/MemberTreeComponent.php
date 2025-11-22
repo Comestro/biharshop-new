@@ -16,7 +16,7 @@ class MemberTreeComponent extends Component
     public $initial_root_id;
     public $root_history = [];
     public $searchQuery = ''; 
-    public $maxDepth = 50; // default to 6 levels when not searching
+    public $maxDepth = 2000; // default to 6 levels when not searching
     public $showCreateModal = false;
     public $createParentId = null;
     public $createPosition = null;
