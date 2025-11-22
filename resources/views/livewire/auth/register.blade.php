@@ -91,7 +91,7 @@ new class extends Component {
         $sponsor = null;
         $pin = null;
 
-        $pin = EPin::where('code', $this->epin)->where('status', 'available')->first();
+        $pin = EPin::where('code', $this->epin)->where('status', '!=', 'used')->first();
 
         if (!$pin) {
             $this->addError('epin', 'Invalid or used E-PIN');
