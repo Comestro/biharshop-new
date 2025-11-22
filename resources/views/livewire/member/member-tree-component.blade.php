@@ -417,6 +417,8 @@
                 const memberid = d?.data?.membership_id ?? '—';
                 const name = d?.data?.name || '—';
                 const status = d?.data?.status || '—';
+                const binary_income = d?.data?.binary_income || '0';
+                const total_income = d?.data?.total_income || '0';
                 const id = d?.data?.id ?? '—';
                 tooltipEl.innerHTML = `
                     <div style="display:flex;flex-direction:column;gap:4px;min-width:200px;max-width:280px;">
@@ -426,6 +428,10 @@
                         <div style="display:flex;justify-content:space-between;gap:12px;">
                             <div><span style="color:#6b7280;">MemberID:</span> <span style="color:#111827;">${memberid}</span></div>
                             <div><span style="color:#6b7280;">Status:</span> <span style="color:#111827;">${status}</span></div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;gap:12px;">
+                            <div><span style="color:#6b7280;">Binary Income:</span> <span style="color:#111827;">${binary_income}</span></div>
+                            <div><span style="color:#6b7280;">Total Income:</span> <span style="color:#111827;">${total_income}</span></div>
                         </div>
                     </div>`;
                 tooltipEl.style.display = 'block';

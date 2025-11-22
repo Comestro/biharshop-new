@@ -108,6 +108,8 @@ new class extends Component {
             return;
         }
 
+        
+
         event(new Registered(($user = User::create($validated))));
 
         $membershipId = $this->generateUniqueMembershipId();
