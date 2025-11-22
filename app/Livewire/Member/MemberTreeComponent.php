@@ -69,6 +69,7 @@ class MemberTreeComponent extends Component
         $flatData[] = [
             'id' => $member->id,
             'parentId' => $parentId,
+            "membership_id" => $member->membership_id,
             'name' => $member->name,
             'token' => $member->membership_id,
             // mark the current root so the frontend can highlight it

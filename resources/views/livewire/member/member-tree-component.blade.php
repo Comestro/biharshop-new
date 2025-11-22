@@ -412,6 +412,7 @@
             document.body.appendChild(tooltipEl);
         }
 
+        console.log("testing", data)
         // Tooltip handlers on node groups
         nodes
             .on('mouseover', function(event, d) {
