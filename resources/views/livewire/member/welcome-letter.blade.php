@@ -19,8 +19,6 @@
             <h2 class="text-lg font-semibold text-gray-900">Enrollment Details</h2>
             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div class="border rounded-lg p-3">
-                    <div class="flex justify-between"><span class="text-gray-600">ID No</span><span
-                            class="font-medium">{{ $member?->token ?? '-' }}</span></div>
                     <div class="flex justify-between mt-1"><span class="text-gray-600">Name</span><span
                             class="font-medium">{{ $member?->name ?? '-' }}</span></div>
                     <div class="flex justify-between mt-1"><span class="text-gray-600">Address</span><span
@@ -38,14 +36,18 @@
                     <div class="flex justify-between mt-1"><span class="text-gray-600">Joining Date</span><span
                             class="font-medium">{{ $member?->created_at ? \Carbon\Carbon::parse($member->created_at)->format('d-M-Y') : '-' }}</span>
                     </div>
+
                     <div class="flex justify-between mt-1"><span class="text-gray-600">Sponsor ID</span><span
                             class="font-medium">{{ $parent?->token ?? '-' }}</span></div>
+                    
                     <div class="flex justify-between mt-1"><span class="text-gray-600">Sponsor Name</span><span
                             class="font-medium">{{ $parent?->name ?? '-' }}</span></div>
-                    @php $planName = $member?->plan->name ?? '—';
-                    $planAmount = $member?->plan->price ?? null; @endphp
+                    @php $planName = $member?->plans->first()->plan->name ?? '—';
+                    $planAmount = $member?->plans->first()->plan->price ?? null; @endphp
+            
                     <div class="flex justify-between mt-1"><span class="text-gray-600">Joining Kit</span><span
                             class="font-medium">{{ $planName }}</span></div>
+                    
                     <div class="flex justify-between mt-1"><span class="text-gray-600">Kit Amount</span><span
                             class="font-medium">{{ $planAmount ? number_format($planAmount, 2) : '—' }}</span></div>
                 </div>

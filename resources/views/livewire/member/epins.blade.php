@@ -130,7 +130,7 @@
                             </td>
 
                             <td class="px-3 py-2 text-sm">
-                                <a href="{{ route('register') }}?epin={{ $pin->code }}&token={{ $myToken }}"
+                                <a href="{{ route('register') }}?epin={{ $pin->code }}&sponsor_id={{ $myToken }}"
                                     class="inline-block px-3 py-1 rounded bg-teal-600 text-white hover:bg-teal-700 {{ $pin->status == 'used' ? 'opacity-50 pointer-events-none' : '' }}">
                                     Join
                                 </a>
