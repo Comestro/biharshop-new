@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('mother_name')->nullable();
             $table->text('home_address')->nullable();
             $table->string('city')->nullable();
-            $table->string('pincode')->nullable();
+            // $table->string('pincode')->nullable();
             $table->string('state')->nullable();
             $table->string('mobile')->nullable();
             $table->string('whatsapp')->nullable();

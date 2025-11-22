@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->enum('type',['main','add_on']);
             $table->decimal('price', 10, 2);
             $table->text('description')->nullable();
-            $table->string('image');
+            $table->string('image')->nullable();
             $table->text('features')->nullable();
             $table->timestamps();
         });

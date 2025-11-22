@@ -2,99 +2,76 @@
 
 namespace Database\Seeders;
 
+use App\Models\EPin;
+use App\Models\MembershipPlan;
+use App\Models\Plan;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 use App\Models\Membership;
-use App\Models\BinaryTree;
-use Faker\Factory as Faker;
+use Illuminate\Support\Facades\Hash;
 
 class MembershipSeeder extends Seeder
 {
     public function run()
     {
-        $faker = Faker::create('en_IN'); // Using Indian locale for realistic data
-        
-        // Create root member
-        $rootMember = Membership::create([
+        // Ensure user exists
+        $user = User::firstOrCreate([
+            'id' => 1
+        ], [
+            'name' => 'top User',
+            'email' => 'top@user.com',
+            'password' => Hash::make('password')
+        ]);
+        $plan = Plan::create([
+            'name' => 'welcome',
+            'type' => 'main',
+            'price' => 3000,
+            'description' => 'xcfvgbhjnmk',
+
+        ]);
+        $epin = EPin::create([
+            'code' => 1234567,
+            'plan_amount' => 3000,
+            'plan_name' => 'starter',
+            'generated_by_admin_id' => 1,
+            'plan_id' => $plan->id,
+        ]);
+        // Create membership
+        $member = Membership::create([
+            'membership_id' => 1234567,
             'token' => 'MEM001',
-            'name' => 'Administrator',
-            'email' => 'admin@example.com',
-            'mobile' => $faker->numerify('98########'),
-            'date_of_birth' => $faker->date(),
+            'user_id' => $user->id,
+            'name' => 'Top User',
+            'email' => 'top@user.com',
+            'mobile' => '9876543210',
             'gender' => 'male',
-            'father_name' => $faker->name('male'),
-            'mother_name' => $faker->name('female'),
-            'home_address' => $faker->address,
-            'city' => $faker->city,
+            'date_of_birth' => '1990-01-01',
+            'father_name' => 'Father',
+            'mother_name' => 'Mother',
+            'home_address' => 'Patna',
+            'city' => 'Patna',
             'state' => 'Bihar',
-            'pincode' => $faker->numerify('8#####'),
             'nationality' => 'Indian',
-            'bank_name' => 'State Bank of India',
-            'account_no' => $faker->numerify('##################'),
-            'ifsc' => 'SBIN' . $faker->numerify('#####'),
-            'pancard' => $faker->regexify('[A-Z]{5}[0-9]{4}[A-Z]'),
-            'aadhar_card' => $faker->numerify('############'),
+            'bank_name' => 'SBI',
+            'account_no' => '123456789012',
+            'ifsc' => 'SBIN0001234',
+            'pancard' => 'ABCDE1234F',
+            'aadhar_card' => '123412341234',
             'isPaid' => true,
             'isVerified' => true,
-            'status' => true
+            'status' => true,
+            'used_pin_count' => 1
         ]);
+        MembershipPlan::create([
+            'membership_id' => 1,
+            'plan_id' => 1,
+            'epin_id' => $epin->id,
+            'status' => 'active',
 
-        // Create 50 members
-        $members = [];
-        for ($i = 2; $i <= 51; $i++) {
-            $member = Membership::create([
-                'token' => 'MEM' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                'name' => $faker->name,
-                'email' => $faker->unique()->safeEmail,
-                'mobile' => $faker->numerify('98########'),
-                'date_of_birth' => $faker->date(),
-                'gender' => $faker->randomElement(['male', 'female']),
-                'father_name' => $faker->name('male'),
-                'mother_name' => $faker->name('female'),
-                'home_address' => $faker->address,
-                'city' => $faker->city,
-                'state' => 'Bihar',
-                'pincode' => $faker->numerify('8#####'),
-                'nationality' => 'Indian',
-                'bank_name' => $faker->randomElement(['SBI', 'PNB', 'BOI', 'HDFC', 'ICICI']),
-                'account_no' => $faker->numerify('##################'),
-                'ifsc' => 'SBIN' . $faker->numerify('#####'),
-                'pancard' => $faker->regexify('[A-Z]{5}[0-9]{4}[A-Z]'),
-                'aadhar_card' => $faker->numerify('############'),
-                'isPaid' => true,
-                'isVerified' => true,
-                'status' => true
-            ]);
-            $members[] = $member;
-        }
+        ]);
+        $epin->used_by_membership_id = $member->id;
+        $epin->save();
 
-        // Create binary tree structure
-        $this->createBinaryTree($rootMember, $members);
-    }
-
-    private function createBinaryTree($parent, &$members)
-    {
-        if (empty($members)) return;
-
-        // Add left child
-        $leftChild = array_shift($members);
-        if ($leftChild) {
-            BinaryTree::create([
-                'member_id' => $leftChild->id,
-                'parent_id' => $parent->id,
-                'position' => 'left'
-            ]);
-            $this->createBinaryTree($leftChild, $members);
-        }
-
-        // Add right child
-        $rightChild = array_shift($members);
-        if ($rightChild) {
-            BinaryTree::create([
-                'member_id' => $rightChild->id,
-                'parent_id' => $parent->id,
-                'position' => 'right'
-            ]);
-            $this->createBinaryTree($rightChild, $members);
-        }
+        dd("Seeder executed successfully");
     }
 }

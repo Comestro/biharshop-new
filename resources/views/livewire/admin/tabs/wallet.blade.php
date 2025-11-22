@@ -2,9 +2,7 @@
     <div class="bg-gray-50 rounded-lg p-4">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-medium text-gray-900">Wallet Summary</h3>
-            <button wire:click="refreshWallet" class="px-3 py-1.5 bg-teal-600 text-white rounded-md">
-                Refresh
-            </button>
+            
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="p-4 rounded-md border border-gray-200 bg-white">
