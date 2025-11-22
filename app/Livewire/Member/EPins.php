@@ -78,7 +78,7 @@ class EPins extends Component
     public function render()
     {
         $pins = EPin::where('owner_user_id', auth()->id())
-            ->orderBy('created_at', 'desc')
+            ->orderBy('used_at', 'asc')
             ->get();
 
         return view('livewire.member.epins', [
